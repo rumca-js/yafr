@@ -35,3 +35,11 @@ https://github.com/nkanaev/yarr
 https://github.com/goniszewski/grimoire
 
 newsboat, etc.
+
+# where to find feed urls
+
+most of the timesnyou have to search.
+
+try checking Github, some awesome, curated lists https://github.com/plenaryapp/awesome-rss-feeds
+
+find interesting page, and try to follow it. if page contains valid RSS link this software should be able to follow it
