@@ -10,6 +10,8 @@ use:
 from datetime import datetime, date, timedelta, timezone
 from dateutil import parser
 
+import django.utils
+
 
 class DateUtils(object):
     def get_iso_today():

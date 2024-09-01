@@ -51,7 +51,7 @@ from bs4 import BeautifulSoup
 
 from utils.dateutils import DateUtils
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 
 
@@ -1358,10 +1358,11 @@ class RssPage(ContentInterface):
         """
         Workaround for https://warhammer-community.com/feed
         """
-        if contents:
-            wh = contents.find("<rss version")
-            if wh > 0:
-                contents = contents[wh:]
+        # TODO apply that woraround differently
+        #if contents:
+        #    wh = contents.find("<rss version")
+        #    if wh > 0:
+        #        contents = contents[wh:]
 
         super().__init__(url=url, contents=contents)
 
@@ -1434,6 +1435,9 @@ class RssPage(ContentInterface):
 
         #    WebLogger.error("No rss hash contents")
         #    return calculate_hash("no body hash")
+        if not self.feed:
+            WebLogger.error("Url:{}. RssPage has contents, but feed could not been analyzed".format(self.url))
+            return
 
         entries = str(self.feed.entries)
         if entries == "":
