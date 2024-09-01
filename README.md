@@ -38,8 +38,11 @@ newsboat, etc.
 
 # where to find feed urls
 
-most of the timesnyou have to search.
+most of the times you have to search.
 
-try checking Github, some awesome, curated lists https://github.com/plenaryapp/awesome-rss-feeds
+try checking Github, some awesome, curated lists 
+
+ - https://github.com/plenaryapp/awesome-rss-feeds
+ - https://github.com/tuan3w/awesome-tech-rss
 
 find interesting page, and try to follow it. if page contains valid RSS link this software should be able to follow it
