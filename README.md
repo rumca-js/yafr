@@ -49,6 +49,7 @@ try checking Github, some awesome, curated lists
  - https://github.com/plenaryapp/awesome-rss-feeds
  - https://github.com/tuan3w/awesome-tech-rss
  - https://github.com/DongjunLee/awesome-feeds
+ - https://github.com/foorilla/allainews_sources
 
 Other places
 
