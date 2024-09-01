@@ -29,12 +29,16 @@ options:
   --db DB               SQLite database file
 ```
 # Alternative software
+ - https://newsboat.org/index.html
+ - https://github.com/guyfedwards/nom
+ - https://github.com/iamaziz/TermFeed
+ - https://feed2exec.readthedocs.io
+ - https://github.com/kpman/newsroom
 
-https://github.com/nkanaev/yarr
-
-https://github.com/goniszewski/grimoire
-
-newsboat, etc.
+# Alternative software - GUI
+ - https://github.com/nkanaev/yarr
+ - https://github.com/goniszewski/grimoire
+ - ...and more...
 
 # where to find feed urls
 
@@ -44,5 +48,14 @@ try checking Github, some awesome, curated lists
 
  - https://github.com/plenaryapp/awesome-rss-feeds
  - https://github.com/tuan3w/awesome-tech-rss
+ - https://github.com/DongjunLee/awesome-feeds
+
+Other places
+
+ - https://nownownow.com/
+ - https://searchmysite.net/
+ - https://downloads.marginalia.nu/
+ - https://aboutideasnow.com/
+ - https://neocities.org/
 
 find interesting page, and try to follow it. if page contains valid RSS link this software should be able to follow it
