@@ -28,3 +28,10 @@ options:
   -v, --verbose         Verbose
   --db DB               SQLite database file
 ```
+# Alternative software
+
+https://github.com/nkanaev/yarr
+
+https://github.com/goniszewski/grimoire
+
+newsboat, etc.
