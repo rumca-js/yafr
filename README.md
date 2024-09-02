@@ -42,6 +42,7 @@ options:
  - https://github.com/FreshRSS/FreshRSS
  - https://github.com/yang991178/fluent-reader
  - https://github.com/samuelclay/NewsBlur
+ - https://github.com/stringer-rss/stringer
  - https://tt-rss.org/
  - https://github.com/nkanaev/yarr
  - https://github.com/goniszewski/grimoire
