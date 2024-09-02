@@ -49,7 +49,6 @@ optional arguments:
  - https://github.com/hello-efficiency-inc/raven-reader
  - https://tt-rss.org/
  - https://github.com/nkanaev/yarr
- - https://github.com/goniszewski/grimoire
  - ...and more...
 
 # where to find feed urls
