@@ -28,7 +28,9 @@ options:
   -v, --verbose         Verbose
   --db DB               SQLite database file
 ```
+
 # Alternative software
+
  - https://newsboat.org/index.html
  - https://github.com/guyfedwards/nom
  - https://github.com/iamaziz/TermFeed
@@ -36,6 +38,8 @@ options:
  - https://github.com/kpman/newsroom
 
 # Alternative software - GUI
+
+ - https://tt-rss.org/
  - https://github.com/nkanaev/yarr
  - https://github.com/goniszewski/grimoire
  - ...and more...
@@ -56,6 +60,10 @@ Other places
  - https://nownownow.com/
  - https://searchmysite.net/
  - https://downloads.marginalia.nu/
+
+# Other things
+
+ - https://github.com/voidfiles/awesome-rss standards
  - https://aboutideasnow.com/
  - https://neocities.org/
 
