@@ -43,6 +43,7 @@ options:
  - https://github.com/yang991178/fluent-reader
  - https://github.com/samuelclay/NewsBlur
  - https://github.com/stringer-rss/stringer
+ - https://github.com/hello-efficiency-inc/raven-reader
  - https://tt-rss.org/
  - https://github.com/nkanaev/yarr
  - https://github.com/goniszewski/grimoire
