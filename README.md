@@ -2,20 +2,19 @@
 Yet another feed reader
 
 ```
-usage: yafr.py [-h] [--timeout TIMEOUT] [--port PORT] [-o OUTPUT_DIR]
-               [--print PRINT] [-r] [--force] [--stats] [--cleanup]
-               [--follow FOLLOW] [--unfollow UNFOLLOW] [--list-sources]
-               [--init-sources] [-v] [--db DB]
+usage: yafr.py [-h] [--timeout TIMEOUT] [--port PORT] [-o OUTPUT_DIR] [--print PRINT] [-r] [--force] [--stats]
+               [--cleanup] [--follow FOLLOW] [--unfollow UNFOLLOW] [--enable ENABLE] [--disable DISABLE]
+               [--list-sources] [--init-sources] [--page-details PAGE_DETAILS] [-v] [--db DB]
 
 Data analyzer program
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   --timeout TIMEOUT     Timeout expressed in seconds
   --port PORT           Port
   -o OUTPUT_DIR, --output-dir OUTPUT_DIR
                         HTML output directory
-  --print PRINT         Print entries to stdout
+  --print PRINT         Prints data to stdout
   -r, --refresh-on-start
                         Refreshes on start
   --force               Forces refresh
@@ -23,8 +22,12 @@ options:
   --cleanup             Remove unreferenced items
   --follow FOLLOW       Follows specific url
   --unfollow UNFOLLOW   Unfollows specific url
+  --enable ENABLE       Enables specific source
+  --disable DISABLE     Disables specific source
   --list-sources        Lists sources
   --init-sources        Initializes sources
+  --page-details PAGE_DETAILS
+                        Shows page details
   -v, --verbose         Verbose
   --db DB               SQLite database file
 ```
