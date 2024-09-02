@@ -39,6 +39,9 @@ options:
 
 # Alternative software - GUI
 
+ - https://github.com/FreshRSS/FreshRSS
+ - https://github.com/yang991178/fluent-reader
+ - https://github.com/samuelclay/NewsBlur
  - https://tt-rss.org/
  - https://github.com/nkanaev/yarr
  - https://github.com/goniszewski/grimoire
@@ -60,11 +63,12 @@ Other places
  - https://nownownow.com/
  - https://searchmysite.net/
  - https://downloads.marginalia.nu/
-
-# Other things
-
- - https://github.com/voidfiles/awesome-rss standards
  - https://aboutideasnow.com/
  - https://neocities.org/
 
+# Other things
+
+ - https://github.com/AboutRSS/ALL-about-RSS
+ - https://github.com/voidfiles/awesome-rss standards
+ 
 find interesting page, and try to follow it. if page contains valid RSS link this software should be able to follow it
