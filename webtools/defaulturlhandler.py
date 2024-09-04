@@ -8,7 +8,7 @@ class DefaultUrlHandler(DefaultContentPage):
     Behavior can be changed by setting .h handler property
     """
 
-    def __init__(self, url=None, contents=None):
+    def __init__(self, url=None, contents=None, page_options=None):
         super().__init__(
             url,
             contents=contents,
@@ -17,6 +17,7 @@ class DefaultUrlHandler(DefaultContentPage):
         self.response = None
         self.dead = None
         self.code = None  # social media handle, ID of channel, etc.
+        self.page_options = page_options
 
     def is_handled_by(self):
         return True
@@ -52,7 +53,6 @@ class DefaultUrlHandler(DefaultContentPage):
 
 
 class DefaultChannelHandler(DefaultContentPage):
-
     def get_contents(self):
         """
         We obtain information about channel.
@@ -76,9 +76,7 @@ class DefaultChannelHandler(DefaultContentPage):
 
         feed_url = self.get_feed_url()
         if not feed_url:
-            AppLogging.error(
-                "Url:{} Cannot read feed URL".format(self.url)
-            )
+            AppLogging.error("Url:{} Cannot read feed URL".format(self.url))
             self.dead = True
             return
 
@@ -86,10 +84,7 @@ class DefaultChannelHandler(DefaultContentPage):
         u = Url(feed_url, page_options=options, handler_class=HttpPageHandler)
         self.response = u.get_response()
 
-        if (
-            not self.response
-            or not self.response.is_valid()
-        ):
+        if not self.response or not self.response.is_valid():
             self.dead = True
 
         if self.response:

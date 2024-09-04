@@ -51,8 +51,7 @@ from bs4 import BeautifulSoup
 
 from utils.dateutils import DateUtils
 
-__version__ = "0.0.2"
-
+__version__ = "0.0.3"
 
 
 PAGE_TOO_BIG_BYTES = 5000000  # 5 MB. There are some RSS more than 1MB
@@ -76,6 +75,7 @@ class WebLogger(object):
     """
     Logging interface
     """
+
     web_logger = None
 
     def info(info_text, detail_text="", user=None, stack=False):
@@ -107,6 +107,7 @@ class PrintWebLogger(object):
     """
     Implementation of weblogger that only prints to std out
     """
+
     def info(info_text, detail_text="", user=None, stack=False):
         print(info_text)
         print(detail_text)
@@ -1305,8 +1306,7 @@ class RssPageEntry(ContentInterface):
 
     def get_date_published_implementation(self):
         if hasattr(self.feed_entry, "published"):
-            if not self.feed_entry.published or \
-               str(self.feed_entry.published) == "":
+            if not self.feed_entry.published or str(self.feed_entry.published) == "":
                 return DateUtils.get_datetime_now_utc()
             else:
                 try:
@@ -1359,7 +1359,7 @@ class RssPage(ContentInterface):
         Workaround for https://warhammer-community.com/feed
         """
         # TODO apply that woraround differently
-        #if contents:
+        # if contents:
         #    wh = contents.find("<rss version")
         #    if wh > 0:
         #        contents = contents[wh:]
@@ -1436,7 +1436,11 @@ class RssPage(ContentInterface):
         #    WebLogger.error("No rss hash contents")
         #    return calculate_hash("no body hash")
         if not self.feed:
-            WebLogger.error("Url:{}. RssPage has contents, but feed could not been analyzed".format(self.url))
+            WebLogger.error(
+                "Url:{}. RssPage has contents, but feed could not been analyzed".format(
+                    self.url
+                )
+            )
             return
 
         entries = str(self.feed.entries)
@@ -2400,7 +2404,9 @@ class PageOptions(object):
         self.use_headless_browser = False
         self.ssl_verify = True
         self.ping = False
-        self.use_browser_promotions = True # tries headles if normal processing does not work
+        self.use_browser_promotions = (
+            True  # tries headles if normal processing does not work
+        )
 
     def use_basic_crawler(self):
         return not self.is_advanced_processing_required()
@@ -2445,7 +2451,7 @@ class PageRequestObject(object):
         if headers:
             self.headers = headers
         else:
-            self.headers = None # not set, use default
+            self.headers = None  # not set, use default
 
         self.timeout_s = timeout_s
         self.ping = False
@@ -2543,7 +2549,7 @@ class PageResponseObject(object):
             date = self.headers["Last-Modified"]
         if "last-modified" in self.headers:
             date = self.headers["last-modified"]
-            
+
         if date:
             return date_str_to_date(date)
 

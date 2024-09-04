@@ -6,6 +6,7 @@ Some crawlers / scrapers cannot be easily called from a thread, etc, because of 
 
 import json
 import traceback
+from pathlib import Path
 
 from .webtools import (
     RssPage,
@@ -20,7 +21,7 @@ from .webtools import (
     HTTP_STATUS_CODE_PAGE_UNSUPPORTED,
 )
 
-from .ipc import(
+from .ipc import (
     string_to_command,
     SocketConnection,
 )
@@ -47,7 +48,6 @@ except Exception as E:
 
 
 class CrawlerInterface(object):
-
     def __init__(self, request, response_file=None, response_port=None):
         """
         @param response_file If set, response is stored in a file
@@ -111,6 +111,10 @@ class CrawlerInterface(object):
         all_bytes = self.response_to_bytes()
 
         if self.response_file:
+            path = Path(self.response_file)
+            if not path.parent.exists():
+                path.parent.mkdir(parents=True, exist_ok=True)
+
             with open(self.response_file, "wb") as fh:
                 fh.write(all_bytes)
 
@@ -121,8 +125,6 @@ class CrawlerInterface(object):
 
         else:
             response = self.get_response()
-            print("Response:{}".format(response))
-            print(response.text)
 
         return True
 
@@ -137,13 +139,15 @@ class RequestsPage(CrawlerInterface):
         """
         Wrapper for python requests.
         """
-        super().__init__(request, response_file=response_file, response_port=response_port)
+        super().__init__(
+            request, response_file=response_file, response_port=response_port
+        )
 
     def run(self):
         if not requests_feataure_enabled:
             return
 
-        WebLogger.debug("Requests GET:{}".format(self.request.url))
+        WebLogger.debug("Requests Driver:{}".format(self.request.url))
 
         """
         stream argument allows us to read header before we fetch the page.
@@ -285,9 +289,10 @@ class RequestsPage(CrawlerInterface):
 
 
 class SeleniumDriver(CrawlerInterface):
-
     def __init__(self, request, response_file=None, response_port=None):
-        super().__init__(request, response_file=response_file, response_port=response_port)
+        super().__init__(
+            request, response_file=response_file, response_port=response_port
+        )
 
     def get_driver(self):
         """
@@ -414,6 +419,8 @@ class SeleniumChromeHeadless(SeleniumDriver):
         if not driver:
             return
 
+        WebLogger.debug("SeleniumChromeHeadless Driver:{}".format(self.request.url))
+
         try:
             # add 10 seconds for start of browser, etc.
             selenium_timeout = self.request.timeout_s + 10
@@ -510,6 +517,8 @@ class SeleniumChromeFull(SeleniumDriver):
         if not driver:
             return
 
+        WebLogger.debug("SeleniumChromeFull Driver:{}".format(self.request.url))
+
         try:
             # add 10 seconds for start of browser, etc.
             selenium_timeout = self.request.timeout_s + 20
@@ -590,6 +599,8 @@ class SeleniumUndetected(SeleniumDriver):
         driver = self.get_driver()
         if not driver:
             return
+
+        WebLogger.debug("SeleniumUndetected Driver:{}".format(self.request.url))
 
         try:
             # add 10 seconds for start of browser, etc.

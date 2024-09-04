@@ -1,11 +1,13 @@
 import subprocess
 import json
+from pathlib import Path
 
 from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
 from datetime import timedelta
 
 from utils.dateutils import DateUtils
+from utils.basictypes import fix_path_for_os
 
 from .webtools import (
     ContentInterface,
@@ -150,14 +152,14 @@ class HttpRequestBuilder(object):
 
         if self.options.use_basic_crawler():
             preference_table = [
-                    self.get_contents_via_requests,
-                    self.get_contents_via_server_headless,
-                    self.get_contents_via_script_headless,
-                    self.get_contents_via_selenium_chrome_headless,
-                    self.get_contents_via_server_full,
-                    self.get_contents_via_script_full,
-                    self.get_contents_via_selenium_chrome_full,
-                    ]
+                self.get_contents_via_requests,
+                self.get_contents_via_server_headless,
+                self.get_contents_via_script_headless,
+                self.get_contents_via_selenium_chrome_headless,
+                self.get_contents_via_server_full,
+                self.get_contents_via_script_full,
+                self.get_contents_via_selenium_chrome_full,
+            ]
 
             for function in preference_table:
                 result = function(request=request)
@@ -342,7 +344,11 @@ class HttpRequestBuilder(object):
 
             diff = DateUtils.get_datetime_now_utc() - script_time_start
             if diff.total_seconds() > request.timeout_s:
-                WebLogger.error("Url:{} Timeout on socket connection:{}/{}".format(request.url, diff.total_seconds(), request.timeout_s))
+                WebLogger.error(
+                    "Url:{} Timeout on socket connection:{}/{}".format(
+                        request.url, diff.total_seconds(), request.timeout_s
+                    )
+                )
 
                 response = PageResponseObject(
                     request.url,
@@ -366,10 +372,27 @@ class HttpRequestBuilder(object):
         file_path = os.path.realpath(__file__)
         full_path = Path(file_path)
 
-        operating_path = full_path.parents[2]
-        response_file_location = full_path.parents[1] / "response.txt"
+        if HttpPageHandler.script_operating_dir is None:
+            operating_path = full_path.parents[1]
+        else:
+            operating_path = Path(HttpPageHandler.script_operating_dir)
 
-        script = script + ' --url "{}" --output-file="{}"'.format(request.url, str(response_file_location))
+        file_name_url_part = fix_path_for_os(request.url)
+        file_name_url_part = file_name_url_part.replace("\\", "")
+        file_name_url_part = file_name_url_part.replace("/", "")
+        file_name_url_part = file_name_url_part.replace("@", "")
+
+        response_file_location = "response_{}.txt".format(file_name_url_part)
+
+        if HttpPageHandler.script_responses_directory is not None:
+            response_dir = Path(HttpPageHandler.script_responses_directory)
+            response_dir.mkdir(parents=True, exist_ok=True)
+
+            response_file_location = response_dir / response_file_location
+
+        script = script + ' --url "{}" --output-file="{}"'.format(
+            request.url, str(response_file_location)
+        )
 
         if response_file_location.exists():
             response_file_location.unlink()
@@ -390,35 +413,35 @@ class HttpRequestBuilder(object):
         )
 
         if p.returncode != 0:
-            return
+            if p.stdout:
+                stdout_str = p.stdout.decode()
+                if stdout_str != "":
+                    WebLogger.debug(stdout_str)
 
-        if p.stdout:
-            stdout_str = p.stdout.decode()
-            WebLogger.debug(stdout_str)
+            if p.stderr:
+                stderr_str = p.stderr.decode()
+                if stderr_str and stderr_str != "":
+                    WebLogger.error("Url:{}. {}".format(request.url, stderr_str))
+
+            WebLogger.error(
+                "Url:{}. Return code invalid:{}".format(request.url, p.returncode)
+            )
 
         if response_file_location.exists():
             with open(str(response_file_location), "rb") as fh:
                 all_bytes = fh.read()
 
-                return get_response_from_bytes(all_bytes)
+                response = get_response_from_bytes(all_bytes)
 
+                response_file_location.unlink()
+                return response
+
+        else:
             WebLogger.error(
-                "Url:{}. Not found response in response file:{}".format(
+                "Url:{}. Response file does not exist:{}".format(
                     request.url, str(response_file_location)
                 )
             )
-            return PageResponseObject(
-                request.url,
-                text=None,
-                status_code=HTTP_STATUS_CODE_EXCEPTION,
-                request_url=request.url,
-            )
-
-        else:
-            if p.stderr:
-                stderr_str = p.stderr.decode()
-                if stderr_str and stderr_str != "":
-                    WebLogger.error("Url:{}. {}".format(request.url, stderr_str))
 
         return PageResponseObject(
             request.url,
@@ -513,7 +536,9 @@ class HttpRequestBuilder(object):
             self.response = self.get_contents_function(request=request)
 
             WebLogger.info(
-                    "Url:{}. Options:{} Requesting page: DONE".format(self.url, self.options)
+                "Url:{}. Options:{} Requesting page: DONE".format(
+                    self.url, self.options
+                )
             )
 
         except Exception as E:
@@ -556,13 +581,15 @@ class HttpRequestBuilder(object):
 
 
 class HttpPageHandler(ContentInterface):
-
     user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0"
     ssl_verify = True
 
     crawling_headless_script = None
     crawling_full_script = None
     crawling_server_port = None
+
+    script_operating_dir = None
+    script_responses_directory = Path("storage")
 
     def __init__(self, url=None, page_options=None):
         super().__init__(url=url, contents=None)
@@ -598,7 +625,10 @@ class HttpPageHandler(ContentInterface):
     def get_contents_implementation(self):
         self.p = self.get_page_handler_simple()
 
-        if self.options.use_browser_promotions and self.is_advanced_processing_possible():
+        if (
+            self.options.use_browser_promotions
+            and self.is_advanced_processing_possible()
+        ):
             # we warn, because if that happens too often, it is easy just to
             # define EntryRule for that domain
             WebLogger.error(
@@ -633,8 +663,7 @@ class HttpPageHandler(ContentInterface):
             pass
 
         if contents:
-            """
-            """
+            """ """
 
             if self.is_html():
                 p = HtmlPage(url, contents)

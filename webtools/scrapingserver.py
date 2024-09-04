@@ -36,6 +36,7 @@ import webtools
 import subprocess
 import traceback
 from datetime import datetime, timedelta
+from webtools import HttpPageHandler
 
 
 max_transaction_timeout_s = 40
@@ -71,7 +72,7 @@ def run_script(script, request, port):
 
 def delete_connection(c):
     for index, request_data in enumerate(requests):
-        connection = request_data['connection']
+        connection = request_data["connection"]
 
         if c == connection:
             del requests[index]
@@ -81,8 +82,8 @@ def delete_connection(c):
 
 def delete_request_connection(url):
     for index, request_data in enumerate(requests):
-        request = request_data['request']
-        connection = request_data['connection']
+        request = request_data["request"]
+        connection = request_data["connection"]
 
         if request.url == url:
             del requests[index]
@@ -112,7 +113,7 @@ def handle_connection_inner(c, address, port):
 
         diff = datetime.now() - time_start_s
         if diff.total_seconds() > max_transaction_timeout_s:
-            #permanent_error("Timeout - closing")
+            # permanent_error("Timeout - closing")
             delete_connection(c)
             return
 
@@ -164,9 +165,9 @@ def handle_connection_inner(c, address, port):
                     should_run_script = False
 
             request_data = {}
-            request_data['request'] = request
-            request_data['connection'] = c
-            request_data['datetime'] = datetime.now()
+            request_data["request"] = request
+            request_data["connection"] = c
+            request_data["datetime"] = datetime.now()
             requests.append(request_data)
 
             if should_run_script:
@@ -212,7 +213,11 @@ def handle_connection_inner(c, address, port):
                 request = request_data["request"]
 
                 if request.url == response.request_url:
-                    print("Sending response to connection:{} bytes:{}".format(connection, len(all_bytes)))
+                    print(
+                        "Sending response to connection:{} bytes:{}".format(
+                            connection, len(all_bytes)
+                        )
+                    )
                     connection.send(all_bytes)
 
             delete_request_connection(response.request_url)
@@ -259,14 +264,19 @@ def remove_temporary_files():
     """
     Crawlee storage
     """
-    path = Path("./storage")
-    if path.exists() and len(requests) == 0:
-        shutil.rmtree(str(path))
+    if HttpPageHandler.script_responses_directory is not None:
+        path = Path(HttpPageHandler.script_responses_directory)
+        if path.exists():
+            shutil.rmtree(str(path), ignore_errors=True, onerror=None)
 
 
 def handle_connection(conn, address, port):
     now = datetime.now()
-    print("[{}] Handling connection from:{}. Requests len:{}".format(now, str(address), len(requests)))
+    print(
+        "[{}] Handling connection from:{}. Requests len:{}".format(
+            now, str(address), len(requests)
+        )
+    )
 
     c = webtools.ipc.SocketConnection(conn)
     try:
@@ -280,11 +290,14 @@ def handle_connection(conn, address, port):
     c.close()
 
     now = datetime.now()
-    print("[{}] Handling connection from:{} DONE. Requests len:{}.".format(now, str(address), len(requests)))
+    print(
+        "[{}] Handling connection from:{} DONE. Requests len:{}.".format(
+            now, str(address), len(requests)
+        )
+    )
 
 
 class ScrapingServer(object):
-
     def __init__(self, host=None, port=None):
         if host:
             self.host = host
@@ -389,11 +402,12 @@ def run_server_task(host=None, port=None):
     """
     Starts server task, starts listening for new input
     """
+
     def task(server):
         server.serve_forever()
 
     s = ScrapingServer()
-    thread = threading.Thread(target = task, args = [s])
+    thread = threading.Thread(target=task, args=[s])
     thread.daemon = True
     thread.start()
     return s
