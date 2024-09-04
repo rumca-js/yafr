@@ -2,34 +2,42 @@
 Yet another feed reader
 
 ```
-usage: yafr.py [-h] [--timeout TIMEOUT] [--port PORT] [-o OUTPUT_DIR] [--print PRINT] [-r] [--force] [--stats]
-               [--cleanup] [--follow FOLLOW] [--unfollow UNFOLLOW] [--enable ENABLE] [--disable DISABLE]
-               [--list-sources] [--init-sources] [--page-details PAGE_DETAILS] [-v] [--db DB]
+usage: yafr.py [-h] [--timeout TIMEOUT] [--port PORT] [-o OUTPUT_DIR] [--add ADD] [--bookmark] [--unbookmark]
+               [--entry ENTRY] [--source SOURCE] [-r] [--force] [--stats] [--cleanup] [--follow FOLLOW]
+               [--unfollow UNFOLLOW] [--enable ENABLE] [--disable DISABLE] [--list-bookmarks] [--list-entries]
+               [--list-sources] [--init-sources] [--page-details PAGE_DETAILS] [--search SEARCH] [-v] [--db DB]
 
-Data analyzer program
+RSS feed program.
 
 optional arguments:
   -h, --help            show this help message and exit
   --timeout TIMEOUT     Timeout expressed in seconds
-  --port PORT           Port
+  --port PORT           Port, if using web scraping server
   -o OUTPUT_DIR, --output-dir OUTPUT_DIR
                         HTML output directory
-  --print PRINT         Prints data to stdout
+  --add ADD             Adds entry with the specified URL
+  --bookmark            makes bookmarked
+  --unbookmark          makes bookmarked
+  --entry ENTRY         Select entry by ID
+  --source SOURCE       Select source by ID
   -r, --refresh-on-start
-                        Refreshes on start
-  --force               Forces refresh
-  --stats               Show statistics
+                        Refreshes links, fetches on start
+  --force               Force refresh
+  --stats               Show table stats
   --cleanup             Remove unreferenced items
-  --follow FOLLOW       Follows specific url
-  --unfollow UNFOLLOW   Unfollows specific url
+  --follow FOLLOW       Follows specific source
+  --unfollow UNFOLLOW   Unfollows specific source
   --enable ENABLE       Enables specific source
   --disable DISABLE     Disables specific source
+  --list-bookmarks      Prints bookmarks to stdout
+  --list-entries        Prints data to stdout
   --list-sources        Lists sources
   --init-sources        Initializes sources
   --page-details PAGE_DETAILS
-                        Shows page details
+                        Shows page details for specified URL
+  --search SEARCH       Search entries. Example: --search "title=Elon"
   -v, --verbose         Verbose
-  --db DB               SQLite database file
+  --db DB               SQLite database file name
 ```
 
 # Alternative software
