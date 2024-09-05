@@ -193,6 +193,7 @@ class FeedReaderFeed(FeedObject):
             return
 
         self.title = self.try_to_get_field("title")
+        self.link = self.try_to_get_field("link")
         self.subtitle = self.try_to_get_field("subtitle")
         self.description = self.try_to_get_field("description")
         self.language = self.try_to_get_field("language")

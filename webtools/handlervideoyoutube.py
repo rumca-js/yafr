@@ -237,9 +237,12 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.get_contents():
             return self.yt_ob.get_channel_code()
 
-    def get_channel_feed_url(self):
+    def get_feeds(self):
+        result = []
         if self.get_contents():
-            return self.yt_ob.get_channel_feed_url()
+            return [self.yt_ob.get_channel_feed_url()]
+
+        return result
 
     def get_channel_name(self):
         if self.get_contents():
@@ -296,7 +299,9 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
 
         youtube_props["embed_url"] = self.get_link_embed()
         youtube_props["valid"] = self.is_valid()
-        youtube_props["channel_feed_url"] = self.get_channel_feed_url()
+        feeds = self.get_feeds()
+        if len(feeds) > 0:
+            youtube_props["channel_feed_url"] = feeds[0]
         youtube_props["contents"] = self.get_json_text()
         youtube_props["keywords"] = self.get_tags()
         youtube_props["live"] = self.is_live()
@@ -385,9 +390,12 @@ class YouTubeJsonHandler(YouTubeVideoHandler):
         if self.get_contents():
             return self.yt_ob.get_channel_code()
 
-    def get_channel_feed_url(self):
+    def get_feeds(self):
+        result = []
         if self.get_contents():
-            return self.yt_ob.get_channel_feed_url()
+            return [self.yt_ob.get_channel_feed_url()]
+
+        return result
 
     def get_channel_name(self):
         if self.get_contents():

@@ -165,7 +165,7 @@ class EntriesTableController(object):
         with Session() as session:
             entries = session.query
 
-            query = delete(EntriesTable).where(EntriesTable.date_published < limit)
+            query = delete(EntriesTable).where(EntriesTable.date_published < limit, EntriesTable.bookmarked == False)
             session.execute(query)
             session.commit()
 

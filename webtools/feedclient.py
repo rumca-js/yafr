@@ -251,10 +251,10 @@ class FeedClientParser(object):
         self.parser.add_argument("-o", "--output-dir", help="HTML output directory")
         self.parser.add_argument("--add", help="Adds entry with the specified URL")
         self.parser.add_argument(
-            "--bookmark", action="store_true", help="makes bookmarked"
+            "--bookmark", action="store_true", help="bookmarks entry"
         )
         self.parser.add_argument(
-            "--unbookmark", action="store_true", help="makes bookmarked"
+            "--unbookmark", action="store_true", help="unbookmarks entry"
         )
         self.parser.add_argument("--entry", help="Select entry by ID")
         self.parser.add_argument("--source", help="Select source by ID")

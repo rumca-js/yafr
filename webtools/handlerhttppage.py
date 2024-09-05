@@ -428,13 +428,15 @@ class HttpRequestBuilder(object):
             )
 
         if response_file_location.exists():
+            response = None 
+
             with open(str(response_file_location), "rb") as fh:
                 all_bytes = fh.read()
 
                 response = get_response_from_bytes(all_bytes)
 
-                response_file_location.unlink()
-                return response
+            response_file_location.unlink()
+            return response
 
         else:
             WebLogger.error(
@@ -911,3 +913,26 @@ class HttpPageHandler(ContentInterface):
         if self.p:
             if type(self.p) is RssPage:
                 return self.p.get_entries()
+
+    def get_feeds(self):
+        # TODO ugly import
+        from .handlers import RedditChannelHandler
+        result = []
+        url = self.url
+
+        h = RedditChannelHandler(url)
+        if h.is_handled_by():
+            feeds = h.get_feeds()
+            if feeds and len(feeds) > 0:
+                result.extend(feeds)
+
+        if type(self.p) is RssPage:
+            # we do not add ourselve
+            pass
+
+        if type(self.p) is HtmlPage:
+            feeds = self.p.get_feeds()
+            if feeds and len(feeds) > 0:
+                result.extend(feeds)
+
+        return result

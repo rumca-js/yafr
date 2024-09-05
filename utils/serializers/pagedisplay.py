@@ -7,6 +7,7 @@ from webtools import (
     WebConfig,
     HttpPageHandler,
 )
+from utils.services import OpenRss
 
 
 class PageDisplay(object):
@@ -29,6 +30,18 @@ class PageDisplay(object):
         print("Language:{}".format(u.get_language()))
         print("Author:{}".format(u.get_author()))
         print("Album:{}".format(u.get_album()))
+
+        print("RSS path:{}".format(Url.find_rss_url(u)))
+
+        feeds = u.get_feeds()
+        for feed in feeds:
+            print("Feed URL:{}".format(feed))
+
+        if not feeds or len(feeds) == 0:
+            rss = OpenRss(url)
+            link = rss.find_rss_link()
+            if link:
+                print("Feed URL:{}".format(link))
 
         handler = u.get_handler()
         if type(handler) is HttpPageHandler:
@@ -76,10 +89,6 @@ class PageDisplay(object):
                 print(
                     "schema image:{}".format(handler.p.get_schema_field("thumbnailUrl"))
                 )
-
-                rss_u = Url.find_rss_url(url)
-                if rss_u:
-                    print("RSS url:{}".format(rss_u.url))
 
         elif type(handler) is Url.youtube_channel_handler:
             index = 0

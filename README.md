@@ -61,16 +61,18 @@ optional arguments:
 
 # where to find feed urls
 
-most of the times you have to search.
+First, try [OpenRss](https://openrss.org/usage)
 
-try checking Github, some awesome, curated lists 
+Then, you can try searching by Google, or other search engine.
+
+You can also check existing awesome lists:
 
  - https://github.com/plenaryapp/awesome-rss-feeds
  - https://github.com/tuan3w/awesome-tech-rss
  - https://github.com/DongjunLee/awesome-feeds
  - https://github.com/foorilla/allainews_sources
 
-Other places
+Other places to find interesting blogs / places:
 
  - https://nownownow.com/
  - https://searchmysite.net/

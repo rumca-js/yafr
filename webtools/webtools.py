@@ -1467,6 +1467,10 @@ class RssPage(ContentInterface):
         if "subtitle" in self.feed.feed:
             return self.feed.feed.subtitle
 
+    def get_link(self):
+        if "link" in self.feed.feed:
+            return self.feed.feed.link
+
     def get_language(self):
         if self.feed is None:
             return
@@ -2131,11 +2135,11 @@ class HtmlPage(ContentInterface):
         return self.get_og_field("locale")
 
     def get_rss_url(self, full_check=False):
-        urls = self.get_rss_urls()
+        urls = self.get_feeds()
         if urls and len(urls) > 0:
             return urls[0]
 
-    def get_rss_urls(self, full_check=False):
+    def get_feeds(self):
         if not self.contents:
             return []
 
@@ -2143,13 +2147,13 @@ class HtmlPage(ContentInterface):
             "application/atom+xml"
         )
 
-        if not rss_links:
-            links = self.get_links_inner()
-            rss_links.extend(
-                link
-                for link in links
-                if "feed" in link or "rss" in link or "atom" in link
-            )
+        #if not rss_links:
+        #    links = self.get_links_inner()
+        #    rss_links.extend(
+        #        link
+        #        for link in links
+        #        if "feed" in link or "rss" in link or "atom" in link
+        #    )
 
         return (
             [DomainAwarePage.get_url_full(self.url, rss_url) for rss_url in rss_links]
