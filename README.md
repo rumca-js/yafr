@@ -2,10 +2,11 @@
 Yet another feed reader
 
 ```
-usage: yafr.py [-h] [--timeout TIMEOUT] [--port PORT] [-o OUTPUT_DIR] [--add ADD] [--bookmark] [--unbookmark]
+usage: yafr.py [-h] [--timeout TIMEOUT] [--port PORT] [-o OUTPUT_DIR] [--add ADD] [--bookmark] [--unbookmark] [-m]
                [--entry ENTRY] [--source SOURCE] [-r] [--force] [--stats] [--cleanup] [--follow FOLLOW]
-               [--unfollow UNFOLLOW] [--enable ENABLE] [--disable DISABLE] [--list-bookmarks] [--list-entries]
-               [--list-sources] [--init-sources] [--page-details PAGE_DETAILS] [--search SEARCH] [-v] [--db DB]
+               [--unfollow UNFOLLOW] [--unfollow-all] [--enable ENABLE] [--disable DISABLE] [--enable-all ENABLE_ALL]
+               [--disable-all DISABLE_ALL] [--list-bookmarks] [--list-entries] [--list-sources] [--init-sources]
+               [--page-details PAGE_DETAILS] [--search SEARCH] [-v] [--db DB]
 
 RSS feed program.
 
@@ -16,8 +17,9 @@ optional arguments:
   -o OUTPUT_DIR, --output-dir OUTPUT_DIR
                         HTML output directory
   --add ADD             Adds entry with the specified URL
-  --bookmark            makes bookmarked
-  --unbookmark          makes bookmarked
+  --bookmark            bookmarks entry
+  --unbookmark          unbookmarks entry
+  -m, --mark-read       Marks entries as read
   --entry ENTRY         Select entry by ID
   --source SOURCE       Select source by ID
   -r, --refresh-on-start
@@ -27,8 +29,13 @@ optional arguments:
   --cleanup             Remove unreferenced items
   --follow FOLLOW       Follows specific source
   --unfollow UNFOLLOW   Unfollows specific source
+  --unfollow-all        Unfollows all sources
   --enable ENABLE       Enables specific source
   --disable DISABLE     Disables specific source
+  --enable-all ENABLE_ALL
+                        Enables all sources
+  --disable-all DISABLE_ALL
+                        Disables all sources
   --list-bookmarks      Prints bookmarks to stdout
   --list-entries        Prints data to stdout
   --list-sources        Lists sources

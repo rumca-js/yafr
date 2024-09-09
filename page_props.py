@@ -18,6 +18,7 @@ from webtools import (
    HttpPageHandler,
    ScrapingClient,
 )
+from utils.logger import Logger
 from utils.serializers import PageDisplay, PageDisplayParser
 
 
@@ -25,7 +26,9 @@ __version__ = "0.0.1"
 
 
 async def main():
-    WebConfig.use_print_logging()
+    # we do not want to be swamped with web requests
+    # WebConfig.use_print_logging()
+    Logger.use_print_logging()
 
     # if scraping server is running, use it
     c = ScrapingClient()
@@ -39,10 +42,8 @@ async def main():
     # scraping server is not running, we do not use port
     #HttpPageHandler.crawling_full_script = None
     #HttpPageHandler.crawling_headless_script = None
-
-    #HttpPageHandler.crawling_full_script = "poetry run python crawleebeautifulsoup.py"
-    #HttpPageHandler.crawling_headless_script = "poetry run python crawleebeautifulsoup.py"
-
+    HttpPageHandler.crawling_full_script = "poetry run python crawleebeautifulsoup.py"
+    HttpPageHandler.crawling_headless_script = "poetry run python crawleebeautifulsoup.py"
     #HttpPageHandler.crawling_full_script = "poetry run python crawlerseleniumundetected.py"
     #HttpPageHandler.crawling_headless_script = "poetry run python crawlerseleniumundetected.py"
 

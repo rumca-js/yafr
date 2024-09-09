@@ -189,7 +189,7 @@ class FeedReaderFeed(FeedObject):
             self.published = None
             self.author = None
             self.tags = []
-            self.image = None
+            self.image = {}
             return
 
         self.title = self.try_to_get_field("title")
@@ -253,6 +253,7 @@ class FeedReader(object):
     def parse_implementation(self):
         # initial?
         self.feed = FeedReaderFeed(self.root, self.ns, is_atom=True)
+        self.feed.parse()
         self.entries = []
 
         if not self.contents:
