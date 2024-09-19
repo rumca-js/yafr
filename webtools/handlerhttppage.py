@@ -1,5 +1,6 @@
 import subprocess
 import json
+import os
 from pathlib import Path
 
 from urllib3.exceptions import InsecureRequestWarning
@@ -10,13 +11,7 @@ from utils.dateutils import DateUtils
 from utils.basictypes import fix_path_for_os
 
 from .webtools import (
-    ContentInterface,
-    DefaultContentPage,
     WebLogger,
-    WebConfig,
-    JsonPage,
-    HtmlPage,
-    RssPage,
     PageRequestObject,
     PageResponseObject,
     PageOptions,
@@ -28,14 +23,12 @@ from .webtools import (
     HTTP_STATUS_CODE_FILE_TOO_BIG,
     HTTP_STATUS_CODE_PAGE_UNSUPPORTED,
 )
-from .crawlers import (
-    selenium_feataure_enabled,
-    RequestsCrawler,
-    SeleniumChromeHeadless,
-    SeleniumChromeFull,
-    SeleniumUndetected,
-    ScriptCrawler,
-    ServerCrawler,
+from .pages import (
+    ContentInterface,
+    DefaultContentPage,
+    JsonPage,
+    HtmlPage,
+    RssPage,
 )
 
 
@@ -144,181 +137,70 @@ class HttpRequestBuilder(object):
          - requests (fast)
          - if above fails we can use headless browser
          - if above fails we can use full browser (most advanced, resource consuming)
+
+        First configured thing provides return value
         """
-        request.timeout_s = max(request.timeout_s, 10)
+        from .webconfig import (
+            WebConfig,
+        )
         if self.options:
             request.ssl_verify = self.options.ssl_verify
         if self.options:
             request.ping = self.options.ping
 
         if self.options.use_basic_crawler():
-            preference_table = [
-                self.get_contents_via_requests,
-                self.get_contents_via_server_headless,
-                self.get_contents_via_script_headless,
-                self.get_contents_via_selenium_chrome_headless,
-                self.get_contents_via_server_full,
-                self.get_contents_via_script_full,
-                self.get_contents_via_selenium_chrome_full,
-            ]
+            # up to 20
+            request.timeout_s = min(request.timeout_s, 20)
+            # at least 10
+            request.timeout_s = max(request.timeout_s, 10)
 
-            for function in preference_table:
-                result = function(request=request)
-                if result:
-                    return result
+            for crawler_data in WebConfig.browser_mapping["standard"]:
+                crawler = crawler_data["crawler"]
+                settings = crawler_data["settings"]
+                WebLogger.debug("Running crawler {}".format(crawler))
+                c = crawler(request=request, settings=settings)
+                c.run()
+                response = c.get_response()
+                c.close()
+                if response:
+                    return response
 
         elif self.options.use_headless_browser:
+            # up to 30
+            request.timeout_s = min(request.timeout_s, 30)
+            # at least 20
             request.timeout_s = max(request.timeout_s, 20)
 
-            preference_table = [
-                self.get_contents_via_server_headless,
-                self.get_contents_via_script_headless,
-                self.get_contents_via_selenium_chrome_headless,
-                self.get_contents_via_server_full,
-                self.get_contents_via_script_full,
-                self.get_contents_via_selenium_chrome_full,
-                self.get_contents_via_requests,
-            ]
-
-            for function in preference_table:
-                result = function(request=request)
-                if result:
-                    return result
+            for crawler_data in WebConfig.browser_mapping["headless"]:
+                crawler = crawler_data["crawler"]
+                settings = crawler_data["settings"]
+                WebLogger.debug("Running crawler {}".format(crawler))
+                c = crawler(request=request, settings=settings)
+                c.run()
+                response = c.get_response()
+                c.close()
+                if response:
+                    return response
 
         elif self.options.use_full_browser:
+            # up to 40
+            request.timeout_s = min(request.timeout_s, 40)
+            # at least 30
             request.timeout_s = max(request.timeout_s, 30)
 
-            preference_table = [
-                self.get_contents_via_server_full,
-                self.get_contents_via_script_full,
-                self.get_contents_via_selenium_chrome_full,
-                self.get_contents_via_server_headless,
-                self.get_contents_via_script_headless,
-                self.get_contents_via_selenium_chrome_headless,
-                self.get_contents_via_requests,
-            ]
-
-            for function in preference_table:
-                print("Trying {}".format(function))
-                result = function(request=request)
-                if result:
-                    return result
+            for crawler_data in WebConfig.browser_mapping["full"]:
+                crawler = crawler_data["crawler"]
+                settings = crawler_data["settings"]
+                WebLogger.debug("Running crawler {}".format(crawler))
+                c = crawler(request=request, settings=settings)
+                c.run()
+                response = c.get_response()
+                c.close()
+                if response:
+                    return response
         else:
             self.dead = True
             raise NotImplementedError("Could not identify method of page capture")
-
-    def get_contents_via_requests(self, request):
-        """
-        This is program is web scraper. If we turn verify, then we discard some of pages.
-        Encountered several major pages, which had SSL programs.
-
-        SSL is mostly important for interacting with pages. During web scraping it is not that useful.
-        """
-
-        p = RequestsCrawler(request)
-        p.run()
-        return p.get_response()
-
-    def get_contents_via_selenium_chrome_headless(self, request):
-        p = SeleniumChromeHeadless(request, driver_executable=WebConfig.selenium_driver_location)
-        p.run()
-        p.close()
-        return p.get_response()
-
-    def get_contents_via_selenium_chrome_full(self, request):
-        p = SeleniumChromeFull(request, driver_executable=WebConfig.selenium_driver_location)
-        p.run()
-        p.close()
-        return p.get_response()
-
-    def get_contents_via_script_headless(self, request):
-        if not WebConfig.crawling_headless_script:
-            return
-
-        script = WebConfig.crawling_headless_script
-
-        return self.get_contents_via_script(script, request)
-
-    def get_contents_via_script_full(self, request):
-        if not WebConfig.crawling_full_script:
-            return
-
-        script = WebConfig.crawling_full_script
-
-        return self.get_contents_via_script(script, request)
-
-    def get_contents_via_server_headless(self, request):
-        if not WebConfig.crawling_server_port:
-            return
-
-        script = WebConfig.crawling_headless_script
-        if script is None:
-            script = "poetry run python crawleebeautifulsoup.py"
-        port = WebConfig.crawling_server_port
-
-        return self.get_contents_via_server(script, port, request)
-
-    def get_contents_via_server_full(self, request):
-        if not WebConfig.crawling_server_port:
-            return
-
-        script = WebConfig.crawling_full_script
-        if script is None:
-            script = "poetry run python crawleeplaywright.py"
-        port = WebConfig.crawling_server_port
-
-        return self.get_contents_via_server(script, port, request)
-
-    def get_contents_via_server(self, script, port, request):
-        """
-        TODO what about timeout?
-        """
-        p = ServerCrawler(request = request, response_port = port, script = script)
-        p.run()
-        p.close()
-        return p.get_response()
-
-    def get_contents_via_script(self, script, request):
-        """
-        TODO There might be collision if apache and celery called same script at the same time.
-        """
-        import os
-        from pathlib import Path
-
-        file_path = os.path.realpath(__file__)
-        full_path = Path(file_path)
-
-        if WebConfig.script_operating_dir is None:
-            operating_path = full_path.parents[1]
-        else:
-            operating_path = Path(WebConfig.script_operating_dir)
-
-        if not operating_path.exists():
-            WebLogger.error("Operating path does not exist: {}".format(operating_path))
-            return
-
-        full_script = operating_path / script
-        if not full_script.exists():
-            WebLogger.error("Script to call does not exist: {}".format(full_script))
-            return
-
-        file_name_url_part = fix_path_for_os(request.url)
-        file_name_url_part = file_name_url_part.replace("\\", "")
-        file_name_url_part = file_name_url_part.replace("/", "")
-        file_name_url_part = file_name_url_part.replace("@", "")
-
-        if WebConfig.script_responses_directory is not None:
-            response_dir = Path(WebConfig.script_responses_directory)
-
-        response_file_location = response_dir / "response_{}.txt".format(file_name_url_part)
-
-        p = ScriptCrawler(request = request,
-                      response_file = response_file_location,
-                      cwd = operating_path,
-                      script = script)
-        p.run()
-        p.close()
-        return p.get_response()
 
     def ping(self, timeout_s=5):
         url = self.url
