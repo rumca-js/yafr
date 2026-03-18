@@ -1,8 +1,15 @@
 import re
 import time
 from datetime import datetime, timedelta
-from webtoolkit import BaseUrl, RemoteUrl, PageRequestObject
 import traceback
+
+from webtoolkit import (
+   BaseUrl,
+   RemoteUrl,
+   PageRequestObject,
+   HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
+   HTTP_STATUS_TOO_MANY_REQUESTS,
+)
 
 from .dbconnection import DbConnection
 from .controller import Controller
@@ -30,30 +37,47 @@ class TaskRunner(object):
         sourcedata = SourceData(self.connection)
         sourcedata.mark_read(source)
 
-        url = self.get_source_url(source)
+        url = self.get_response_real(source)
+
         if not url:
             return
 
         response = url.get_response()
         if response:
             if response.is_valid():
-                source_properties = url.get_properties()
-
-                sources = Sources(self.connection)
-                sources.set(source.url, source_properties)
-                sources.delete_entries(source)
-
-                entries = url.get_entries()
-                for entry in entries:
-                    if self.is_entry_ok(entry, source):
-                        entries = Entries(self.connection)
-                        entries.add(entry, source)
+                self.handle_valid_response(source, url, response)
             else:
                 AppLogging(self.connection).error(f"URL:{source.url} Response is invalid")
-                time.sleep(5)
         else:
             AppLogging(self.connection).error(f"URL:{source.url} No response")
-            time.sleep(5)
+
+    def get_response_real(self, source):
+        while True:
+            url = self.get_source_url(source)
+            if not url:
+                return
+
+            response = url.get_response()
+            if response:
+                if (response.get_status_code() == HTTP_STATUS_TOO_MANY_REQUESTS or
+                    response.get_status_code() == HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS):
+                    AppLogging.debug("Retry of request")
+                    continue
+
+            return url
+
+    def handle_valid_response(self, source, url, response):
+        source_properties = url.get_properties()
+
+        sources = Sources(self.connection)
+        sources.set(source.url, source_properties)
+        sources.delete_entries(source)
+
+        entries = url.get_entries()
+        for entry in entries:
+            if self.is_entry_ok(entry, source):
+                entries = Entries(self.connection)
+                entries.add(entry, source)
 
     def is_entry_ok(self, entry, source):
         link = entry.get("link")
