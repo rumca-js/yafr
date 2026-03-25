@@ -98,6 +98,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
         return True
 
     def get_source_url(self, source):
+        if not source:
+            return
         request = PageRequestObject(source.url)
         request.timeout_s = 300
 

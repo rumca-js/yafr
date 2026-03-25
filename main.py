@@ -25,6 +25,7 @@ from src.dbconnection import DbConnection
 from src.serializers import entry_to_json, source_to_json, source_and_entries_to_rss
 from src.controller import Controller
 from src.system import System
+from src.sources import Sources
 from src.applogging import AppLogging
 
 
@@ -373,8 +374,8 @@ def remove_source():
 
     source = connection.sources_table.get(id=source_id)
     if source:
-        controller = Controller(connection)
-        controller.remove_source(source)
+        sources = Sources(connection)
+        sources.delete(id=source.id)
 
         html_text = get_view(OK_TEMPLATE, title="Remove source")
         return render_template_string(html_text)
