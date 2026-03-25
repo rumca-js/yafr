@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime
 
 class AppLogging(object):
@@ -52,12 +53,27 @@ class AppLogging(object):
         self.create_entry(info_text, detail_text=detail_text, level=AppLogging.WARNING, stack=stack)
 
     def error(self, info_text, detail_text="", stack=False):
+        print("Error: " + info_text)
         self.create_entry(info_text, detail_text=detail_text, level=AppLogging.ERROR, stack=stack)
 
     def notify(self, info_text, detail_text="", stack=False):
         self.create_entry(info_text, detail_text=detail_text, level=AppLogging.NOTIFICATION, stack=stack)
 
-    def exc(self, exception, info_text, detail_text="", stack=False):
-        info_text += str(exception)
+    def exc(self, exception_object, info_text="", detail_text="", stack=False):
+
+        error_text = traceback.format_exc()
+        print("Exception format")
+        print(error_text)
+
+        stack_lines = traceback.format_stack()
+        stack_string = "".join(stack_lines)
+        print("Stack:")
+        print(stack_string)
+
+        if not info_text:
+            info_text = ""
+
+        info_text = info_text + "\n" + str(exception_object)
+        detail_text = error_text + "\n" + stack_string
 
         self.create_entry(info_text, detail_text=detail_text, level=AppLogging.ERROR, stack=stack)

@@ -87,7 +87,16 @@ def parse_search(search, table):
         "source_id": table.c.source_id,
     }
 
-    if "=" in search:
+    if "==" in search:
+        field, value = search.split("==", 1)
+        field = field.strip()
+        value = value.strip()
+
+        column = searchable_fields.get(field)
+        if column is not None and value:
+            return [column == value]
+
+    elif "=" in search:
         field, value = search.split("=", 1)
         field = field.strip()
         value = value.strip()
@@ -335,6 +344,16 @@ def remove_all_logs():
     return render_template_string(html_text)
 
 
+@app.route("/remove-all-jobs")
+def remove_all_jobs():
+    connection = DbConnection(table_name)
+
+    connection.backgroundjob.truncate()
+
+    html_text = get_view(OK_TEMPLATE, title="Remove all jobs")
+    return render_template_string(html_text)
+
+
 @app.route("/remove-all-sources")
 def remove_all_sources():
     connection = DbConnection(table_name)
@@ -391,6 +410,21 @@ def logs():
     logs = list(connection.applogging.get_where(order_by=order_by))
 
     return render_template_string(html_text, logs=logs)
+
+
+@app.route("/jobs", methods=["GET", "POST"])
+def jobs():
+    connection = DbConnection(table_name)
+
+    html_text = get_view(JOBS_TEMPLATE, title="Jobs")
+
+    order_by = [
+            connection.backgroundjob.get_table().c.date_created.desc()
+            ]
+
+    jobs = list(connection.backgroundjob.get_where(order_by=order_by))
+
+    return render_template_string(html_text, jobs=jobs)
 
 
 @app.route("/stats")
