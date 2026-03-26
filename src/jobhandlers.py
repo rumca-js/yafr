@@ -69,8 +69,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
                     continue
             if response is None:
                 AppLogging(self.connection).error(f"URL:{source.url} No response")
-                time.sleep(20)
-                continue
+                return
 
             return url
 
