@@ -1,3 +1,6 @@
+import subprocess
+import time
+
 from webtoolkit import (
    BaseUrl,
    RemoteUrl,
@@ -10,6 +13,7 @@ from .sources import Sources
 from .entries import Entries
 from .sourcedata import SourceData
 from .applogging import AppLogging
+from .entryrules import EntryRules
 
 
 class GenericJobHandler(object):
@@ -64,7 +68,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
                     AppLogging(self.connection).debug("Retry of request")
                     continue
             if response is None:
-                AppLogging(self.connection).error("No response")
+                AppLogging(self.connection).error(f"URL:{source.url} No response")
+                time.sleep(20)
                 continue
 
             return url
@@ -81,6 +86,18 @@ class ProcessSourceJobHandler(GenericJobHandler):
             if self.is_entry_ok(entry, source):
                 entries = Entries(self.connection)
                 entries.add(entry, source)
+                self.on_added_entry(entry)
+
+    def on_added_entry(self, entry):
+        rules = EntryRules(self.connection).get_rules_for(entry=entry)
+        for rule in rules:
+            if not rule.enabled:
+                continue
+
+            """
+            if rule.script:
+                subprocess.run(rule.script, shell=True, capture_output=True, text=True)
+            """
 
     def is_entry_ok(self, entry, source):
         link = entry.get("link")
@@ -138,7 +155,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
             AppLogging(self.connection).debug(f"Source id: {source_id} Source is not enabled")
             return False
 
-        if self.controller.is_entry_rule_triggered(source.url):
+        rules = EntryRules(self.connection)
+        if rules.is_entry_rule_triggered(source.url):
             sources = Sources(connection=self.connection)
             sources.delete(id=source.id)
             return False

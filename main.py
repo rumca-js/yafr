@@ -409,8 +409,9 @@ def logs():
             ]
 
     logs = list(connection.applogging.get_where(order_by=order_by))
+    len_logs = len(logs)
 
-    return render_template_string(html_text, logs=logs)
+    return render_template_string(html_text, logs=logs, len_logs=len_logs)
 
 
 @app.route("/jobs", methods=["GET", "POST"])
@@ -424,8 +425,9 @@ def jobs():
             ]
 
     jobs = list(connection.backgroundjob.get_where(order_by=order_by))
+    len_jobs = len(jobs)
 
-    return render_template_string(html_text, jobs=jobs)
+    return render_template_string(html_text, jobs=jobs, len_jobs=len_jobs)
 
 
 @app.route("/stats")

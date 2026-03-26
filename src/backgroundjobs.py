@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy import and_
 import json
 
 class BackgroundJob(object):
@@ -62,7 +63,10 @@ class BackgroundJob(object):
             return self.connection.backgroundjob.insert_json_data(json_data)
 
     def is_job(self, job_name, subject):
-        jobs = self.connection.backgroundjob.get_where({"job":job_name, "subject":subject})
+        table = self.connection.backgroundjob.get_table()
+        conditions = and_(table.c.job==job_name, table.c.subject==subject)
+
+        jobs = self.connection.backgroundjob.get_where_ex(conditions=conditions)
         for job in jobs:
             return True
 

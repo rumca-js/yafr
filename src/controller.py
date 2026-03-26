@@ -2,6 +2,7 @@ from pathlib import Path
 from datetime import datetime
 from .sourcedata import SourceData
 from .sources import Sources
+from .entryrules import EntryRules
 
 
 def read_line_things(input_text):
@@ -24,8 +25,9 @@ class Controller(object):
     def add_sources(self, sources):
         self.start_reading = True
 
+        entry_rules = EntryRule(self.connection)
         for source_url in sources:
-            if not self.is_entry_rule_triggered(source_url):
+            if not entry_rules.is_entry_rule_triggered(source_url):
                 sources = Sources(self.connection)
                 sources.set(source_url)
 
@@ -44,50 +46,6 @@ class Controller(object):
                 sources = read_line_things(raw_text)
                 output_path.unlink()
                 return sources
-
-    def is_entry_rule_triggered(self, url) -> bool:
-        rules = self.connection.entry_rules.get_where({"trigger_rule_url" : url})
-        rules = next(rules, None)
-        if rules:
-            return True
-        return False
-
-    def add_entry_rules(self, raw_input):
-        self.connection.entry_rules.truncate()
-
-        entry_rule_urls = read_line_things(raw_input)
-        for entry_rule_url in entry_rule_urls:
-            self.add_entry_rule(entry_rule_url)
-
-    def get_rule_urls(self):
-        urls = []
-
-        rules = self.connection.entry_rules.get_where(limit=10000)
-        for rule in rules:
-            urls.append(rule.trigger_rule_url)
-
-        return urls
-
-    def add_entry_rule(self, entry_rule):
-        entries = self.connection.entry_rules.get_where({"trigger_rule_url" : entry_rule})
-        entry = next(entries, None)
-
-        if not entry:
-            data = {}
-            data["trigger_rule_url"] = entry_rule
-            data["enabled"] = True
-            data["priority"] = 0
-            data["rule_name"] = entry_rule
-            data["trigger_text"] = ""
-            data["trigger_text_hits"] = 0
-            data["trigger_text_fields"] = ""
-            data["block"] = True
-            data["trust"] = False
-            data["auto_tag"] = ""
-            data["apply_age_limit"] = 0
-            data["browser_id"] = 0
-
-            self.connection.entry_rules.insert_json_data(data)
 
     def truncate(self):
         self.connection.entries_table.truncate()

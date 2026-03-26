@@ -335,7 +335,7 @@ JOBS_TEMPLATE = """
     <a class="btn btn-primary" href="/remove-all-jobs">Clear</a>
 </div>
 
-<h1>Jobs</h1>
+<h1>Jobs {{len_jobs}}</h1>
 
 <div>
     {% for job in jobs %}

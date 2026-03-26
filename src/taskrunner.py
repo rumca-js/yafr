@@ -61,11 +61,12 @@ class TaskRunner(object):
         sources = Sources(self.connection)
         sources_len = sources.count()
 
-        print(f"Entries: {entries_len}")
-        print(f"Sources: {sources_len}")
+        AppLogging(self.connection).info(f"Entries: {entries_len}")
+        AppLogging(self.connection).info(f"Sources: {sources_len}")
 
     def process_jobs(self):
         print("Starting reading")
+
         while True:
             try:
                 system = System.get_object()
@@ -75,7 +76,7 @@ class TaskRunner(object):
                 self.connection = DbConnection(self.table_name)
                 # do the reading
                 if not self.handle_one_job():
-                    print("Sleeping")
+                    AppLogging(self.connection).debug("Sleeping")
                     time.sleep(10)
                 self.connection.close()
 
@@ -95,29 +96,29 @@ class TaskRunner(object):
 
         source_ids = []
         for source in self.connection.sources_table.get_sources():
-            # print(f"Check source {source.url}")
+            this_source_data = sourcedata.get_source_data(source)
+
             if sourcedata.is_update_needed(source):
                 job = BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source.id))
 
     def handle_one_job(self):
         job = self.get_job()
         if not job:
-            print("No jobs")
             self.check_sources()
             return False
 
         handler = None
         if job.job == BackgroundJob.JOB_PROCESS_SOURCE:
-            print("Processing source")
+            AppLogging(self.connection).debug("Processing source")
             handler = ProcessSourceJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-            print("Processing source DONE")
+            AppLogging(self.connection).debug("Processing source DONE")
         else:
             raise IOError("Unsupported job")
 
         if handler:
-            print("Running source process handler")
+            AppLogging(self.connection).debug(f"Running source process handler: job ID:{job.id}")
             handler.run()
             handler.close()
-            print("Running source process handler DONE")
+            AppLogging(self.connection).debug(f"Running source process handler: job ID:{job.id} DONE")
 
             return True
