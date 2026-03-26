@@ -12,6 +12,7 @@ from webtoolkit import (
 from .sources import Sources
 from .entries import Entries
 from .sourcedata import SourceData
+from .socialdata import SocialData
 from .applogging import AppLogging
 from .entryrules import EntryRules
 

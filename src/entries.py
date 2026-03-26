@@ -24,7 +24,8 @@ class Entries(object):
         entry_json["source_id"] = source.id
 
         try:
-            self.connection.entries_table.insert_json(entry_json)
+            entry_id = self.connection.entries_table.insert_json(entry_json)
+            return entry_id
         except Exception as E:
             print(E)
             print(entry_json)
@@ -40,6 +41,8 @@ class Entries(object):
         return self.connection.entries_table.get(id=id)
 
     def cleanup(self):
+        # TODO remove social data
+
         ids_to_remove = set()
         for entry in self.connection.entries_table.get_where():
             if not self.connection.sources_table.get(id=entry.source_id):
@@ -47,5 +50,3 @@ class Entries(object):
 
         for id in ids_to_remove:
             self.connection.entries_table.delete(id=id)
-
-
