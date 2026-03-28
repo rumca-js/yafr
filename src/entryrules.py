@@ -55,7 +55,9 @@ class EntryRules(object):
            if not rule.enabled:
                continue
 
-           if self.is_entry_rule_triggered(entry["link"]):
+           if entry and self.is_entry_rule_triggered(entry["link"]):
+               result.append(rule)
+           if url and self.is_entry_rule_triggered(url):
                result.append(rule)
 
         return result

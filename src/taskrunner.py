@@ -74,10 +74,20 @@ class TaskRunner(object):
                 self.start_reading = False
 
                 self.connection = DbConnection(self.table_name)
+                self.controller = Controller(connection=self.connection)
+
+                if self.controller.get_due_sources_path().exists():
+                    print("Found sources to add")
+                    sources = self.controller.get_sources_to_add()
+                    print("sources:")
+                    print(sources)
+                    self.controller.add_sources(sources)
+
                 # do the reading
                 if not self.handle_one_job():
                     AppLogging(self.connection).debug("Sleeping")
                     time.sleep(10)
+
                 self.connection.close()
 
                 system.set_thread_ok()

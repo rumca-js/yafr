@@ -22,10 +22,10 @@ class Controller(object):
     def __init__(self, connection):
         self.connection = connection
 
-    def add_sources(self, sources):
+    def add_sources(self, source_urls):
         self.start_reading = True
 
-        for source_url in sources:
+        for source_url in source_urls:
             if not self.is_url_blocked(source_url):
                 sources = Sources(self.connection)
                 sources.set(source_url)
@@ -50,13 +50,16 @@ class Controller(object):
                 sources_text += line + "\n"
 
         # write raw_text to file
-        output_path = Path("sources.txt")
+        output_path = self.get_due_sources_path()
         with output_path.open("a", encoding="utf-8", errors="ignore") as f:
             f.write("\n")
             f.write(sources_text)
 
+    def get_due_sources_path(self):
+        return Path("sources.txt")
+
     def get_sources_to_add(self):
-        output_path = Path("sources.txt")
+        output_path = self.get_due_sources_path()
         if output_path.exists():
             raw_text = output_path.read_text(encoding="utf-8")
             if raw_text:
