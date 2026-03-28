@@ -320,8 +320,10 @@ def entry_rules():
     sources = []
     html_text = get_view(DEFINE_ENTRY_RULES_TEMPLATE, title="Set Entry Rules")
 
-    urls = controller.get_rule_urls()
+    rules = EntryRules(connection = connection)
+    urls = rules.get_rule_urls()
     raw_data = "\n".join(urls)
+
     return render_template_string(html_text, raw_data=raw_data)
 
 
