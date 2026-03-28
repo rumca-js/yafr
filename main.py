@@ -25,6 +25,7 @@ from src.dbconnection import DbConnection
 from src.serializers import entry_to_json, source_to_json, source_and_entries_to_rss
 from src.controller import Controller
 from src.system import System
+from src.entryrules import EntryRules
 from src.sources import Sources
 from src.applogging import AppLogging
 
