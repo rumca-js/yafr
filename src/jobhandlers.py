@@ -9,9 +9,11 @@ from webtoolkit import (
    HTTP_STATUS_TOO_MANY_REQUESTS,
 )
 
+from .controller import Controller
 from .sources import Sources
 from .entries import Entries
 from .sourcedata import SourceData
+from .socialdata import SocialData
 from .applogging import AppLogging
 from .entryrules import EntryRules
 
@@ -192,9 +194,6 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
 class CleanupJobHandler(GenericJobHandler):
     def run(self):
-        self.connection = DbConnection(self.table_name)
-        self.controller = Controller(connection=self.connection)
-
         self.add_due_sources()
 
         entries = Entries(self.connection)
@@ -202,11 +201,10 @@ class CleanupJobHandler(GenericJobHandler):
         sources_data = SourceData(self.connection)
         sources_data.cleanup()
 
-        self.controller.close()
-        self.connection.close()
-
     def add_due_sources(self):
         status = False
+
+        self.controller = Controller(connection=self.connection)
 
         sources = self.controller.get_sources_to_add()
         if sources:

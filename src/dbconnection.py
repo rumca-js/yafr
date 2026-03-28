@@ -11,6 +11,7 @@ from linkarchivetools.utils.reflected import (
    ReflectedConfigurationEntry,
    ReflectedSourceOperationalData,
    ReflectedGenericTable,
+   ReflectedSocialData,
 )
 
 
@@ -32,6 +33,7 @@ class DbConnection(object):
         self.configurationentry = ReflectedConfigurationEntry(engine=self.engine, connection=self.connection)
         self.sourceoperationaleata = ReflectedSourceOperationalData(engine=self.engine, connection=self.connection)
         self.applogging = ReflectedGenericTable(engine=self.engine, connection=self.connection, table_name="applogging")
+        self.socialdata = ReflectedSocialData(engine=self.engine, connection=self.connection)
         self.backgroundjob = ReflectedGenericTable(engine=self.engine, connection=self.connection, table_name="backgroundjob")
 
     def create_engine(db_file):

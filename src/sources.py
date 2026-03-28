@@ -106,3 +106,13 @@ class Sources(object):
         path = self.get_file_name(source)
         if path.exists():
             path.unlink()
+
+    def exists(self, source_url):
+        link = source_url
+
+        source_iter = self.connection.sources_table.get_where({"url":link})
+        source = next(source_iter, None)
+        if source:
+            return True
+
+        return False

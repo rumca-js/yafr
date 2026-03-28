@@ -14,7 +14,7 @@ from .sourcedata import SourceData
 from .sources import Sources
 from .entries import Entries
 from .applogging import AppLogging
-from .jobhandlers import ProcessSourceJobHandler
+from .jobhandlers import *
 from .backgroundjobs import BackgroundJob
 
 
@@ -104,21 +104,23 @@ class TaskRunner(object):
     def handle_one_job(self):
         job = self.get_job()
         if not job:
+            BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_CLEANUP)
             self.check_sources()
             return False
 
         handler = None
         if job.job == BackgroundJob.JOB_PROCESS_SOURCE:
-            AppLogging(self.connection).debug("Processing source")
             handler = ProcessSourceJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-            AppLogging(self.connection).debug("Processing source DONE")
+        elif job.job == BackgroundJob.JOB_CLEANUP:
+            handler = CleanupJobHandler(connection = self.connection, job=job, table_name = self.table_name)
         else:
             raise IOError("Unsupported job")
 
+
         if handler:
-            AppLogging(self.connection).debug(f"Running source process handler: job ID:{job.id}")
+            AppLogging(self.connection).debug(f"Running job {job.job} ID:{job.id}")
             handler.run()
             handler.close()
-            AppLogging(self.connection).debug(f"Running source process handler: job ID:{job.id} DONE")
+            AppLogging(self.connection).debug(f"Running job {job.job} ID:{job.id} DONE")
 
             return True
