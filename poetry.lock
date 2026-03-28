@@ -1206,13 +1206,13 @@ zstd = ["backports-zstd (>=1.0.0)"]
 
 [[package]]
 name = "webtoolkit"
-version = "0.1.46"
+version = "0.1.47"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "webtoolkit-0.1.46-py3-none-any.whl", hash = "sha256:074d9c7b593bea6332c5591917d66dfd8686ccf9ccb2e4df90458820c15fa05f"},
-    {file = "webtoolkit-0.1.46.tar.gz", hash = "sha256:b4171c9b8c4024964e9baf938f0aba1f0f18392975f6cfd69d21a29030142e1e"},
+    {file = "webtoolkit-0.1.47-py3-none-any.whl", hash = "sha256:204f2b3ab4cce4ac6fc0679784789454af02a6bba5904155bd66397cb87f6b5b"},
+    {file = "webtoolkit-0.1.47.tar.gz", hash = "sha256:e5c26bb1aa1a0f740b8510b8ee4a2f2a60b9a2d214c97531795876aa5d2a055b"},
 ]
 
 [package.dependencies]
