@@ -313,15 +313,16 @@ def entry_rules():
     connection = DbConnection(table_name)
     controller = Controller(connection)
 
+    rules = EntryRules(connection = connection)
+
     if request.method == "POST":
         raw_text = request.form.get("sources", "")
-        controller.add_entry_rules(raw_text)
+        rules.add_entry_rules(raw_text)
         return redirect(url_for("index"))
 
     sources = []
     html_text = get_view(DEFINE_ENTRY_RULES_TEMPLATE, title="Set Entry Rules")
 
-    rules = EntryRules(connection = connection)
     urls = rules.get_rule_urls()
     raw_data = "\n".join(urls)
 
