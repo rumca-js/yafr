@@ -5,6 +5,7 @@ import traceback
 
 from webtoolkit import (
    RemoteUrl,
+   RemoteServer,
 )
 
 from .dbconnection import DbConnection
@@ -76,11 +77,12 @@ class TaskRunner(object):
                 self.connection = DbConnection(self.table_name)
                 self.controller = Controller(connection=self.connection)
 
+                if not self.is_crawling_server_ok():
+                    AppLogging(self.connection).error("Crawling server error")
+                    time.sleep(60)
+
                 if self.controller.get_due_sources_path().exists():
-                    print("Found sources to add")
                     sources = self.controller.get_sources_to_add()
-                    print("sources:")
-                    print(sources)
                     self.controller.add_sources(sources)
 
                 # do the reading
@@ -134,3 +136,13 @@ class TaskRunner(object):
             AppLogging(self.connection).debug(f"Running job {job.job} ID:{job.id} DONE")
 
             return True
+
+    def is_crawling_server_ok(self):
+        config = self.connection.configurationentry.get()
+        location = config.remote_webtools_server_location
+        if location:
+            request = PageRequestObject(location)
+            url = RemoteServer(remote_server=location)
+            if not url.get_pingj(url = location):
+                return False
+        return True

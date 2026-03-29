@@ -4,6 +4,7 @@ import time
 from webtoolkit import (
    BaseUrl,
    RemoteUrl,
+   RemoteServer,
    PageRequestObject,
    HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
    HTTP_STATUS_TOO_MANY_REQUESTS,
@@ -37,7 +38,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
         source_id = int(self.job.subject)
         sources = Sources(self.connection)
         source = sources.get(id=source_id)
-        self.check_source(source)
+
+        return self.check_source(source)
 
     def check_source(self, source):
         url = self.get_response_real(source)
@@ -56,6 +58,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 AppLogging(self.connection).error(f"URL:{source.url} Response is invalid")
         else:
             AppLogging(self.connection).error(f"URL:{source.url} No response")
+
+        return True
 
     def get_response_real(self, source):
         while True:
