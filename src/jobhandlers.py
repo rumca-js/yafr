@@ -1,9 +1,11 @@
 import subprocess
 import time
+from datetime import datetime
 
 from webtoolkit import (
    BaseUrl,
    RemoteUrl,
+   UrlLocation,
    RemoteServer,
    PageRequestObject,
    HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
@@ -17,6 +19,9 @@ from .sourcedata import SourceData
 from .socialdata import SocialData
 from .applogging import AppLogging
 from .entryrules import EntryRules
+from .entryurlinterface import EntryUrlInterface
+from .controller import Controller
+from .urlhandler import UrlHandler
 
 
 class GenericJobHandler(object):
@@ -38,8 +43,9 @@ class ProcessSourceJobHandler(GenericJobHandler):
         source_id = int(self.job.subject)
         sources = Sources(self.connection)
         source = sources.get(id=source_id)
-
-        return self.check_source(source)
+        if source is not None:
+            self.check_source(source)
+        # source might have been removed
 
     def check_source(self, source):
         url = self.get_response_real(source)
@@ -105,6 +111,9 @@ class ProcessSourceJobHandler(GenericJobHandler):
             """
 
     def is_entry_ok(self, entry, source):
+        if entry is None:
+            return False
+
         link = entry.get("link")
         if not link:
             return False
@@ -119,32 +128,6 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
         return True
 
-    def get_source_url(self, source):
-        if not source:
-            return
-        request = PageRequestObject(source.url)
-        request.timeout_s = 300
-
-        config = self.connection.configurationentry.get()
-        try:
-            if self.is_remote_server() or self.is_config_remote_server():
-                # TODO dates are strings
-                location = config.remote_webtools_server_location
-                if not location:
-                    location = RemoteUrl.get_remote_server_location()
-
-                url = RemoteUrl(request=request, remote_server_location=location)
-            else:
-                url = BaseUrl(request=request)
-            return url
-        except:
-            AppLogging(self.connection).notify(f"Removing invalid source:{source.url}")
-            sources = Sources(self.connection)
-            sources.delete(id=source.id)
-
-    def is_remote_server(self):
-        return RemoteUrl.get_remote_server_location()
-    
     def on_done(self, response):
         pass
 
@@ -184,15 +167,79 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
         return True
 
-    def is_config_remote_server(self):
-        config = self.connection.configurationentry.get()
-        if config.remote_webtools_server_location is None:
-            return False
-        if config.remote_webtools_server_location == "":
-            return False
-        if config.remote_webtools_server_location == "None":
-            return False
-        return True
+    def get_source_url(self, source):
+        handler = UrlHandler(connection=self.connection, link=source.url)
+        url = handler.get_link_url()
+        if not url:
+            AppLogging(self.connection).notify(f"Removing invalid source:{source.url}")
+            sources = Sources(self.connection)
+            sources.delete(id=source.id)
+        return url
+
+
+class UpdateLinkJobHandler(GenericJobHandler):
+    def run(self):
+        entries = Entries(self.connection)
+
+        try:
+            entry_id = int(self.job.subject)
+        except Exception as E:
+            AppLogging(self.connection).exc(E)
+            return
+
+        entry = entries.get(id=entry_id)
+        self.update_entry(entry)
+
+    def update_entry(self, entry):
+        handler = UrlHandler(connection=self.connection, link=entry.link)
+        url = handler.get_link_url()
+
+        json_data = {}
+        json_data["date_update_last"] = datetime.now()
+
+        if not entry.title:
+            json_data["title"] = url.get_title()
+        if not entry.description:
+            json_data["description"] = url.get_description()
+        json_data["status_code"] = url.get_status_code()
+        ##TODO implement rest
+
+        controller = Controller(self.connection)
+        controller.add_social_data(entry)
+
+        self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
+
+
+class ResetLinkJobHandler(GenericJobHandler):
+    def run(self):
+        entries = Entries(self.connection)
+        try:
+            entry_id = int(self.job.subject)
+        except Exception as E:
+            AppLogging(self.connection).exc(E)
+            return
+
+        entry = entries.get(id=entry_id)
+        self.reset_entry(entry)
+
+    def reset_entry(self, entry):
+        handler = UrlHandler(connection=self.connection, link=entry.link)
+        url = handler.get_link_url()
+
+        json_data = {}
+        json_data["date_updated"] = datetime.now()
+
+        if url.get_title():
+            json_data["title"] = url.get_title()
+        if url.get_description():
+            json_data["description"] = url.get_description()
+        json_data["status_code"] = url.get_status_code()
+        ##TODO implement rest
+
+        controller = Controller(self.connection)
+        controller.add_social_data(entry)
+
+        self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
 
 
 

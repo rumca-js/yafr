@@ -1,8 +1,12 @@
 from pathlib import Path
 from datetime import datetime
+
 from .sourcedata import SourceData
 from .sources import Sources
 from .entryrules import EntryRules
+from .socialdata import SocialData
+from .urlhandler import UrlHandler
+
 
 
 def read_line_things(input_text):
@@ -54,6 +58,21 @@ class Controller(object):
         with output_path.open("a", encoding="utf-8", errors="ignore") as f:
             f.write("\n")
             f.write(sources_text)
+
+    def add_social_data(self, entry):
+        link = entry.link
+        entry_id = entry.id
+
+        social_data_info = self.link_to_social_data(link)
+        if social_data_info:
+            social_data = SocialData(self.connection)
+            social_data.add(entry_id, social_data_info)
+
+    def link_to_social_data(self, link):
+        handler = UrlHandler(connection=self.connection, link=link)
+        url = handler.get_link_url()
+        social_data_info = url.get_social_properties()
+        return social_data_info
 
     def get_due_sources_path(self):
         return Path("sources.txt")

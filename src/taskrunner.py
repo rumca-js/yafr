@@ -116,6 +116,7 @@ class TaskRunner(object):
     def handle_one_job(self):
         job = self.get_job()
         if not job:
+            self.add_update_jobs()
             BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_CLEANUP)
             self.check_sources()
             return False
@@ -125,9 +126,12 @@ class TaskRunner(object):
             handler = ProcessSourceJobHandler(connection = self.connection, job=job, table_name = self.table_name)
         elif job.job == BackgroundJob.JOB_CLEANUP:
             handler = CleanupJobHandler(connection = self.connection, job=job, table_name = self.table_name)
+        elif job.job == BackgroundJob.JOB_LINK_UPDATE_DATA:
+            handler = UpdateLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
+        elif job.job == BackgroundJob.JOB_LINK_RESET_DATA:
+            handler = ResetLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
         else:
             raise IOError("Unsupported job")
-
 
         if handler:
             AppLogging(self.connection).debug(f"Running job {job.job} ID:{job.id}")
@@ -136,6 +140,25 @@ class TaskRunner(object):
             AppLogging(self.connection).debug(f"Running job {job.job} ID:{job.id} DONE")
 
             return True
+
+    def add_update_jobs(self):
+        len_updated = 0
+        desired_len = 5
+
+        entries = Entries(self.connection)
+        entry_objs = self.connection.entries_table.get_where({"date_update_last" : None}, limit=desired_len)
+        for entry in entry_objs:
+            BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_UPDATE_DATA, subject=str(entry.id))
+            len_updated += 1
+
+        if len_updated < desired_len:
+            # TODO older than
+
+            #entry_objs = self.connection.entries_table.get_where({"date_update_last" : None}, limit=desired_len)
+            #for entry in entry_objs:
+            #    BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_UPDATE_DATA, subject=str(entry.id))
+            #    len_updated += 1
+            pass
 
     def is_crawling_server_ok(self):
         config = self.connection.configurationentry.get()
