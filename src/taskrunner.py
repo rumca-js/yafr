@@ -17,6 +17,7 @@ from .entries import Entries
 from .applogging import AppLogging
 from .jobhandlers import *
 from .backgroundjobs import BackgroundJob
+from .configurationentry import ConfigurationEntry
 
 
 class TaskRunner(object):
@@ -42,6 +43,9 @@ class TaskRunner(object):
 
             if init_sources:
                 self.init_sources(init_sources)
+
+            config_entry = ConfigurationEntry(self.connection)
+            config_entry.reset()
 
             self.controller.close()
             self.connection.close()
@@ -90,7 +94,7 @@ class TaskRunner(object):
                 system.set_thread_ok()
             except Exception as E:
                 AppLogging(self.connection).exc(E)
-                time.sleep(1)
+                time.sleep(10)
 
     def get_job(self):
         order_by = self.connection.backgroundjob.get_table().c.date_created

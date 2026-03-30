@@ -2,7 +2,22 @@ def iso_z(dt):
     if dt:
         return dt.isoformat(timespec="milliseconds").replace("+00:00", "Z")
 
-def entry_to_json(entry, with_id=False, source=None):
+
+def social_data_to_json(social_data):
+    json_entry = {}
+
+    json_entry["thumbs_up"] = social_data.thumbs_up
+    json_entry["thumbs_down"] = social_data.thumbs_down
+    json_entry["view_count"] = social_data.view_count
+    json_entry["stars"] = social_data.stars
+    json_entry["followers_count"] = social_data.followers_count
+    json_entry["upvote_diff"] = social_data.upvote_diff
+    json_entry["upvote_ratio"] = social_data.upvote_ratio
+    json_entry["upvote_view_ratio"] = social_data.upvote_view_ratio
+
+    return json_entry
+
+def entry_to_json(entry, with_id=False, source=None, social_data=None):
     json_entry = {}
 
     if with_id:
@@ -33,6 +48,10 @@ def entry_to_json(entry, with_id=False, source=None):
     if source:
         json_entry["source_title"] = source.title
         json_entry["source"] = source_to_json(source)
+
+    if social_data:
+        social_data_json = social_data_to_json(social_data)
+        json_entry.update(social_data_json)
 
     json_entry["backgroundcolor"] = None
     json_entry["alpha"] = 1.0

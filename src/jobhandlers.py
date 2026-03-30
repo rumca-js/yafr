@@ -22,6 +22,7 @@ from .entryrules import EntryRules
 from .entryurlinterface import EntryUrlInterface
 from .controller import Controller
 from .urlhandler import UrlHandler
+from .configurationentry import ConfigurationEntry
 
 
 class GenericJobHandler(object):
@@ -118,7 +119,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
         if not link:
             return False
 
-        if source.xpath:
+        if source.xpath and source.xpath != "":
             try:
                 if re.search(source.xpath, link) is None:
                     return False
@@ -193,6 +194,10 @@ class UpdateLinkJobHandler(GenericJobHandler):
     def update_entry(self, entry):
         handler = UrlHandler(connection=self.connection, link=entry.link)
         url = handler.get_link_url()
+        response = url.get_response()
+        if response is None:
+            AppLogging(self.connection).error("URL:{enry.link} Response is None")
+            return
 
         json_data = {}
         json_data["date_update_last"] = datetime.now()
@@ -204,10 +209,12 @@ class UpdateLinkJobHandler(GenericJobHandler):
         json_data["status_code"] = url.get_status_code()
         ##TODO implement rest
 
-        controller = Controller(self.connection)
-        controller.add_social_data(entry)
-
         self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
+
+        config_entry = ConfigurationEntry(self.connection).get()
+        if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
+            controller = Controller(self.connection)
+            controller.add_social_data(entry)
 
 
 class ResetLinkJobHandler(GenericJobHandler):
@@ -225,6 +232,10 @@ class ResetLinkJobHandler(GenericJobHandler):
     def reset_entry(self, entry):
         handler = UrlHandler(connection=self.connection, link=entry.link)
         url = handler.get_link_url()
+        response = url.get_response()
+        if response is None:
+            AppLogging(self.connection).error("URL:{enry.link} Response is None")
+            return
 
         json_data = {}
         json_data["date_updated"] = datetime.now()
@@ -236,31 +247,17 @@ class ResetLinkJobHandler(GenericJobHandler):
         json_data["status_code"] = url.get_status_code()
         ##TODO implement rest
 
-        controller = Controller(self.connection)
-        controller.add_social_data(entry)
-
         self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
 
+        config_entry = ConfigurationEntry(self.connection).get()
+        if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
+            controller = Controller(self.connection)
+            controller.add_social_data(entry)
 
 
 class CleanupJobHandler(GenericJobHandler):
     def run(self):
-        self.add_due_sources()
-
         entries = Entries(self.connection)
         entries.cleanup()
         sources_data = SourceData(self.connection)
         sources_data.cleanup()
-
-    def add_due_sources(self):
-        status = False
-
-        self.controller = Controller(connection=self.connection)
-
-        sources = self.controller.get_sources_to_add()
-        if sources:
-            self.start_reading = True
-            self.controller.add_sources(sources)
-            status = True
-
-        return status

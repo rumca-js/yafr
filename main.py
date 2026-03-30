@@ -26,6 +26,7 @@ from src.serializers import entry_to_json, source_to_json, source_and_entries_to
 from src.controller import Controller
 from src.system import System
 from src.entryrules import EntryRules
+from src.socialdata import SocialData
 from src.sources import Sources
 from src.applogging import AppLogging
 
@@ -491,6 +492,9 @@ def configuration():
     instance_fields["instance_description"] = config.instance_description
     instance_fields["display_type"] = config.display_type
     instance_fields["remote_webtools_server_location"] = config.remote_webtools_server_location
+    instance_fields["enable_social_data"] = config.enable_social_data
+    instance_fields["new_entries_fetch_social_data"] = config.new_entries_fetch_social_data
+    instance_fields["entry_update_fetches_social_data"] = config.entry_update_fetches_social_data
 
     html_text = get_view(CONFIGURATION_TEMPLATE, title="Configuration")
     return render_template_string(html_text, configuration=instance_fields)
@@ -514,7 +518,14 @@ def api_entries():
     for entry in entries:
         if entry.source_id:
             entry_source = connection.sources_table.get(id=entry.source_id)
-            json_entry_data = entry_to_json(entry, with_id=True, source=entry_source)
+
+            socialdata = SocialData(connection=connection)
+            social_data_object = socialdata.get(entry_id=entry.id)
+
+            json_entry_data = entry_to_json(entry,
+                                            with_id=True,
+                                            source=entry_source,
+                                            social_data=social_data_object)
             json_entries.append(json_entry_data)
 
     json_data = {}
