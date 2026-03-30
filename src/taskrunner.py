@@ -28,7 +28,6 @@ class TaskRunner(object):
         system = System.get_object()
         system.set_thread_ok()
 
-        self.waiting_due = None
         self.start_reading = True
 
     def start(self, init_sources=None):
@@ -80,10 +79,6 @@ class TaskRunner(object):
                 if not self.is_crawling_server_ok():
                     AppLogging(self.connection).error("Crawling server error")
                     time.sleep(60)
-
-                if self.controller.get_due_sources_path().exists():
-                    sources = self.controller.get_sources_to_add()
-                    self.controller.add_sources(sources)
 
                 # do the reading
                 if not self.handle_one_job():

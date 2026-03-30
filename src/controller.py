@@ -43,21 +43,8 @@ class Controller(object):
         return False
 
     def add_sources_text(self, raw_text):
-        sources_text = ""
-        lines = raw_text.split("\n")
-        sources = Sources(connection = self.connection)
-
-        for line in lines:
-            line = line.replace("\r", "")
-            line = line.strip()
-            if not sources.exists(line):
-                sources_text += line + "\n"
-
-        # write raw_text to file
-        output_path = self.get_due_sources_path()
-        with output_path.open("a", encoding="utf-8", errors="ignore") as f:
-            f.write("\n")
-            f.write(sources_text)
+        source_urls = read_line_things(raw_text)
+        self.add_sources(source_urls)
 
     def add_social_data(self, entry):
         link = entry.link
@@ -73,18 +60,6 @@ class Controller(object):
         url = handler.get_link_url()
         social_data_info = url.get_social_properties()
         return social_data_info
-
-    def get_due_sources_path(self):
-        return Path("sources.txt")
-
-    def get_sources_to_add(self):
-        output_path = self.get_due_sources_path()
-        if output_path.exists():
-            raw_text = output_path.read_text(encoding="utf-8")
-            if raw_text:
-                sources = read_line_things(raw_text)
-                output_path.unlink()
-                return sources
 
     def truncate(self):
         self.connection.entries_table.truncate()
