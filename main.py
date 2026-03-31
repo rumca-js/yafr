@@ -179,7 +179,7 @@ def index():
     connection = DbConnection(table_name)
     config = connection.configurationentry.get_first()
     html_text = get_view(INDEX_TEMPLATE, title=config.instance_title)
-    return render_template_string(html_text, version=__version__)
+    return render_template_string(html_text, version=__version__, title=config.instance_title)
 
 
 @app.route('/scripts/<path:filename>')
@@ -309,8 +309,24 @@ def rss(source_id):
     return Response(rss_text, mimetype="application/rss+xml")
 
 
-@app.route("/entry-rules", methods=["GET", "POST"])
-def entry_rules():
+@app.route("/block-rules", methods=["GET", "POST"])
+def block_rules():
+    text = """
+    <div class="nav-buttons">
+        <button class="btn btn-primary" onclick="history.back()">Go back</button>
+        <a class="btn btn-primary" href="/">Home</a>
+    </div>
+<ul>
+  <li><a href="/define-block-rules">Define block rules</a>
+  <li><a href="/block-url">Block Url</a>
+</ul>
+    """
+    html_text = get_view(text, title="Block rules")
+    return render_template_string(html_text)
+
+
+@app.route("/block-url", methods=["GET", "POST"])
+def block_url():
     connection = DbConnection(table_name)
     controller = Controller(connection)
 
@@ -322,7 +338,27 @@ def entry_rules():
         return redirect(url_for("index"))
 
     sources = []
-    html_text = get_view(DEFINE_ENTRY_RULES_TEMPLATE, title="Set Entry Rules")
+    html_text = get_view(DEFINE_ENTRY_RULES_TEMPLATE, title="Set Block Rules")
+
+    raw_data = ""
+
+    return render_template_string(html_text, raw_data=raw_data)
+
+
+@app.route("/define-block-rules", methods=["GET", "POST"])
+def define_block_rules():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    rules = EntryRules(connection = connection)
+
+    if request.method == "POST":
+        raw_text = request.form.get("sources", "")
+        rules.set_entry_rules(raw_text)
+        return redirect(url_for("index"))
+
+    sources = []
+    html_text = get_view(DEFINE_ENTRY_RULES_TEMPLATE, title="Set Block Rules")
 
     urls = rules.get_rule_urls()
     raw_data = "\n".join(urls)

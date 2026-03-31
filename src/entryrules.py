@@ -29,6 +29,11 @@ class EntryRules(object):
         return False
 
     def add_entry_rules(self, raw_input):
+        entry_rule_urls = read_line_things(raw_input)
+        for entry_rule_url in entry_rule_urls:
+            self.add_entry_rule(entry_rule_url)
+
+    def set_entry_rules(self, raw_input):
         self.connection.entry_rules.truncate()
 
         entry_rule_urls = read_line_things(raw_input)
