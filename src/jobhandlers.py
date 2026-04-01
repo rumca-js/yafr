@@ -93,12 +93,12 @@ class ProcessSourceJobHandler(GenericJobHandler):
         sources.set(source.url, source_properties)
         sources.delete_entries(source)
 
-        entries = url.get_entries()
-        for entry in entries:
-            if self.is_entry_ok(entry, source):
+        entry_jsons = url.get_entries()
+        for entry_json in entry_jsons:
+            if self.is_entry_ok(entry_json, source):
                 entries = Entries(self.connection)
-                entries.add(entry, source)
-                self.on_added_entry(entry)
+                entries.add(entry_json, source)
+                self.on_added_entry(entry_json)
 
     def on_added_entry(self, entry):
         rules = EntryRules(self.connection).get_rules_for(entry=entry)
@@ -253,6 +253,27 @@ class ResetLinkJobHandler(GenericJobHandler):
         if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
             controller = Controller(self.connection)
             controller.add_social_data(entry)
+
+
+class AddLinkJobHandler(GenericJobHandler):
+    def run(self):
+        link_url = self.job.subject
+
+        entries = Entries(connection=self.connection)
+        if entries.exists(link=link_url):
+            return
+
+        handler = UrlHandler(connection=self.connection, link=source.url)
+        url = handler.get_link_url()
+        if not url.is_valid():
+            return
+
+        interface = EntryUrlInterface(url=url)
+        entry_json = interface.get_entry_json()
+        if not entry_json:
+            return
+
+        entries.add(entry_json)
 
 
 class CleanupJobHandler(GenericJobHandler):

@@ -291,6 +291,24 @@ def add_sources():
     return render_template_string(html_text, raw_data="")
 
 
+@app.route("/add-links", methods=["GET", "POST"])
+def add_links():
+    connection = DbConnection(table_name)
+
+    if request.method == "POST":
+        raw_text = request.form.get("sources", "")
+
+        controller = Controller(connection)
+        controller.add_links_text(raw_text)
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "Wait until links are added")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+    html_text = get_view(ADD_SOURCES_TEMPLATE, title="Add links")
+    return render_template_string(html_text, raw_data="")
+
+
 @app.route("/rss/<int:source_id>", methods=["GET", "POST"])
 def rss(source_id):
     connection = DbConnection(table_name)
@@ -311,17 +329,7 @@ def rss(source_id):
 
 @app.route("/block-rules", methods=["GET", "POST"])
 def block_rules():
-    text = """
-    <div class="nav-buttons">
-        <button class="btn btn-primary" onclick="history.back()">Go back</button>
-        <a class="btn btn-primary" href="/">Home</a>
-    </div>
-<ul>
-  <li><a href="/define-block-rules">Define block rules</a>
-  <li><a href="/block-url">Block Url</a>
-</ul>
-    """
-    html_text = get_view(text, title="Block rules")
+    html_text = get_view(BLOCK_RULES_TEMPLATE, title="Block rules")
     return render_template_string(html_text)
 
 
@@ -472,8 +480,8 @@ def jobs():
     return render_template_string(html_text, jobs=jobs, len_jobs=len_jobs)
 
 
-@app.route("/stats")
-def stats():
+@app.route("/status")
+def status():
     connection = DbConnection(table_name)
 
     system = System.get_object()
@@ -493,6 +501,14 @@ def stats():
 
     html_text = get_view(STATS_TEMPLATE, title="Stats")
     return render_template_string(html_text, stats=stats_map)
+
+
+@app.route("/admin")
+def admin():
+    connection = DbConnection(table_name)
+
+    html_text = get_view(ADMIN_TEMPLATE, title="Admin")
+    return render_template_string(html_text)
 
 
 @app.route("/configuration", methods=["GET", "POST"])

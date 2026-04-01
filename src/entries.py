@@ -40,6 +40,9 @@ class Entries(object):
     def get(self,id):
         return self.connection.entries_table.get(id=id)
 
+    def exists(self,link=None):
+        return self.connection.entries_table.exists(link=link)
+
     def cleanup(self):
         # TODO remove social data
 

@@ -37,13 +37,25 @@ INDEX_TEMPLATE = """
 <ul>
   <li><a href="/search">Search</a>
   <li><a href="/sources">Sources</a>
-  <li><a href="/add-sources">Add sources</a>
-  <li><a href="/remove-all-sources">Remove all sources</a>
-  <li><a href="/remove-all-entries">Remove all entries</a>
-  <li><a href="/block-rules">Block rules</a>
   <li><a href="/logs">Logs</a>
   <li><a href="/jobs">Jobs</a>
-  <li><a href="/stats">Status</a>
+  <li><a href="/status">Status</a>
+  <li><a href="/admin">Admin</a>
+</ul>
+"""
+
+
+ADMIN_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+</div>
+<h1>Admin</h1>
+<ul>
+  <li><a href="/add-sources">Add sources</a>
+  <li><a href="/block-rules">Block rules</a>
+  <li><a href="/remove-all-sources">Remove all sources</a>
+  <li><a href="/remove-all-entries">Remove all entries</a>
   <li><a href="/configuration">Configuration</a>
 </ul>
 """
@@ -299,6 +311,20 @@ Will block sources, and entries.
     <br>
     <button type="submit">Save</button>
 </form>
+"""
+
+BLOCK_RULES_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+</div>
+
+<h1>Block rules</h1>
+
+<ul>
+  <li><a href="/define-block-rules">Define block rules</a>
+  <li><a href="/block-url">Block Url</a>
+</ul>
 """
 
 
