@@ -1,6 +1,7 @@
 from pathlib import Path
 from .system import System
 from .sourcedata import SourceData
+from .entries import Entries
 
 
 class Sources(object):
@@ -37,8 +38,7 @@ class Sources(object):
             data["favicon"] = favicon
             data["language"] = favicon
 
-            self.connection.sources_table.update_json_data(source.id, data)
-            return
+            return self.connection.sources_table.update_json_data(source.id, data)
 
         properties = {
                "url": link,
@@ -62,7 +62,7 @@ class Sources(object):
                "favicon": favicon,
        }
 
-        self.connection.sources_table.insert_json(properties)
+        return self.connection.sources_table.insert_json(properties)
 
     def count(self):
         return self.connection.sources_table.count()
@@ -71,7 +71,8 @@ class Sources(object):
         """
         TODO Remove all entries with source_url = source
         """
-        self.connection.entries_table.delete_where({"source_url" : source.url})
+        entries = Entries(self.connection)
+        entries.delete_where({"source_url" : source.url})
 
     def delete(self, id):
         source = self.get(id)

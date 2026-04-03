@@ -44,9 +44,29 @@ class ProcessSourceJobHandler(GenericJobHandler):
         source_id = int(self.job.subject)
         sources = Sources(self.connection)
         source = sources.get(id=source_id)
-        if source is not None:
-            self.check_source(source)
-        # source might have been removed
+
+        if not source:
+            AppLogging(self.connection).debug(f"Source id: {source_id} Could not find source")
+            return False
+
+        if not source.enabled:
+            AppLogging(self.connection).debug(f"Source id: {source_id} Source is not enabled")
+            return False
+
+        rules = EntryRules(self.connection)
+        if rules.is_url_blocked(source.url):
+            AppLogging(self.connection).debug(f"Source id: {source_id} Source is blocked")
+            sources = Sources(connection=self.connection)
+            sources.delete(id=source.id)
+            return False
+
+        sources_data = SourceData(self.connection)
+        if not sources_data.is_update_needed(source):
+            now = datetime.now()
+            AppLogging(self.connection).debug(f"{source.url}: Update not needed @ {now}")
+            return False
+
+        self.check_source(source)
 
     def check_source(self, source):
         url = self.get_response_real(source)
@@ -100,11 +120,9 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 entries.add(entry_json, source)
                 self.on_added_entry(entry_json)
 
-    def on_added_entry(self, entry):
-        rules = EntryRules(self.connection).get_rules_for(entry=entry)
-        for rule in rules:
-            if not rule.enabled:
-                continue
+    def on_added_entry(self, entry_json):
+        if EntryRules(self.connection).is_url_blocked(url=entry_json["link"]):
+            return
 
             """
             if rule.script:
@@ -131,42 +149,6 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
     def on_done(self, response):
         pass
-
-    def process_source(self, index, source_id, source_count):
-        sources = Sources(self.connection)
-        source = sources.get(id=source_id)
-
-        if not source:
-            AppLogging(self.connection).debug(f"Source id: {source_id} Could not find source")
-            return False
-
-        if not source.enabled:
-            AppLogging(self.connection).debug(f"Source id: {source_id} Source is not enabled")
-            return False
-
-        rules = EntryRules(self.connection)
-        if rules.is_entry_rule_triggered(source.url):
-            sources = Sources(connection=self.connection)
-            sources.delete(id=source.id)
-            return False
-
-        sources_data = SourceData(self.connection)
-
-        if not sources_data.is_update_needed(source):
-            now = datetime.now()
-            AppLogging(self.connection).debug(f"{source.url}: Update not needed @ {now}")
-            return False
-
-        AppLogging(self.connection).debug(f"{index}/{source_count} {source.url} {source.title}: Reading")
-        self.check_source(source)
-
-        #writer = SourceWriter(connection=self.connection, source=source)
-        #writer.write()
-
-        AppLogging(self.connection).debug(f"{index}/{source_count} {source.url} {source.title}: Reading DONE")
-        time.sleep(1)
-
-        return True
 
     def get_source_url(self, source):
         handler = UrlHandler(connection=self.connection, link=source.url)
@@ -280,5 +262,9 @@ class CleanupJobHandler(GenericJobHandler):
     def run(self):
         entries = Entries(self.connection)
         entries.cleanup()
+
         sources_data = SourceData(self.connection)
         sources_data.cleanup()
+
+        social_data = SocialData(self.connection)
+        social_data.cleanup()

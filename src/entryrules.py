@@ -21,24 +21,11 @@ class EntryRules(object):
     def __init__(self, connection):
         self.connection = connection
 
-    def is_entry_rule_triggered(self, url) -> bool:
-        rules = self.connection.entry_rules.get_where({"trigger_rule_url" : url})
-        rules = next(rules, None)
-        if rules:
-            return True
-        return False
-
-    def add_entry_rules(self, raw_input):
-        entry_rule_urls = read_line_things(raw_input)
-        for entry_rule_url in entry_rule_urls:
-            self.add_entry_rule(entry_rule_url)
-
-    def set_entry_rules(self, raw_input):
-        self.connection.entry_rules.truncate()
-
-        entry_rule_urls = read_line_things(raw_input)
-        for entry_rule_url in entry_rule_urls:
-            self.add_entry_rule(entry_rule_url)
+    def is_url_blocked(self, url):
+        rules = self.connection.entry_rules.get_where({"block" : True, "enabled" : True})
+        for rule in rules:
+            if rule.trigger_rule_url == url:
+                return True
 
     def get_rule_urls(self):
         urls = []
@@ -67,16 +54,16 @@ class EntryRules(object):
 
         return result
 
-    def add_entry_rule(self, entry_rule):
-        entries = self.connection.entry_rules.get_where({"trigger_rule_url" : entry_rule})
+    def add_entry_rule(self, entry_rule_url):
+        entries = self.connection.entry_rules.get_where({"trigger_rule_url" : entry_rule_url})
         entry = next(entries, None)
 
         if not entry:
             data = {}
-            data["trigger_rule_url"] = entry_rule
+            data["trigger_rule_url"] = entry_rule_url
             data["enabled"] = True
             data["priority"] = 0
-            data["rule_name"] = entry_rule
+            data["rule_name"] = entry_rule_url
             data["trigger_text"] = ""
             data["trigger_text_hits"] = 0
             data["trigger_text_fields"] = ""
@@ -86,7 +73,7 @@ class EntryRules(object):
             data["apply_age_limit"] = 0
             data["browser_id"] = 0
 
-            self.connection.entry_rules.insert_json_data(data)
+            return self.connection.entry_rules.insert_json_data(data)
 
     def truncate(self):
         self.connection.entry_rules.truncate()
@@ -95,3 +82,18 @@ class EntryRules(object):
         if self.connection:
             self.connection.close()
             self.connection = None
+
+    def add_entry_rules(self, raw_input):
+        entry_rule_urls = read_line_things(raw_input)
+        for entry_rule_url in entry_rule_urls:
+            self.add_entry_rule(entry_rule_url)
+
+    def set_entry_rules(self, raw_input):
+        self.connection.entry_rules.truncate()
+
+        entry_rule_urls = read_line_things(raw_input)
+        for entry_rule_url in entry_rule_urls:
+            self.add_entry_rule(entry_rule_url)
+
+    def count(self):
+        return self.connection.entry_rules.count()

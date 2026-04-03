@@ -5,6 +5,7 @@ from webtoolkit import (
 )
 
 from .applogging import AppLogging
+from .entryrules import EntryRules
 
 
 class UrlHandler(object):
@@ -46,3 +47,21 @@ class UrlHandler(object):
 
     def is_remote_server(self):
         return RemoteUrl.get_remote_server_location()
+
+    def is_blocked(self):
+        rules = EntryRules(self.connection)
+        return rules.is_url_blocked()
+
+    def is_valid(self):
+        rules = EntryRules(self.connection)
+        if rules.is_url_blocked():
+            return False
+
+        return True
+
+    def is_invalid(self):
+        rules = EntryRules(self.connection)
+        if rules.is_url_blocked():
+            return True
+
+        return False

@@ -37,5 +37,13 @@ class SocialData(object):
                 valid = True
         return valid
 
-    def remove(self, entry_id):
-        self.connection.social_data.delete_where({"entry_id" : entry_id})
+    def delete(self, entry_id):
+        self.connection.socialdata.delete_where({"entry_id" : entry_id})
+
+    def cleanup(self):
+        social_data_container = self.connection.socialdata.get_where({})
+        # TODO  cannot import entries
+        #for social_data in social_data_container:
+        #    entry = Entries.get(id=social_data.entry_id)
+        #    if not entry:
+        #        self.connection.socialdata.delete(id=social_data.id)

@@ -71,3 +71,6 @@ class BackgroundJob(object):
             return True
 
         return False
+
+    def get(self, id):
+        return self.connection.backgroundjob.get(id=id)
