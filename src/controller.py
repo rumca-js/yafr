@@ -30,9 +30,13 @@ class Controller(object):
     def add_sources(self, source_urls):
         self.start_reading = True
 
+        sources = Sources(self.connection)
+
         for source_url in source_urls:
+            if sources.exists(source_url=source_url):
+                continue
+
             if not self.is_url_blocked(source_url):
-                sources = Sources(self.connection)
                 sources.set(source_url)
 
     def add_links(self, link_urls):

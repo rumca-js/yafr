@@ -22,15 +22,25 @@ class EntryRules(object):
         self.connection = connection
 
     def is_url_blocked(self, url):
-        rules = self.connection.entry_rules.get_where({"block" : True, "enabled" : True})
+        conditions = {"block" : True, "enabled" : True}
+        rules = self.connection.entry_rules.get_where(conditions)
         for rule in rules:
             if rule.trigger_rule_url == url:
                 return True
 
+    def is_entry_rule_triggered(self, url) -> bool:
+        rules = self.connection.entry_rules.get_where({"trigger_rule_url" : url})
+        rules = next(rules, None)
+        if rules:
+            return True
+        return False
+
     def get_rule_urls(self):
         urls = []
 
-        rules = self.connection.entry_rules.get_where(limit=10000)
+        conditions = {"enabled" : True}
+
+        rules = self.connection.entry_rules.get_where(conditions, limit=10000)
         for rule in rules:
             if not rule.enabled:
                 continue
@@ -42,7 +52,9 @@ class EntryRules(object):
     def get_rules_for(self, url=None, entry=None):
         result = []
 
-        rules = self.connection.entry_rules.get_where(limit=10000)
+        conditions = {"enabled" : True}
+
+        rules = self.connection.entry_rules.get_where(conditions, limit=10000)
         for rule in rules:
            if not rule.enabled:
                continue
