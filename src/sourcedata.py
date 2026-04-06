@@ -18,7 +18,6 @@ class SourceData(object):
         new_data = {}
         new_data["date_fetched"] = datetime.now()
         new_data["source_obj_id"] = source.id
-        new_data["conse"] = source.id
 
         # TODO fill correctly
         new_data["consecutive_errors"] = 0

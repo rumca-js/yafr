@@ -16,7 +16,7 @@ class SocialData(object):
         existing_social_data = self.get(entry_id)
 
         if existing_social_data:
-            social_data["id"] = existing_social_data["id"]
+            social_data["id"] = existing_social_data.id
 
         social_data["entry_id"] = entry_id
         social_data["date_updated"] = datetime.now()

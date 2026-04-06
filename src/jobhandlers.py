@@ -245,14 +245,19 @@ class AddLinkJobHandler(GenericJobHandler):
         if entries.exists(link=link_url):
             return
 
-        handler = UrlHandler(connection=self.connection, link=source.url)
+        handler = UrlHandler(connection=self.connection, link=link_url)
         url = handler.get_link_url()
+
+        url.get_response()
+
         if not url.is_valid():
+            AppLogging(self.connection).error(f"URL:{link_url} Link is not valid")
             return
 
         interface = EntryUrlInterface(url=url)
         entry_json = interface.get_entry_json()
         if not entry_json:
+            AppLogging(self.connection).error(f"URL:{link_url} Link data are not valid")
             return
 
         entries.add(entry_json)
