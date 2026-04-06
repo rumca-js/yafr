@@ -19,6 +19,11 @@ class SourceData(object):
         new_data["date_fetched"] = datetime.now()
         new_data["source_obj_id"] = source.id
 
+        # TODO fill correctly
+        new_data["consecutive_errors"] = 0
+        new_data["import_seconds"] = 0
+        new_data["number_of_entries"] = 0
+
         if op_data:
             self.connection.sourceoperationaleata.update_json_data(id=op_data.id, json_data=new_data)
         else:

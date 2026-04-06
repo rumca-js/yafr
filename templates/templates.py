@@ -37,8 +37,6 @@ INDEX_TEMPLATE = """
 <ul>
   <li><a href="/search">Search</a>
   <li><a href="/sources">Sources</a>
-  <li><a href="/logs">Logs</a>
-  <li><a href="/jobs">Jobs</a>
   <li><a href="/status">Status</a>
   <li><a href="/admin">Admin</a>
 </ul>
@@ -52,11 +50,17 @@ ADMIN_TEMPLATE = """
 </div>
 <h1>Admin</h1>
 <ul>
+  <li><a href="/logs">Logs</a>
+  <li><a href="/jobs">Jobs</a>
+  <li><a href="/add-links">Add links</a>
   <li><a href="/add-sources">Add sources</a>
   <li><a href="/block-rules">Block rules</a>
+  <li><a href="/configuration">Configuration</a>
+</ul>
+
+<ul>
   <li><a href="/remove-all-sources">Remove all sources</a>
   <li><a href="/remove-all-entries">Remove all entries</a>
-  <li><a href="/configuration">Configuration</a>
 </ul>
 """
 

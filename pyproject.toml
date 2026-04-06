@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "yafr"
-version = "1.1.14"
+version = "1.1.16"
 description = "Yet another feed reader"
 authors = ["Iwan Grozny <renegat@renegat0x0.ddns.net>"]
 license = "GPL3"

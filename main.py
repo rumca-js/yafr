@@ -568,15 +568,21 @@ def api_entries():
     entries = get_entries_for_request(connection, limit, offset, search)
 
     for entry in entries:
+        socialdata = SocialData(connection=connection)
+        social_data_object = socialdata.get(entry_id=entry.id)
+
         if entry.source_id:
             entry_source = connection.sources_table.get(id=entry.source_id)
-
-            socialdata = SocialData(connection=connection)
-            social_data_object = socialdata.get(entry_id=entry.id)
 
             json_entry_data = entry_to_json(entry,
                                             with_id=True,
                                             source=entry_source,
+                                            social_data=social_data_object)
+            json_entries.append(json_entry_data)
+        else:
+            json_entry_data = entry_to_json(entry,
+                                            with_id=True,
+                                            source=None,
                                             social_data=social_data_object)
             json_entries.append(json_entry_data)
 

@@ -142,6 +142,8 @@ class TaskRunner(object):
             return UpdateLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
         elif job.job == BackgroundJob.JOB_LINK_RESET_DATA:
             return ResetLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
+        elif job.job == BackgroundJob.JOB_LINK_ADD:
+            return AddLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
 
     def add_update_jobs(self):
         len_updated = 0
