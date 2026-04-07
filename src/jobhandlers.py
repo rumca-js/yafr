@@ -248,10 +248,14 @@ class AddLinkJobHandler(GenericJobHandler):
         handler = UrlHandler(connection=self.connection, link=link_url)
         url = handler.get_link_url()
 
-        url.get_response()
+        response = url.get_response()
+
+        if not response.is_valid():
+            AppLogging(self.connection).error(f"URL:{link_url} Response is not valid {response}")
+            return
 
         if not url.is_valid():
-            AppLogging(self.connection).error(f"URL:{link_url} Link is not valid")
+            AppLogging(self.connection).error(f"URL:{link_url} Url object is not valid")
             return
 
         interface = EntryUrlInterface(url=url)

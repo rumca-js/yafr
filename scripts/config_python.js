@@ -31,6 +31,11 @@ function getEntryAPI() {
 }
 
 
+function getEntryDeleteAPI() {
+   return `/entry-edit`;
+}
+
+
 function getEntryLocalLink(entry) {
     return `?entry_id=${entry.id}`;
 }

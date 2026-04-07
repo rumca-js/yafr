@@ -470,7 +470,10 @@ function getEntryBodyText(entry) {
        `;
     }
 
+    text += '<div class="d-flex gap-2">';
     text += getViewMenu(entry);
+    text += getEntryEditMenu(entry);
+    text += '</div>';
 
     let description = getEntryDescriptionSafe(entry);
 
@@ -551,6 +554,39 @@ function getViewMenu(entry) {
     });
 
     html += `</ul></div>`;
+
+    return html;
+}
+
+
+function getEntryEditMenu(entry) {
+    let entry_edit = getEntryDeleteAPI();
+    let html = "";
+
+    if (entry_edit)
+    {
+    html = 
+    `<div class="dropdown">
+        <button class="btn btn-primary" type="button" id="#entryEditDrop${entry.id}" data-bs-toggle="dropdown" aria-expanded="false">
+          Edit
+        </button>
+        <ul class="dropdown-menu">`;
+
+    html += `
+        <li>
+          <a href="${entry_edit}" id="Edit" class="dropdown-item" title="Edit">
+             Edit
+          </a>
+        </li>
+        <li>
+          <a href="remove-entry?id=${entry.id}" id="Remove" class="dropdown-item" title="Remove">
+             Remove
+          </a>
+        </li>
+    `;
+
+    html += `</ul></div>`;
+    }
 
     return html;
 }
