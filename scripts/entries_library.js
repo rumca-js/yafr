@@ -560,7 +560,13 @@ function getViewMenu(entry) {
 
 
 function getEntryEditMenu(entry) {
-    let entry_edit = getEntryDeleteAPI();
+    let entry_edit = getEntryEditAPI();
+    let entry_tag = getEntryTagAPI();
+    let entry_vote = getEntryVoteAPI();
+    let entry_remove = getEntryRemoveAPI();
+    let entry_update = getEntryUpdateAPI();
+    let entry_reset = getEntryResetAPI();
+
     let html = "";
 
     if (entry_edit)
@@ -574,12 +580,32 @@ function getEntryEditMenu(entry) {
 
     html += `
         <li>
-          <a href="${entry_edit}" id="Edit" class="dropdown-item" title="Edit">
+          <a href="${entry_edit}?id=${entry.id}" id="Edit" class="dropdown-item" title="Edit">
              Edit
           </a>
         </li>
         <li>
-          <a href="remove-entry?id=${entry.id}" id="Remove" class="dropdown-item" title="Remove">
+          <a href="${entry_vote}?id=${entry.id}" id="Vote" class="dropdown-item" title="Vote">
+             Vote
+          </a>
+        </li>
+        <li>
+          <a href="${entry_tag}?id=${entry.id}" id="Tag" class="dropdown-item" title="Tag">
+             Tag
+          </a>
+        </li>
+        <li>
+          <a href="${entry_update}?id=${entry.id}" id="Update" class="dropdown-item" title="Update">
+             Update
+          </a>
+        </li>
+        <li>
+          <a href="${entry_reset}?id=${entry.id}" id="Reset" class="dropdown-item" title="Reset">
+             Reset
+          </a>
+        </li>
+        <li>
+          <a href="${entry_remove}?id=${entry.id}" id="Remove" class="dropdown-item" title="Remove">
              Remove
           </a>
         </li>

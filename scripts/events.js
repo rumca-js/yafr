@@ -286,11 +286,11 @@ function registerEventsListeners() {
    
    
    //-----------------------------------------------
-   $(document).on('change', 'input[name="order"]', function () {
+   $(document).on('change', 'input[name="order_by"]', function () {
        sort_function = $(this).val();
    
        const currentUrl = new URL(window.location.href);
-       currentUrl.searchParams.set('order', sort_function);
+       currentUrl.searchParams.set('order_by', sort_function);
        window.history.pushState({}, '', currentUrl);
    
        performSearch();

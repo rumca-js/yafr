@@ -127,13 +127,14 @@ function performSearchDb() {
 function performSearchAPI() {
     let page_num = getPageNumber();
     const userInput = $("#searchInput").val();
+    let order_by = getQueryParam("order_by");
 
     getEntriesJson(function(data) {
        object_list_data = data;
        fillListData();
        $('#pagination').html(getPaginationText());
        onSearchStop();
-    }, page=page_num, search=userInput);
+    }, page=page_num, search=userInput, order_by=order_by);
 }
 
 

@@ -1,23 +1,26 @@
 import re
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import traceback
+from sqlalchemy import select, or_
 
 from webtoolkit import (
    RemoteUrl,
    RemoteServer,
 )
+from linkarchivetools.model import (
+    DbConnection,
+    SourceData,
+    Sources,
+    Entries,
+    AppLogging,
+    BackgroundJob,
+    ConfigurationEntry,
+)
 
-from .dbconnection import DbConnection
 from .controller import Controller
 from .system import System
-from .sourcedata import SourceData
-from .sources import Sources
-from .entries import Entries
-from .applogging import AppLogging
 from .jobhandlers import *
-from .backgroundjobs import BackgroundJob
-from .configurationentry import ConfigurationEntry
 
 
 class TaskRunner(object):
@@ -146,23 +149,26 @@ class TaskRunner(object):
             return AddLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
 
     def add_update_jobs(self):
-        len_updated = 0
         desired_len = 5
 
-        entries = Entries(self.connection)
-        entry_objs = self.connection.entries_table.get_where({"date_update_last" : None}, limit=desired_len)
+        days_to_update = 5
+
+        date_cutoff = datetime.now(timezone.utc) - timedelta(days=days_to_update)
+
+        table = self.connection.entries_table.get_table()
+        entries_select = (select(table)
+                          .order_by(table.c.page_rating_votes.desc())
+                          .where(or_(table.c.date_update_last.is_(None),
+                                 table.c.date_update_last < date_cutoff)
+                          )
+                          .limit(desired_len)
+                         )
+
+        entries = self.connection.connection.execute(entries_select)
+        entry_objs = list(entries)
+
         for entry in entry_objs:
             BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_UPDATE_DATA, subject=str(entry.id))
-            len_updated += 1
-
-        if len_updated < desired_len:
-            # TODO older than
-
-            #entry_objs = self.connection.entries_table.get_where({"date_update_last" : None}, limit=desired_len)
-            #for entry in entry_objs:
-            #    BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_UPDATE_DATA, subject=str(entry.id))
-            #    len_updated += 1
-            pass
 
     def is_crawling_server_ok(self):
         config = self.connection.configurationentry.get()

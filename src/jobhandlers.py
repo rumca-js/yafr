@@ -13,16 +13,20 @@ from webtoolkit import (
 )
 
 from .controller import Controller
-from .sources import Sources
-from .entries import Entries
-from .sourcedata import SourceData
-from .socialdata import SocialData
-from .applogging import AppLogging
-from .entryrules import EntryRules
+from linkarchivetools.model import (
+   Sources,
+   Entries,
+   SourceData,
+   SocialData,
+   AppLogging,
+   EntryRules,
+   EntryTags,
+   ConfigurationEntry,
+)
+
 from .entryurlinterface import EntryUrlInterface
 from .controller import Controller
 from .urlhandler import UrlHandler
-from .configurationentry import ConfigurationEntry
 
 
 class GenericJobHandler(object):
@@ -277,3 +281,6 @@ class CleanupJobHandler(GenericJobHandler):
 
         social_data = SocialData(self.connection)
         social_data.cleanup()
+
+        tags = EntryTags(self.connection)
+        tags.cleanup()

@@ -289,7 +289,7 @@ function getOrderButtons() {
         text += `
                 <li>
                     <div class="dropdown-item form-check">
-                        <input class="form-check-input me-2" type="radio" name="order" id="order${style_real}" value="${style_real}">
+                        <input class="form-check-input me-2" type="radio" name="order_by" id="order${style_real}" value="${style_real}">
                         <label class="form-check-label" for="order${style_real}">Order by ${style_name}</label>
                     </div>
                 </li>
@@ -447,7 +447,7 @@ function setDarkMode() {
 function updateWidgets() {
     $('input[name="viewMode"][value="' + view_display_type + '"]').prop('checked', true);
     $('input[name="theme"][value="' + view_display_style + '"]').prop('checked', true);
-    $('input[name="order"][value="' + sort_function + '"]').prop('checked', true);
+    $('input[name="order_by"][value="' + sort_function + '"]').prop('checked', true);
 
     $('#showIcons').prop('checked', view_show_icons);
     $('#directLinks').prop('checked', entries_direct_links);

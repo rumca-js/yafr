@@ -1,12 +1,14 @@
 from pathlib import Path
 from datetime import datetime
 
-from .backgroundjobs import BackgroundJob
-from .sourcedata import SourceData
-from .entries import Entries
-from .sources import Sources
-from .entryrules import EntryRules
-from .socialdata import SocialData
+from linkarchivetools.model import (
+   Entries,
+   SocialData,
+   Sources,
+   SourceData,
+   EntryRules,
+   BackgroundJob,
+)
 from .urlhandler import UrlHandler
 
 

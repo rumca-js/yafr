@@ -7,6 +7,7 @@ import threading
 import argparse
 import shutil
 from pathlib import Path
+from sqlalchemy import select, or_
 from flask import (
    Flask,
    render_template_string,
@@ -17,18 +18,26 @@ from flask import (
    redirect,
    Response,
 )
+from linkarchivetools.model import (
+   DbConnection,
+   EntryRules,
+   SocialData,
+   Sources,
+   AppLogging,
+   EntryVotes,
+   EntryTags,
+   entry_to_json,
+   source_to_json,
+   source_and_entries_to_rss,
+)
+from linkarchivetools.utils.reflected import ReflectedTable
+
 from urllib.parse import unquote
 
 from templates.templates import *
 from src.taskrunner import TaskRunner
-from src.dbconnection import DbConnection
-from src.serializers import entry_to_json, source_to_json, source_and_entries_to_rss
 from src.controller import Controller
 from src.system import System
-from src.entryrules import EntryRules
-from src.socialdata import SocialData
-from src.sources import Sources
-from src.applogging import AppLogging
 
 
 __version__ = "0.0.0"
@@ -70,7 +79,7 @@ class PagePagination:
         return page_size
 
 
-def parse_search(search, table):
+def parse_search(search, table, tags_table):
     """
     Supports:
       - "keyword"                  → search all fields
@@ -109,44 +118,80 @@ def parse_search(search, table):
             return [column.ilike(f"%{value}%")]
 
     return [
-        table.c.title.ilike(f"%{search}%"),
-        table.c.description.ilike(f"%{search}%"),
-        table.c.link.ilike(f"%{search}%"),
-        table.c.source_url.ilike(f"%{search}%"),
-    ]
-
-
-def get_entries_for_request(connection, limit, offset, search=None):
-    table = connection.entries_table.get_table()
-    order_by = [
-      table.c.date_published.desc()
-    ]
-
-    conditions = parse_search(search, table)
-
-    if conditions:
-        entries = list(connection.entries_table.get_where(limit=limit,
-                                                          offset=offset,
-                                                          order_by=order_by,
-                                                          conditions=conditions,
-                                                          ))
-
-    elif search and search != "":
-        conditions = [
           table.c.title.ilike(f"%{search}%"),
           table.c.description.ilike(f"%{search}%"),
           table.c.link.ilike(f"%{search}%"),
           table.c.source_url.ilike(f"%{search}%"),
-        ]
-        entries = list(connection.entries_table.get_where(limit=limit,
-                                                          offset=offset,
-                                                          order_by=order_by,
-                                                          conditions=conditions,
-                                                          ))
+          tags_table.c.tag.ilike(f"%{search}%"),
+    ]
+
+
+def get_entries_for_request(connection, order, limit, offset, search=None):
+    table = connection.entries_table.get_table()
+    tags_table = connection.entrycompactedtags.get_table()
+    social_table = connection.socialdata.get_table()
+
+    conditions = parse_search(search, table, tags_table)
+
+    order_bys = [table.c.page_rating_votes.desc()]
+    if order == "-view_count":
+        order_bys = [social_table.c.view_count.desc()]
+    elif order == "view_count":
+        order_bys = [social_table.c.view_count.asc()]
+    elif order == "-stars":
+        order_bys = [social_table.c.stars.desc()]
+    elif order == "stars":
+        order_bys = [social_table.c.stars.asc()]
+    elif order == "-followers_count":
+        order_bys = [social_table.c.followers_count.desc()]
+    elif order == "followers_count":
+        order_bys = [social_table.c.followers_count.asc()]
+    elif order == "-date_published":
+        order_bys = [table.c.date_published.desc()]
+    elif order == "date_published":
+        order_bys = [table.c.date_published.asc()]
+    elif order == "-date_created":
+        order_bys = [table.c.date_created.desc()]
+    elif order == "date_created":
+        order_bys = [table.c.date_created.asc()]
+    elif order == "-link":
+        order_bys = [table.c.link.desc()]
+    elif order == "link":
+        order_bys = [table.c.link.asc()]
+    elif order == "-page_rating_votes":
+        order_bys = [table.c.page_rating_votes.desc()]
+    elif order == "page_rating_votes":
+        order_bys = [table.c.page_rating_votes.asc()]
     else:
-        entries = list(connection.entries_table.get_where(limit=limit,
-                                                          offset=offset,
-                                                          order_by=order_by))
+        order_bys = [table.c.page_rating_votes.desc()]
+
+    entries_select = (select(table,
+                             tags_table.c.tag,
+                             social_table.c.thumbs_up,
+                             social_table.c.thumbs_down,
+                             social_table.c.view_count,
+                             social_table.c.followers_count,
+                             social_table.c.stars,
+                             social_table.c.upvote_ratio,
+                             social_table.c.upvote_diff,
+                             social_table.c.upvote_view_ratio,
+                             )
+                     .outerjoin(tags_table, table.c.id == tags_table.c.entry_id)
+                     .outerjoin(social_table, table.c.id == social_table.c.entry_id)
+                     .order_by(*order_bys)
+                     )
+
+    if conditions:
+        entries_select = entries_select.where(or_(*conditions))
+    if offset is not None:
+        entries_select = entries_select.offset(offset)
+    if limit is not None:
+        entries_select = entries_select.limit(limit)
+
+    entries = connection.connection.execute(entries_select)
+
+    entries = list(entries)
+
     return entries
 
 
@@ -305,8 +350,118 @@ def add_links():
         html_text = get_view(template_html, title="OK")
         return render_template_string(html_text)
 
-    html_text = get_view(ADD_SOURCES_TEMPLATE, title="Add links")
+    html_text = get_view(ADD_LINKS_TEMPLATE, title="Add links")
     return render_template_string(html_text, raw_data="")
+
+
+@app.route("/entry-edit", methods=["GET", "POST"])
+def entry_edit():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+
+    if request.method == "POST":
+        title = request.form.get("title", "")
+
+        entries = Entries(connection)
+        entry = entries.get(id=entry_id)
+
+        json = entry_to_json(entry)
+        json["title"] = title
+
+        entries.update_json_data(id=entry_id, json_data=json)
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+    html_text = get_view(ENTRY_EDIT_TEMPLATE, title="Edit entry")
+    return render_template_string(html_text, entry_id=entry_id)
+
+
+@app.route("/entry-update", methods=["GET", "POST"])
+def entry_update():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+
+    if entry_id:
+        BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_UPDATE_DATA, subject=str(entry_id))
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+    else:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+
+@app.route("/entry-reset", methods=["GET", "POST"])
+def entry_reset():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+
+    if entry_id:
+        BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_RESET_DATA, subject=str(entry_id))
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+    else:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+
+@app.route("/entry-vote", methods=["GET", "POST"])
+def entry_vote():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+    current_vote = 0
+    votes = EntryVotes(connection=connection)
+
+    if request.method == "POST":
+        entry_vote = request.form.get("entry-vote", "")
+
+        votes.set(entry_id=entry_id, vote=entry_vote)
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+    else:
+        current_vote = votes.get(entry_id=entry_id)
+
+    html_text = get_view(ENTRY_VOTE_TEMPLATE, title="Vote entry")
+    return render_template_string(html_text, entry_id=entry_id, current_vote=current_vote)
+
+
+@app.route("/entry-tag", methods=["GET", "POST"])
+def entry_tag():
+    connection = DbConnection(table_name)
+    table = ReflectedTable(connection.engine, connection.connection)
+    table.vacuum()
+
+    entry_id = request.args.get("id")
+    tags = EntryTags(connection=connection)
+
+    if request.method == "POST":
+        entry_tags = request.form.get("entry-tag", "")
+
+        tags.set(entry_id=entry_id, tags=entry_tags)
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+    else:
+        current_tags = tags.get(entry_id=entry_id)
+
+    html_text = get_view(ENTRY_TAG_TEMPLATE, title="Tag entry")
+    return render_template_string(html_text, entry_id=entry_id, current_tags=current_tags)
 
 
 @app.route("/rss/<int:source_id>", methods=["GET", "POST"])
@@ -563,13 +718,17 @@ def api_entries():
     offset = pagination.get_offset()
 
     search = request.args.get("search")
+    order_by = request.args.get("order_by")
 
     json_entries = []
-    entries = get_entries_for_request(connection, limit, offset, search)
+    entries = get_entries_for_request(connection, order_by, limit, offset, search)
 
     for entry in entries:
         socialdata = SocialData(connection=connection)
         social_data_object = socialdata.get(entry_id=entry.id)
+
+        tags = EntryTags(connection)
+        tags = tags.get_map(entry_id=entry.id)
 
         if entry.source_id:
             entry_source = connection.sources_table.get(id=entry.source_id)
@@ -577,13 +736,15 @@ def api_entries():
             json_entry_data = entry_to_json(entry,
                                             with_id=True,
                                             source=entry_source,
-                                            social_data=social_data_object)
+                                            social_data=social_data_object,
+                                            tags=tags)
             json_entries.append(json_entry_data)
         else:
             json_entry_data = entry_to_json(entry,
                                             with_id=True,
                                             source=None,
-                                            social_data=social_data_object)
+                                            social_data=social_data_object,
+                                            tags=tags)
             json_entries.append(json_entry_data)
 
     json_data = {}

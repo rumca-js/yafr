@@ -4,8 +4,7 @@ from webtoolkit import (
    PageRequestObject,
 )
 
-from .applogging import AppLogging
-from .entryrules import EntryRules
+from linkarchivetools.model import EntryRules, AppLogging
 
 
 class UrlHandler(object):

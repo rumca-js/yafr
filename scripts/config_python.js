@@ -31,8 +31,33 @@ function getEntryAPI() {
 }
 
 
-function getEntryDeleteAPI() {
+function getEntryEditAPI() {
    return `/entry-edit`;
+}
+
+
+function getEntryTagAPI() {
+   return `/entry-tag`;
+}
+
+
+function getEntryVoteAPI() {
+   return `/entry-vote`;
+}
+
+
+function getEntryUpdateAPI() {
+   return `/entry-update`;
+}
+
+
+function getEntryResetAPI() {
+   return `/entry-reset`;
+}
+
+
+function getEntryRemoveAPI() {
+   return `/remove-entry`;
 }
 
 
