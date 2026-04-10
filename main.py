@@ -133,7 +133,7 @@ def get_entries_for_request(connection, order, limit, offset, search=None):
 
     conditions = parse_search(search, table, tags_table)
 
-    order_bys = [table.c.page_rating_votes.desc()]
+    order_bys = [table.c.date_published.desc()]
     if order == "-view_count":
         order_bys = [social_table.c.view_count.desc()]
     elif order == "view_count":
@@ -163,7 +163,7 @@ def get_entries_for_request(connection, order, limit, offset, search=None):
     elif order == "page_rating_votes":
         order_bys = [table.c.page_rating_votes.asc()]
     else:
-        order_bys = [table.c.page_rating_votes.desc()]
+        order_bys = [table.c.date_published.desc()]
 
     entries_select = (select(table,
                              tags_table.c.tag,
