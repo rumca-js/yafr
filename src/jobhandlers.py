@@ -88,7 +88,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
             else:
                 AppLogging(self.connection).error(f"URL:{source.url} Response is invalid")
         else:
-            AppLogging(self.connection).error(f"URL:{source.url} No response")
+            AppLogging(self.connection).error(f"Source ID:{source.id} URL:{source.url} No response")
 
         return True
 
@@ -105,7 +105,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
                     AppLogging(self.connection).debug("Retry of request")
                     continue
             if response is None:
-                AppLogging(self.connection).error(f"URL:{source.url} No response")
+                AppLogging(self.connection).error(f"Source ID:{source.id} URL:{source.url} No response")
                 return
 
             return url

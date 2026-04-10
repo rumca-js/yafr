@@ -666,6 +666,18 @@ def admin():
     return render_template_string(html_text)
 
 
+def to_bool(variable):
+    if not variable:
+        return False
+    if variable == "true":
+        return True
+    if variable == "True":
+        return True
+    if variable == "1":
+        return True
+    return False
+
+
 @app.route("/configuration", methods=["GET", "POST"])
 def configuration():
     connection = DbConnection(table_name)
@@ -678,6 +690,10 @@ def configuration():
         description = request.form.get("instance_description", "")
         remote_webtools_server_location = request.form.get("remote_webtools_server_location", "")
         display_type = request.form.get("display_type", "")
+        enable_social_data = request.form.get("enable_social_data", "")
+        new_entries_fetch_social_data = request.form.get("new_entries_fetch_social_data", "")
+        entry_update_fetches_social_data = request.form.get("entry_update_fetches_social_data", "")
+        number_of_update_entries = request.form.get("number_of_update_entries", "")
 
         data = {}
         if title != "None":
@@ -688,6 +704,11 @@ def configuration():
             data["display_type"] = display_type
         if remote_webtools_server_location != "None":
             data["remote_webtools_server_location"] = remote_webtools_server_location
+
+        data["enable_social_data"] = to_bool(enable_social_data)
+        data["new_entries_fetch_social_data"] = to_bool(new_entries_fetch_social_data)
+        data["entry_update_fetches_social_data"] = to_bool(entry_update_fetches_social_data)
+        data["number_of_update_entries"] = number_of_update_entries
 
         connection.configurationentry.update_json_data(id=config.id, json_data=data)
 
@@ -702,6 +723,7 @@ def configuration():
     instance_fields["enable_social_data"] = config.enable_social_data
     instance_fields["new_entries_fetch_social_data"] = config.new_entries_fetch_social_data
     instance_fields["entry_update_fetches_social_data"] = config.entry_update_fetches_social_data
+    instance_fields["number_of_update_entries"] = config.number_of_update_entries
 
     html_text = get_view(CONFIGURATION_TEMPLATE, title="Configuration")
     return render_template_string(html_text, configuration=instance_fields)
