@@ -107,7 +107,8 @@ class TaskRunner(object):
 
                 system.set_thread_ok()
             except Exception as E:
-                AppLogging(self.connection).exc(E)
+                # AppLogging(self.connection).exc(E)
+                print(str(E))
                 time.sleep(10)
 
     def get_job(self):
