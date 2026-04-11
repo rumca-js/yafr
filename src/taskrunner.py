@@ -72,23 +72,15 @@ class TaskRunner(object):
             sources.set(source_url)
 
     def setup_start(self):
-        #entries = Entries(self.connection)
-        #entries_len = entries.count()
-        #sources = Sources(self.connection)
-        #sources_len = sources.count()
-
-        #AppLogging(self.connection).info(f"Entries: {entries_len}")
-        #AppLogging(self.connection).info(f"Sources: {sources_len}")
-
         self.reset_config()
 
     def process_jobs(self):
         print("Starting reading")
 
+        system = System.get_object()
+
         while True:
             try:
-                system = System.get_object()
-
                 self.start_reading = False
 
                 self.connection = DbConnection(self.table_name)
@@ -96,18 +88,31 @@ class TaskRunner(object):
 
                 if not self.is_crawling_server_ok():
                     AppLogging(self.connection).error("Crawling server error")
+                    self.connection.close()
                     time.sleep(60)
+                    continue
+                AppLogging(self.connection).debug("Crawling server OK")
 
-                # do the reading
-                if not self.handle_one_job():
+                system.set_thread_ok()
+
+                self.handle_one_job()
+
+                if self.connection.backgroundjob.count() == 0:
+                    self.check_sources()
+
+                if self.connection.backgroundjob.count() == 0:
+                    self.add_update_jobs()
+                    BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_CLEANUP)
+
                     AppLogging(self.connection).debug("Sleeping")
+                    self.connection.close()
+
                     time.sleep(10)
+                    continue
 
                 self.connection.close()
 
-                system.set_thread_ok()
             except Exception as E:
-                # AppLogging(self.connection).exc(E)
                 print(str(E))
                 time.sleep(10)
 
@@ -133,9 +138,6 @@ class TaskRunner(object):
     def handle_one_job(self):
         job = self.get_job()
         if not job:
-            self.add_update_jobs()
-            BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_CLEANUP)
-            self.check_sources()
             return False
 
         handler = self.job2handler(job)
