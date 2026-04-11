@@ -297,7 +297,7 @@ def source(source_id):
     connection = DbConnection(table_name)
 
     source_item = connection.sources_table.get(id=source_id)
-    source_ops = list(connection.sourceoperationaleata.get_where({"source_obj_id" : source_id}))
+    source_ops = list(connection.sourceoperationaldata.get_where({"source_obj_id" : source_id}))
     source_op = None
     if len(source_ops) > 0:
         source_op = source_ops[0]
@@ -565,7 +565,7 @@ def remove_all_sources():
     connection = DbConnection(table_name)
 
     connection.sources_table.truncate()
-    connection.sourceoperationaleata.truncate()
+    connection.sourceoperationaldata.truncate()
 
     html_text = get_view(OK_TEMPLATE, title="Remove all sources")
     return render_template_string(html_text)
@@ -645,7 +645,7 @@ def status():
 
     stats_map["Entries"] = connection.entries_table.count()
     stats_map["Sources"] = connection.sources_table.count()
-    stats_map["Sources Operational Data"] = connection.sourceoperationaleata.count()
+    stats_map["Sources Operational Data"] = connection.sourceoperationaldata.count()
     stats_map["Entry rules"] = connection.entry_rules.count()
     stats_map["Social data"] = connection.socialdata.count()
     stats_map["AppLogging"] = connection.applogging.count()
