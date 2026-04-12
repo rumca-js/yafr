@@ -94,6 +94,7 @@ def parse_search(search, table, tags_table):
     search = unquote(search).strip()
 
     searchable_fields = {
+        "id": table.c.id,
         "title": table.c.title,
         "description": table.c.description,
         "link": table.c.link,
@@ -375,7 +376,7 @@ def check_later_list():
     check_controller = CheckLater(connection=connection)
     entries = check_controller.get_entries()
 
-    html_text = get_view(ENTRIES_LIST_TEMPLATE, title="Check later list")
+    html_text = get_view(CHECK_LATER_LIST_TEMPLATE, title="Check later list")
     return render_template_string(html_text, entries=entries)
 
 

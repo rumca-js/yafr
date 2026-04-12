@@ -148,18 +148,21 @@ CHECK_LATER_LIST_TEMPLATE = """
     <a class="btn btn-primary" href="/">Home</a>
 </div>
 
-<h1>YouTube Feed Entries</h1>
+<h1>Entries</h1>
 
-<div class="title">
+<ul>
 {% for entry in entries %}
-    {% if entry.link %}
-        <a href="{{ entry.link }}" target="_blank" rel="noopener">
+    <li class="entry">
+        {% if entry.thumnail %}
+        <img src="{{entry.thumbnail}}"/>
+        {% endif %}
+
+        <a href="/search?id={{ entry.id }}">
             {{ entry.title or "Untitled entry" }}
         </a>
-    {% else %}
-        {{ entry.title or "Untitled entry" }}
-    {% endif %}
-</div>
+    </li>
+{% endfor %}
+</ul>
 """
 
 
