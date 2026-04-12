@@ -36,6 +36,7 @@ INDEX_TEMPLATE = """
 <h1>{{title}} v{{version}}</h1>
 <ul>
   <li><a href="/search">Search</a>
+  <li><a href="/check-later-list">Check later</a>
   <li><a href="/sources">Sources</a>
   <li><a href="/status">Status</a>
   <li><a href="/admin">Admin</a>
@@ -121,13 +122,54 @@ STR_TEMPLATE = """
 """
 
 
-ENTRIES_LIST_TEMPLATE = """
+ENTRY_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
 </div>
 
 <h1>YouTube Feed Entries</h1>
+
+<div class="title">
+    {% if entry.link %}
+        <a href="{{ entry.link }}" target="_blank" rel="noopener">
+            {{ entry.title or "Untitled entry" }}
+        </a>
+    {% else %}
+        {{ entry.title or "Untitled entry" }}
+    {% endif %}
+</div>
+"""
+
+
+CHECK_LATER_LIST_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+</div>
+
+<h1>YouTube Feed Entries</h1>
+
+<div class="title">
+{% for entry in entries %}
+    {% if entry.link %}
+        <a href="{{ entry.link }}" target="_blank" rel="noopener">
+            {{ entry.title or "Untitled entry" }}
+        </a>
+    {% else %}
+        {{ entry.title or "Untitled entry" }}
+    {% endif %}
+</div>
+"""
+
+
+ENTRIES_LIST_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+</div>
+
+<h1>Entries</h1>
 
 <ul>
 {% for entry in entries %}
@@ -144,10 +186,10 @@ ENTRIES_LIST_TEMPLATE = """
         </div>
 
         <div class="meta">
-            {% if entry.author %}By {{ entry.author }}{% endif %}
-            {% if entry.album %} • Album: {{ entry.album }}{% endif %}
-            {% if entry.language %} • Language: {{ entry.language }}{% endif %}
-            {% if entry.status_code %} • HTTP {{ entry.status_code }}{% endif %}
+            {% if entry.author %} By {{ entry.author }}{% endif %}
+            {% if entry.album %} Album: {{ entry.album }}{% endif %}
+            {% if entry.language %} Language: {{ entry.language }}{% endif %}
+            {% if entry.status_code %} HTTP {{ entry.status_code }}{% endif %}
         </div>
 
         {% if entry.description %}
@@ -161,13 +203,13 @@ ENTRIES_LIST_TEMPLATE = """
                 Rating: {{ entry.page_rating }}
             {% endif %}
             {% if entry.page_rating_votes %}
-                • Votes: {{ entry.page_rating_votes }}
+                Votes: {{ entry.page_rating_votes }}
             {% endif %}
             {% if entry.page_rating_visits %}
-                • Visits: {{ entry.page_rating_visits }}
+                Visits: {{ entry.page_rating_visits }}
             {% endif %}
             {% if entry.age %}
-                • Age: {{ entry.age }}
+                Age: {{ entry.age }}
             {% endif %}
         </div>
 
@@ -185,16 +227,16 @@ ENTRIES_LIST_TEMPLATE = """
                 Published: {{ entry.date_published }}
             {% endif %}
             {% if entry.date_created %}
-                • Created: {{ entry.date_created }}
+                Created: {{ entry.date_created }}
             {% endif %}
             {% if entry.date_update_last %}
-                • Updated: {{ entry.date_update_last }}
+                Updated: {{ entry.date_update_last }}
             {% endif %}
             {% if entry.date_last_modified %}
-                • Modified: {{ entry.date_last_modified }}
+                Modified: {{ entry.date_last_modified }}
             {% endif %}
             {% if entry.date_dead_since %}
-                • Dead since: {{ entry.date_dead_since }}
+                Dead since: {{ entry.date_dead_since }}
             {% endif %}
         </div>
     </li>

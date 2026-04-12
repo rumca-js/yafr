@@ -56,6 +56,15 @@ function getEntryResetAPI() {
 }
 
 
+function getEntryCheckLaterAPI() {
+   return `/entry-check-later`;
+}
+
+function getEntryNotCheckLaterAPI() {
+   return `/entry-not-check-later`;
+}
+
+
 function getEntryRemoveAPI() {
    return `/remove-entry`;
 }

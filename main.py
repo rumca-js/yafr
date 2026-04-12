@@ -20,6 +20,8 @@ from flask import (
 )
 from linkarchivetools.model import (
    DbConnection,
+   Entries,
+   CheckLater,
    EntryRules,
    SocialData,
    Sources,
@@ -352,6 +354,78 @@ def add_links():
 
     html_text = get_view(ADD_LINKS_TEMPLATE, title="Add links")
     return render_template_string(html_text, raw_data="")
+
+
+@app.route("/entry", methods=["GET"])
+def entry():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+    entries = Entries(connection=connection)
+    entry = entries.get(id=entry_id)
+
+    html_text = get_view(ENTRY_TEMPLATE, title="Entry")
+    return render_template_string(html_text, entry=entry)
+
+
+@app.route("/check-later-list", methods=["GET"])
+def check_later_list():
+    connection = DbConnection(table_name)
+
+    check_controller = CheckLater(connection=connection)
+    entries = check_controller.get_entries()
+
+    html_text = get_view(ENTRIES_LIST_TEMPLATE, title="Check later list")
+    return render_template_string(html_text, entries=entries)
+
+
+@app.route("/entry-check-later", methods=["GET"])
+def check_later():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+
+    entry_controller = Entries(connection=connection)
+    entry = entry_controller.get(id=entry_id)
+    if not entry:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK")
+        html_text = get_view(template_html, title="NOK")
+        return render_template_string(html_text)
+
+    check_controller = CheckLater(connection=connection)
+    status = check_controller.check_later(entry)
+
+    if status:
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+    else:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK")
+
+    html_text = get_view(template_html, title="OK")
+    return render_template_string(html_text)
+
+
+@app.route("/entry-not-check-later", methods=["GET"])
+def entry_not_check_later():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+
+    entry_controller = Entries(connection=connection)
+    entry = entry_controller.get(id=entry_id)
+    if not entry:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK")
+        html_text = get_view(template_html, title="NOK")
+        return render_template_string(html_text)
+
+    check_controller = CheckLater(connection=connection)
+    status = check_controller.not_check_later(entry)
+
+    if status:
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+    else:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK")
+    html_text = get_view(template_html, title="OK")
+    return render_template_string(html_text)
 
 
 @app.route("/entry-edit", methods=["GET", "POST"])

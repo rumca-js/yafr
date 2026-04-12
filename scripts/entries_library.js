@@ -566,6 +566,8 @@ function getEntryEditMenu(entry) {
     let entry_remove = getEntryRemoveAPI();
     let entry_update = getEntryUpdateAPI();
     let entry_reset = getEntryResetAPI();
+    let entry_check_later = getEntryCheckLaterAPI();
+    let entry_not_check_later = getEntryNotCheckLaterAPI();
 
     let html = "";
 
@@ -594,6 +596,22 @@ function getEntryEditMenu(entry) {
              Tag
           </a>
         </li>
+    `;
+
+    html += `
+        <li>
+          <a href="${entry_check_later}?id=${entry.id}" id="check-later" class="dropdown-item" title="Check Later">
+             Check Later
+          </a>
+        </li>
+        <li>
+          <a href="${entry_not_check_later}?id=${entry.id}" id="not-check-later" class="dropdown-item" title="Not Check Later">
+             Not Check Later
+          </a>
+        </li>
+    `;
+
+    html += `
         <li>
           <a href="${entry_update}?id=${entry.id}" id="Update" class="dropdown-item" title="Update">
              Update
