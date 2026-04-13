@@ -124,16 +124,24 @@ class TaskRunner(object):
 
     def check_sources(self):
         """
-        TODO - order by update time required
+        First read unread sources.
+        The add jobs in order of reading need.
         """
-        sourcedata = SourceData(self.connection)
+        sd_controller = SourceData(self.connection)
+        sources = Sources(self.connection)
 
-        source_ids = []
-        for source in self.connection.sources_table.get_sources():
-            this_source_data = sourcedata.get_source_data(source)
-
-            if sourcedata.is_update_needed(source):
+        for source in soures.get_table().get_where():
+            source_data = sd_controller.get_source_data(source)
+            if not source_data:
                 job = BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source.id))
+
+        table = sd_controller.get_table().get_table()
+        order_by = [table.c.date_fetched.asc()]
+        for sd in sd_controller.get_table().get_where(order_by=order_by):
+            source = sources.get_table().get(id=sd.source_obj_id)
+            if source:
+                if sd_controller.is_update_needed(source):
+                    job = BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source.id))
 
     def handle_one_job(self):
         job = self.get_job()
