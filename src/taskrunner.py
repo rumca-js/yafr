@@ -130,7 +130,7 @@ class TaskRunner(object):
         sd_controller = SourceData(self.connection)
         sources = Sources(self.connection)
 
-        for source in soures.get_table().get_where():
+        for source in sources.get_table().get_where():
             source_data = sd_controller.get_source_data(source)
             if not source_data:
                 job = BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source.id))
