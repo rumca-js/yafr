@@ -253,6 +253,7 @@ SOURCES_LIST_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/sources-fetch-period">Set Fetch Period</a>
 </div>
 
 <h1>Sources {{sources_length}}</h1>
@@ -384,6 +385,22 @@ ENTRY_VOTE_TEMPLATE = """
    <div><label for="entry-vote">Vote:</label></div>
    <div>
       <input type="search" id="entry-vote" name="entry-vote" value="{{current_vote}}" autofocus/>
+   </div>
+   <button type="submit">Save</button>
+</form>
+"""
+
+
+SOURCES_FETCH_TIME = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+</div>
+
+<form method="POST">
+   <div><label for="fetch-period">Fetch time:</label></div>
+   <div>
+      <input type="fetch-period" id="fetch-period" name="fetch-period" autofocus/>
    </div>
    <button type="submit">Save</button>
 </form>

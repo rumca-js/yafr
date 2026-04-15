@@ -300,6 +300,22 @@ def sources():
     return render_template_string(html_text, sources=sources, sources_length=sources_len)
 
 
+@app.route("/sources-fetch-period", methods=["GET", "POST"])
+def sources_fetch_period():
+    connection = DbConnection(table_name)
+
+    if request.method == "POST":
+        fetch_period = request.form.get("fetch-period", 0)
+        sourcedatas = connection.sourceoperationaldata.get_where()
+        for source_data in sourcedatas:
+            json_data = {}
+            json_data["fetch_period"] = fetch_period
+            connection.sources_table.update_json_data(id=source_data.id, json_data=json_data)
+
+    html_text = get_view(SOURCES_FETCH_TIME, title="Set sources fetch period")
+    return render_template_string(html_text)
+
+
 @app.route("/source/<int:source_id>", methods=["GET", "POST"])
 def source(source_id):
     connection = DbConnection(table_name)
