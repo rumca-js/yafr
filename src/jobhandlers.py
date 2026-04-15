@@ -167,7 +167,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
         entries = Entries(self.connection)
 
-        entries_where = entries.get_where({"source_id"})
+        entries_where = entries.get_table().get_where({"source_id" : source.id})
         for entry in entries_where:
             if self.is_entry_to_be_removed(entry):
                 entries.delete(id=entry.id)

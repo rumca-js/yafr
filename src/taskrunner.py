@@ -113,7 +113,7 @@ class TaskRunner(object):
                 self.connection.close()
 
             except Exception as E:
-                print(str(E))
+                traceback.print_exc()
                 time.sleep(10)
 
     def get_job(self):
