@@ -229,6 +229,7 @@ function registerEventsListeners() {
        $('#pagination').html("");
    
        hideSearchSuggestions();
+       performSearch();
    });
    
    

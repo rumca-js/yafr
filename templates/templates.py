@@ -146,9 +146,10 @@ CHECK_LATER_LIST_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/check-later-clear">Clear</a>
 </div>
 
-<h1>Entries</h1>
+<h1>Check later list</h1>
 
 <ul>
 {% for entry in entries %}
@@ -558,18 +559,11 @@ PROJECT_TEMPLATE = """
   </div>
 
   <div id="helpPlace" style="display: none;">
-      <p>
-      This is offline search. It might sound unbelievable, even absurd, but it is true. This search, once initialized from JSON data, is totally offline.
-      </p>
-      <p>
-      I always liked "awesome lists", or reddit megathreads. These are community-driven collections of resources—programs, tools, or knowledge—compiled manually or semi-automatically.
-      </p>
-      <p>
-      The idea behind the Offline Search Initiative is to create similar curated lists, but tailored for domains and channels. This approach could simplify access to focused content without relying on intensive, online search infrastructure. It does, surely has it's downsides.
-      </p>
-      <p>
-      Input supports any words, so you can enter "Google", or "Bing". If "LIKE" is part of the input, then it will be treated as a part of WHERE SQL clause.
-      </p>
+      <a class="btn btn-primary" href="/check-later-list">Check later</a>
+      <a class="btn btn-primary" href="/sources">Sources</a>
+      <a class="btn btn-primary" href="/status">Status</a>
+      <a class="btn btn-primary" href="/admin">Admin</a>
+
       <div id="version">
       </div>
   </div>

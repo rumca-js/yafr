@@ -152,7 +152,7 @@ function getNavBarMobile() {
                ${navbar_view_menu}
 
                <li class="nav-item">
-                 <a id="helpButton" class="nav-link" href="#">?</a>
+                 <a id="helpButton" class="nav-link" href="#">More</a>
                </li>
             </ul>
         </div>
@@ -194,7 +194,7 @@ function getNavBarDesktop() {
              ${navbar_view_menu}
 
              <li class="nav-item">
-               <a id="helpButton" class="nav-link" href="#">?</a>
+               <a id="helpButton" class="nav-link" href="#">More</a>
              </li>
           </ul>
       </div>
@@ -223,7 +223,7 @@ function getNavSearchForm() {
 
 function getNavHomeButton() {
     let home_location = getHomeLocation();
-    return `<a id="homeButton" class="d-flex align-items-right px-3 mb-2" href="${home_location}">🏠</a>`;
+    return `<a id="homeButton" class="d-flex align-items-right px-3 mb-2" href="#">🏠</a>`;
 }
 
 

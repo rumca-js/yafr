@@ -110,19 +110,15 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
             return url
 
-    def handle_valid_response(self, source, url, response):
-        source_properties = url.get_properties()
+    def is_entry_to_be_removed(self, entry):
+        if entry.bookmarked:
+            return False
 
-        sources = Sources(self.connection)
-        sources.set(source.url, source_properties)
-        sources.delete_entries(source)
+        check_later = CheckLater(self.connection)
+        if check_later.get(entry_id = entry.id):
+            return False
 
-        entry_jsons = url.get_entries()
-        for entry_json in entry_jsons:
-            if self.is_entry_ok(entry_json, source):
-                entries = Entries(self.connection)
-                entries.add(entry_json, source)
-                self.on_added_entry(entry_json)
+        return True
 
     def on_added_entry(self, entry_json):
         if EntryRules(self.connection).is_url_blocked(url=entry_json["link"]):
@@ -162,6 +158,28 @@ class ProcessSourceJobHandler(GenericJobHandler):
             sources = Sources(self.connection)
             sources.delete(id=source.id)
         return url
+
+    def handle_valid_response(self, source, url, response):
+        source_properties = url.get_properties()
+
+        sources = Sources(self.connection)
+        sources.set(source.url, source_properties)
+
+        entries = Entries(self.connection)
+
+        entries_where = entries.get_where({"source_id"})
+        for entry in entries_where:
+            if self.is_entry_to_be_removed(entry):
+                entries.delete(id=entry.id)
+            else:
+                continue
+
+        entry_jsons = url.get_entries()
+        for entry_json in entry_jsons:
+            if self.is_entry_ok(entry_json, source):
+                entries.add(entry_json, source)
+                self.on_added_entry(entry_json)
+
 
 
 class UpdateLinkJobHandler(GenericJobHandler):
