@@ -161,6 +161,10 @@ CHECK_LATER_LIST_TEMPLATE = """
         <a href="/search?id={{ entry.id }}">
             {{ entry.title or "Untitled entry" }}
         </a>
+
+        <a href="/entry-not-check-later?id={{ entry.id }}">
+            Do not check later
+        </a>
     </li>
 {% endfor %}
 </ul>
@@ -368,8 +372,12 @@ ENTRY_EDIT_TEMPLATE = """
 </div>
 
 <form method="POST">
-    <div><label for="{{config_setting}}">{{config_setting}}</label></div>
-    <div><input type="search" id="{{config_setting}}" name="{{config_setting}}" value="{{config_value}}"/></div>
+    <div><label for="title">Title</label></div>
+    <div><input type="search" id="title" name="title" value="{{entry.title}}"/></div>
+    <div><label for="link">Link</label></div>
+    <div><input type="search" id="link" name="link" value="{{entry.link}}"/></div>
+    <div><label for="description">Description</label></div>
+    <div><textarea type="search" id="description" name="description">{{entry.description}}</textarea></div>
    <button type="submit">Save</button>
 </form>
 """

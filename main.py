@@ -467,24 +467,27 @@ def entry_edit():
     connection = DbConnection(table_name)
 
     entry_id = request.args.get("id")
+    entries = Entries(connection)
+    entry = entries.get(id=entry_id)
 
     if request.method == "POST":
         title = request.form.get("title", "")
+        link = request.form.get("link", "")
+        description = request.form.get("description", "")
 
-        entries = Entries(connection)
-        entry = entries.get(id=entry_id)
-
-        json = entry_to_json(entry)
+        json = {}
         json["title"] = title
+        json["link"] = link
+        json["description"] = description
 
-        entries.update_json_data(id=entry_id, json_data=json)
+        entries.get_table().update_json_data(id=entry_id, json_data=json)
 
         template_html = STR_TEMPLATE.replace("{template_string}", "OK")
         html_text = get_view(template_html, title="OK")
         return render_template_string(html_text)
 
     html_text = get_view(ENTRY_EDIT_TEMPLATE, title="Edit entry")
-    return render_template_string(html_text, entry_id=entry_id)
+    return render_template_string(html_text, entry=entry)
 
 
 @app.route("/entry-update", methods=["GET", "POST"])
