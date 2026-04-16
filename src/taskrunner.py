@@ -93,8 +93,6 @@ class TaskRunner(object):
                     continue
                 AppLogging(self.connection).debug("Crawling server OK")
 
-                system.set_thread_ok()
-
                 self.handle_one_job()
 
                 if self.connection.backgroundjob.count() == 0:
@@ -107,9 +105,12 @@ class TaskRunner(object):
                     AppLogging(self.connection).debug("Sleeping")
                     self.connection.close()
 
+                    system.set_thread_ok()
+
                     time.sleep(10)
                     continue
 
+                system.set_thread_ok()
                 self.connection.close()
 
             except Exception as E:

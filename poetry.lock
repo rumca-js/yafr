@@ -286,14 +286,14 @@ files = [
 
 [[package]]
 name = "filelock"
-version = "3.25.2"
+version = "3.28.0"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "filelock-3.25.2-py3-none-any.whl", hash = "sha256:ca8afb0da15f229774c9ad1b455ed96e85a81373065fb10446672f64444ddf70"},
-    {file = "filelock-3.25.2.tar.gz", hash = "sha256:b64ece2b38f4ca29dd3e810287aa8c48182bbecd1ae6e9ae126c9b35f1382694"},
+    {file = "filelock-3.28.0-py3-none-any.whl", hash = "sha256:de9af6712788e7171df1b28b15eba2446c69721433fa427a9bee07b17820a9db"},
+    {file = "filelock-3.28.0.tar.gz", hash = "sha256:4ed1010aae813c4ee8d9c660e4792475ee60c4a0ba76073ceaf862bd317e3ca6"},
 ]
 
 [[package]]
@@ -441,14 +441,14 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "linkarchivetools"
-version = "0.1.56"
+version = "0.1.58"
 description = "Link Archive Tools"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "linkarchivetools-0.1.56-py3-none-any.whl", hash = "sha256:c2f25e249c84426e6b8296375877e077472753d87457f7b5e96df91470839c48"},
-    {file = "linkarchivetools-0.1.56.tar.gz", hash = "sha256:b47c39c425e773116fcafa28dea1e67de1cc4b7bf11152764b140ce64a670446"},
+    {file = "linkarchivetools-0.1.58-py3-none-any.whl", hash = "sha256:1918eca3a11b62c520e0ed407e6d225e3aad0bb72554c8cf1bafc2b056d9cb77"},
+    {file = "linkarchivetools-0.1.58.tar.gz", hash = "sha256:3f74f8363a70d9228479c9dbfacbcbb04f1091eb10e30a081c4a5a42a32a0d27"},
 ]
 
 [package.dependencies]
@@ -736,14 +736,14 @@ files = [
 
 [[package]]
 name = "packaging"
-version = "26.0"
+version = "26.1"
 description = "Core utilities for Python packages"
 optional = false
 python-versions = ">=3.8"
 groups = ["dev"]
 files = [
-    {file = "packaging-26.0-py3-none-any.whl", hash = "sha256:b36f1fef9334a5588b4166f8bcd26a14e521f2b55e6b9de3aaa80d3ff7a37529"},
-    {file = "packaging-26.0.tar.gz", hash = "sha256:00243ae351a257117b6a241061796684b084ed1c516a08c48a3f7e147a9d80b4"},
+    {file = "packaging-26.1-py3-none-any.whl", hash = "sha256:5d9c0669c6285e491e0ced2eee587eaf67b670d94a19e94e3984a481aba6802f"},
+    {file = "packaging-26.1.tar.gz", hash = "sha256:f042152b681c4bfac5cae2742a55e103d27ab2ec0f3d88037136b6bfe7c9c5de"},
 ]
 
 [[package]]
@@ -1319,4 +1319,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "561892202b05e57276bca0e40feb8b7b8515e3612572bb8d782207fea7c80f2a"
+content-hash = "57ae888abfa861a3c05994636ae55b26ad0db3d5d7af8fb5a3d01038a0289056"
