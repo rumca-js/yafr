@@ -157,6 +157,8 @@ function getOrderPossibilities() {
         ['-view_count', "Views DESC"],
         ['date_published', "Date published ASC"],
         ['-date_published', "Date published DESC"],
+        ['date_created', "Date created ASC"],
+        ['-date_created', "Date created DESC"],
         ['followers_count', "Followers ASC"],
         ['-followers_count', "Followers DESC"],
         ['stars', "Stars ASC"],

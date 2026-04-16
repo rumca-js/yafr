@@ -154,11 +154,7 @@ CHECK_LATER_LIST_TEMPLATE = """
 <ul>
 {% for entry in entries %}
     <li class="entry">
-        {% if entry.thumnail %}
-        <img src="{{entry.thumbnail}}"/>
-        {% endif %}
-
-        <a href="/search?id={{ entry.id }}">
+        <a href="/search?search=id={{ entry.id }}">
             {{ entry.title or "Untitled entry" }}
         </a>
 

@@ -22,6 +22,7 @@ from linkarchivetools.model import (
    EntryRules,
    EntryTags,
    ConfigurationEntry,
+   CheckLater,
 )
 
 from .entryurlinterface import EntryUrlInterface
@@ -211,6 +212,12 @@ class UpdateLinkJobHandler(GenericJobHandler):
         if not entry.description:
             json_data["description"] = url.get_description()
         json_data["status_code"] = url.get_status_code()
+
+        if response.is_invalid():
+            json_data["date_dead_since"] = datetime.now()
+        else:
+            json_data["date_dead_since"] = None
+
         ##TODO implement rest
 
         self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
@@ -249,6 +256,12 @@ class ResetLinkJobHandler(GenericJobHandler):
         if url.get_description():
             json_data["description"] = url.get_description()
         json_data["status_code"] = url.get_status_code()
+
+        if response.is_invalid():
+            json_data["date_dead_since"] = datetime.now()
+        else:
+            json_data["date_dead_since"] = None
+
         ##TODO implement rest
 
         self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
