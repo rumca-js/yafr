@@ -62,6 +62,7 @@ ADMIN_TEMPLATE = """
 <ul>
   <li><a href="/remove-all-sources">Remove all sources</a>
   <li><a href="/remove-all-entries">Remove all entries</a>
+  <li><a href="/remove-all-social-data">Remove all social data</a>
 </ul>
 """
 
