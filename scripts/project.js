@@ -331,8 +331,8 @@ function readConfig() {
     if (urlParams.has("view_display_type")) {
         view_display_type = urlParams.get("view_display_type");
     }
-    if (urlParams.has("order")) {
-        sort_function = urlParams.get('order');
+    if (urlParams.has("order_by")) {
+        sort_function = urlParams.get('order_by');
     }
 
     if (urlParams.has("default_page_size")) {
