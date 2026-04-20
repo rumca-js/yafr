@@ -347,6 +347,34 @@ def source(source_id):
         return render_template_string(html_text)
 
 
+@app.route("/source-edit", methods=["GET", "POST"])
+def source_edit():
+    connection = DbConnection(table_name)
+
+    source_id = request.args.get("id")
+    controller = Sources(connection)
+    source = controller.get(id=source_id)
+
+    if request.method == "POST":
+        title = request.form.get("title", "")
+        url = request.form.get("url", "")
+        language = request.form.get("language", "")
+
+        json = {}
+        json["title"] = title
+        json["url"] = url
+        json["language"] = language
+
+        controller.get_table().update_json_data(id=source_id, json_data=json)
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+    html_text = get_view(SOURCE_EDIT_TEMPLATE, title="Edit source")
+    return render_template_string(html_text, source=source)
+
+
 @app.route("/add-sources", methods=["GET", "POST"])
 def add_sources():
     connection = DbConnection(table_name)
@@ -479,11 +507,21 @@ def entry_edit():
         title = request.form.get("title", "")
         link = request.form.get("link", "")
         description = request.form.get("description", "")
+        age = request.form.get("age", "")
+        language = request.form.get("language", "")
+
+        age_int = 0
+        try:
+            age_int = int(age)
+        except Exception as E:
+            pass
 
         json = {}
         json["title"] = title
         json["link"] = link
         json["description"] = description
+        json["language"] = language
+        json["age"] = age_int
 
         entries.get_table().update_json_data(id=entry_id, json_data=json)
 

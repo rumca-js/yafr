@@ -255,6 +255,7 @@ SOURCES_LIST_TEMPLATE = """
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
     <a class="btn btn-primary" href="/sources-fetch-period">Set Fetch Period</a>
+    <a class="btn btn-primary" href="/add-sources">Add sources</a>
 </div>
 
 <h1>Sources {{sources_length}}</h1>
@@ -291,6 +292,24 @@ SOURCES_LIST_TEMPLATE = """
 </div>
 
 {{pagination_text}}
+"""
+
+
+SOURCE_EDIT_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+</div>
+
+<form method="POST">
+    <div><label for="title">Title</label></div>
+    <div><input type="search" id="title" name="title" value="{{source.title}}"/></div>
+    <div><label for="url">URL</label></div>
+    <div><input type="search" id="url" name="url" value="{{source.url}}"/></div>
+    <div><label for="language">Language</label></div>
+    <div><input type="search" id="language" name="language" value="{{source.language}}"/></div>
+   <button type="submit">Save</button>
+</form>
 """
 
 
@@ -375,6 +394,10 @@ ENTRY_EDIT_TEMPLATE = """
     <div><input type="search" id="link" name="link" value="{{entry.link}}"/></div>
     <div><label for="description">Description</label></div>
     <div><textarea type="search" id="description" name="description">{{entry.description}}</textarea></div>
+    <div><label for="language">Language</label></div>
+    <div><input type="search" id="language" name="language" value="{{entry.language}}"/></div>
+    <div><label for="age">Age</label></div>
+    <div><input type="search" id="age" name="age" value="{{entry.age}}"/></div>
    <button type="submit">Save</button>
 </form>
 """
