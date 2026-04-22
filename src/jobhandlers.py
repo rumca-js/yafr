@@ -8,6 +8,7 @@ from webtoolkit import (
    UrlLocation,
    RemoteServer,
    PageRequestObject,
+   ContentLinkParser,
    HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
    HTTP_STATUS_TOO_MANY_REQUESTS,
 )
@@ -161,6 +162,54 @@ class ProcessSourceJobHandler(GenericJobHandler):
         return url
 
     def handle_valid_response(self, source, url, response):
+        return self.handle_valid_response__rss(source, url, response):
+
+    def handle_valid_response__links(self, source, url, response):
+        source_properties = url.get_properties()
+
+        sources = Sources(self.connection)
+        sources.set(source.url, source_properties)
+
+        links = self.get_links(url)
+        entries = Entries(self.connection)
+
+        for link in links:
+            exists = self.connection.entries_table.exists(link=link)
+            if not exists and UrlLocation(link).is_webpage_link():
+                self.process_link(link, source)
+
+    def process_link(self, link, source):
+        entry_json = self.link_to_entry(link, source)
+        if self.is_entry_ok(entry_json, source):
+            entries = Entries(self.connection)
+            entry_id = entries.add(entry_json, source)
+            entry = entries.get(id=entry_id)
+
+            config_entry = ConfigurationEntry(self.connection).get()
+            if config_entry.enable_social_data and config_entry.new_entries_fetch_social_data:
+                controller = Controller(self.connection)
+                controller.add_social_data(entry)
+
+    def get_links(self, url):
+        response = url.get_response()
+        if response:
+            text = response.get_text()
+
+            parser = ContentLinkParser(url.url, text)
+            return parser.get_links()
+        return []
+
+    def link_to_entry(self, link, source):
+        handler = UrlHandler(connection=self.connection, link=link)
+        url = handler.get_link_url()
+        url.get_response()
+
+        entry_interface = EntryUrlInterface(url=url, source=source)
+        entry = entry_interface.get_entry_json()
+
+        return entry
+
+    def handle_valid_response__rss(self, source, url, response):
         source_properties = url.get_properties()
 
         sources = Sources(self.connection)
@@ -180,7 +229,6 @@ class ProcessSourceJobHandler(GenericJobHandler):
             if self.is_entry_ok(entry_json, source):
                 entries.add(entry_json, source)
                 self.on_added_entry(entry_json)
-
 
 
 class UpdateLinkJobHandler(GenericJobHandler):
