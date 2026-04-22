@@ -24,6 +24,7 @@ from linkarchivetools.model import (
    EntryTags,
    ConfigurationEntry,
    CheckLater,
+   BackgroundJob,
 )
 
 from .entryurlinterface import EntryUrlInterface
@@ -162,7 +163,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
         return url
 
     def handle_valid_response(self, source, url, response):
-        return self.handle_valid_response__rss(source, url, response):
+        return self.handle_valid_response__rss(source, url, response)
 
     def handle_valid_response__links(self, source, url, response):
         source_properties = url.get_properties()
@@ -363,3 +364,17 @@ class CleanupJobHandler(GenericJobHandler):
 
         tags = EntryTags(self.connection)
         tags.cleanup()
+
+        self.add_backgroundjob_history()
+
+    def add_backgroundjob_history(self):
+        self.connection.backgroundjobhistory.truncate()
+
+        json_data = {}
+        json_data["job"] = BackgroundJob.JOB_CLEANUP
+        json_data["task"] = ""
+        json_data["subject"] = ""
+        json_data["args"] = ""
+        json_data["date_created"] = datetime.now()
+
+        self.connection.backgroundjobhistory.insert_json_data(json_data=json_data)
