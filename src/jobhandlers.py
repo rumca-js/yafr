@@ -201,7 +201,7 @@ class UpdateLinkJobHandler(GenericJobHandler):
         url = handler.get_link_url()
         response = url.get_response()
         if response is None:
-            AppLogging(self.connection).error("URL:{enry.link} Response is None")
+            AppLogging(self.connection).error(f"URL:{enry.link} Response is None")
             return
 
         json_data = {}
