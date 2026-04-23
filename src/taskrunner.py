@@ -202,28 +202,52 @@ class TaskRunner(object):
                 if self.connection.backgroundjob.count() == 0:
                     self.check_sources()
 
-                if self.connection.backgroundjob.count() == 0:
+                if self.is_time_to_clean():
                     self.add_update_jobs()
                     BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_CLEANUP)
 
                     AppLogging(self.connection).debug("Sleeping")
                     self.connection.close()
-
                     system.set_thread_ok()
-
                     time.sleep(10)
                     continue
 
+
+                if self.connection.backgroundjob.count() == 0:
+                    AppLogging(self.connection).debug("Sleeping")
+                    self.connection.close()
+                    system.set_thread_ok()
+                    time.sleep(60)
+                    continue
+
                 system.set_thread_ok()
+
                 self.connection.close()
 
             except Exception as E:
                 traceback.print_exc()
                 time.sleep(10)
 
+    def is_time_to_clean(self):
+        job_history = self.get_job_history()
+
+        if not job_history:
+            return True
+
+        if not job_history.date_created:
+            return True
+
+        return datetime.now() - job_history.date_created > timedelta(days=1)
+
     def get_job(self):
         order_by = self.connection.backgroundjob.get_table().c.date_created
         jobs = self.connection.backgroundjob.get_where(order_by=[order_by])
+        for job in jobs:
+            return job
+
+    def get_job_history(self):
+        order_by = self.connection.backgroundjobhistory.get_table().c.date_created
+        jobs = self.connection.backgroundjobhistory.get_where(order_by=[order_by])
         for job in jobs:
             return job
 
