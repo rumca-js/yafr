@@ -443,6 +443,8 @@ ENTRY_TAG_TEMPLATE = """
     <a class="btn btn-primary" href="/">Home</a>
 </div>
 
+<h1>{{entry.title}}</h1>
+
 <form method="POST">
     <div><label for="entry-tag">Tag:</label></div>
     <div>

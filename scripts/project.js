@@ -318,6 +318,7 @@ function resetParams() {
    currentUrl.searchParams.delete('page')
    currentUrl.searchParams.delete('search')
    currentUrl.searchParams.delete('entry_id')
+   // currentUrl.searchParams.delete('order_by')
    window.history.pushState({}, '', currentUrl);
 }
 

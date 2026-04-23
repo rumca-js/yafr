@@ -11,6 +11,11 @@ function onSearchStop() {
     $('#searchInput').prop('disabled', false);
     $('#searchButton').prop('disabled', false);
     $('#statusLine').html("");
+
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+      searchInput.focus();
+    }
 }
 
 

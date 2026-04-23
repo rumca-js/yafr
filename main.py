@@ -601,6 +601,9 @@ def entry_tag():
     table.vacuum()
 
     entry_id = request.args.get("id")
+    entries = Entries(connection=connection)
+    entry = entries.get(id=entry_id)
+
     tags = EntryTags(connection=connection)
 
     if request.method == "POST":
@@ -615,7 +618,7 @@ def entry_tag():
         current_tags = tags.get(entry_id=entry_id)
 
     html_text = get_view(ENTRY_TAG_TEMPLATE, title="Tag entry")
-    return render_template_string(html_text, entry_id=entry_id, current_tags=current_tags)
+    return render_template_string(html_text, entry_id=entry_id, current_tags=current_tags, entry=entry)
 
 
 @app.route("/rss/<int:source_id>", methods=["GET", "POST"])

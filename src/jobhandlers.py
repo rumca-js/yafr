@@ -267,6 +267,9 @@ class UpdateLinkJobHandler(GenericJobHandler):
         else:
             json_data["date_dead_since"] = None
 
+        if entry.link.endswith("/"):
+            json_data["link"] = entry.link[:-1]
+
         ##TODO implement rest
 
         self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
@@ -310,6 +313,9 @@ class ResetLinkJobHandler(GenericJobHandler):
             json_data["date_dead_since"] = datetime.now()
         else:
             json_data["date_dead_since"] = None
+
+        if entry.link.endswith("/"):
+            json_data["link"] = entry.link[:-1]
 
         ##TODO implement rest
 
