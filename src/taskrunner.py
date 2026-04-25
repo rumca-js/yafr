@@ -301,6 +301,8 @@ class TaskRunner(object):
             return ResetLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
         elif job.job == BackgroundJob.JOB_LINK_ADD:
             return AddLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
+        elif job.job == BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL:
+            return DownloadSocialDataJobHandler(connection = self.connection, job=job, table_name = self.table_name)
 
     def add_update_jobs(self):
         config_entry = ConfigurationEntry(self.connection).get()

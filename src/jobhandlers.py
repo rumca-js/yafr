@@ -188,8 +188,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
             config_entry = ConfigurationEntry(self.connection).get()
             if config_entry.enable_social_data and config_entry.new_entries_fetch_social_data:
-                controller = Controller(self.connection)
-                controller.add_social_data(entry)
+                BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry_id))
 
     def get_links(self, url):
         response = url.get_response()
@@ -260,7 +259,17 @@ class UpdateLinkJobHandler(GenericJobHandler):
             json_data["title"] = url.get_title()
         if not entry.description:
             json_data["description"] = url.get_description()
+        if url.get_thumbnail():
+            json_data["thumbnail"] = url.get_thumbnail()
+        if url.get_author():
+            json_data["author"] = url.get_author()
+        if url.get_album():
+            json_data["album"] = url.get_album()
+
         json_data["status_code"] = url.get_status_code()
+        json_data["contents_hash"] = url.get_hash()
+        json_data["body_hash"] = url.get_body_hash()
+        json_data["meta_hash"] = url.get_meta_hash()
 
         if response.is_invalid():
             json_data["date_dead_since"] = datetime.now()
@@ -270,14 +279,11 @@ class UpdateLinkJobHandler(GenericJobHandler):
         if entry.link.endswith("/"):
             json_data["link"] = entry.link[:-1]
 
-        ##TODO implement rest
-
         self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
 
         config_entry = ConfigurationEntry(self.connection).get()
         if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
-            controller = Controller(self.connection)
-            controller.add_social_data(entry)
+            BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry.id))
 
 
 class ResetLinkJobHandler(GenericJobHandler):
@@ -307,7 +313,17 @@ class ResetLinkJobHandler(GenericJobHandler):
             json_data["title"] = url.get_title()
         if url.get_description():
             json_data["description"] = url.get_description()
+        if url.get_thumbnail():
+            json_data["thumbnail"] = url.get_thumbnail()
+        if url.get_author():
+            json_data["author"] = url.get_author()
+        if url.get_album():
+            json_data["album"] = url.get_album()
+
         json_data["status_code"] = url.get_status_code()
+        json_data["contents_hash"] = url.get_hash()
+        json_data["body_hash"] = url.get_body_hash()
+        json_data["meta_hash"] = url.get_meta_hash()
 
         if response.is_invalid():
             json_data["date_dead_since"] = datetime.now()
@@ -317,14 +333,54 @@ class ResetLinkJobHandler(GenericJobHandler):
         if entry.link.endswith("/"):
             json_data["link"] = entry.link[:-1]
 
-        ##TODO implement rest
-
         self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
 
         config_entry = ConfigurationEntry(self.connection).get()
         if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
-            controller = Controller(self.connection)
-            controller.add_social_data(entry)
+            BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry.id))
+
+
+class DownloadSocialDataJobHandler(GenericJobHandler):
+    def run(self):
+        entries = Entries(self.connection)
+
+        try:
+            entry_id = int(self.job.subject)
+        except Exception as E:
+            AppLogging(self.connection).exc(E)
+            return
+
+        entry = entries.get(id=entry_id)
+        self.download_social_Data(entry)
+        return True
+
+    def download_social_Data(self, entry):
+        handler = UrlHandler(connection=self.connection, link=entry.link)
+        url = handler.get_link_url()
+        social_properties = url.get_social_properties()
+        if social_properties is None:
+            AppLogging(self.connection).error(f"URL:{enry.link} Social properties are None")
+            return False
+
+        if self.is_all_none(social_properties):
+            return False
+
+        controller = SocialData(self.connection)
+        controller.add(entry_id = entry.id, social_data = social_properties)
+
+        return True
+
+    def is_all_none(self, json_obj):
+        """
+        Returns indication if json object elements are all true
+        """
+        # indicator of unsupported on crawler buddy
+        all_values_are_none = True
+        for key, value in json_obj.items():
+            if value is not None:
+                all_values_are_none = False
+
+        return all_values_are_none
 
 
 class AddLinkJobHandler(GenericJobHandler):

@@ -64,3 +64,8 @@ class UrlHandler(object):
             return True
 
         return False
+
+    def get_social_properties(self):
+        location = RemoteUrl.get_remote_server_location()
+        url = RemoteUrl(request=request, remote_server_location=location)
+        return url.get_social_properties()

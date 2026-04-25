@@ -542,9 +542,16 @@ STATS_TEMPLATE = """
     <a class="btn btn-primary" href="/">Home</a>
 </div>
 
+<h1>System</h1>
+{% for stat_name, stat_counter in program_info.items() %}
+    <div>{{stat_name}} {{stat_counter}}</div>
+{% endfor %}
+
+<h1>Parameters</h1>
 {% for stat_name, stat_counter in stats.items() %}
     <div>{{stat_name}} {{stat_counter}}</div>
 {% endfor %}
+
 """
 
 

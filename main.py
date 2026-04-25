@@ -7,7 +7,9 @@ import threading
 import argparse
 import shutil
 from pathlib import Path
+from urllib.parse import unquote
 from sqlalchemy import select, or_
+from collections import OrderedDict
 from flask import (
    Flask,
    render_template_string,
@@ -18,6 +20,7 @@ from flask import (
    redirect,
    Response,
 )
+
 from linkarchivetools.model import (
    DbConnection,
    BackgroundJob,
@@ -36,21 +39,35 @@ from linkarchivetools.model import (
 )
 from linkarchivetools.utils.reflected import ReflectedTable
 
-from urllib.parse import unquote
-
 from templates.templates import *
 from src.taskrunner import TaskRunner
 from src.controller import Controller
 from src.system import System
 
 
-__version__ = "0.0.0"
+
+def get_project_version(pyproject_text):
+    for line in pyproject_text.split("\n"):
+        wh = line.find("version")
+        if wh >= 0:
+            sp = line.split("=")
+            trimmed = sp[1].strip()
+            return trimmed[1:-1]
+    return "0.0.0"
+
+def get_project_name(pyproject_text):
+    for line in pyproject_text.split("\n"):
+        wh = line.find("name")
+        if wh >= 0:
+            sp = line.split("=")
+            trimmed = sp[1].strip()
+            return trimmed[1:-1]
+
+
 path = Path("pyproject.toml")
-text = path.read_text()
-for line in text.split("\n"):
-    wh = line.find("version")
-    if wh >= 0:
-        __version__ = line[11:-1]
+pyproject_text = path.read_text()
+__version__ = get_project_version(pyproject_text)
+__project_name__ = get_project_name(pyproject_text)
 
 
 page_size = 100
@@ -821,8 +838,12 @@ def status():
 
     stats_map["System state"] = system.is_system_ok()
 
+    program_info = OrderedDict()
+    program_info["Name"] = __project_name__
+    program_info["version"] = __version__
+
     html_text = get_view(STATS_TEMPLATE, title="Stats")
-    return render_template_string(html_text, stats=stats_map)
+    return render_template_string(html_text, stats=stats_map, program_info=program_info)
 
 
 @app.route("/admin")

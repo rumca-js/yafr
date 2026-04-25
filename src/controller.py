@@ -70,21 +70,6 @@ class Controller(object):
         links_urls = read_line_things(raw_text)
         self.add_links(links_urls)
 
-    def add_social_data(self, entry):
-        link = entry.link
-        entry_id = entry.id
-
-        social_data_info = self.link_to_social_data(link)
-        if social_data_info:
-            social_data = SocialData(self.connection)
-            social_data.add(entry_id, social_data_info)
-
-    def link_to_social_data(self, link):
-        handler = UrlHandler(connection=self.connection, link=link)
-        url = handler.get_link_url()
-        social_data_info = url.get_social_properties()
-        return social_data_info
-
     def truncate(self):
         self.connection.entries_table.truncate()
         self.connection.sources_table.truncate()
