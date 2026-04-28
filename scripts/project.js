@@ -313,6 +313,19 @@ function getEntriesJson(callback=null, page=1, search=null, order_by=null) {
 }
 
 
+function getEntriesVisitJson(entry_id, callback=null, page=1, search=null, order_by=null) {
+   let url_location = getEntryVisitAPI();
+   let url_address = `${url_location}?id=${entry_id}`;
+
+   getDynamicJson(url_address, function(data) {
+       if (callback) {
+          callback(data);
+       }
+   });
+}
+
+
+
 function resetParams() {
    const currentUrl = new URL(window.location.href);
    currentUrl.searchParams.delete('page')

@@ -56,6 +56,11 @@ function getEntryResetAPI() {
 }
 
 
+function getEntryVisitAPI() {
+   return `/api/entry-visit`;
+}
+
+
 function getEntryCheckLaterAPI() {
    return `/entry-check-later`;
 }

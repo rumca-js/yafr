@@ -334,24 +334,31 @@ function registerEventsListeners() {
      }
    });
 
-   function onShowContainer(container) {
-       if (!container || container.dataset.loaded) return;
+   function onShowContainer(target) {
+       let container = target.querySelector('.youtube-lazy')
+       if (!container || container.dataset.loaded) {
+       }
+       else {
+          const src = container.dataset.youtubeSrc;
    
-       const src = container.dataset.youtubeSrc;
-   
-       container.innerHTML = `
+          container.innerHTML = `
            <iframe
                src="${src}"
                title="YouTube video"
                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                allowfullscreen>
            </iframe>
-       `;
+          `;
    
-       container.dataset.loaded = 'true';
+          container.dataset.loaded = 'true';
+       }
+
+       const entryId = target.dataset.entryId;
+       getEntriesVisitJson(entryId);
    }
 
-   function onHideContainer(container) {
+   function onHideContainer(target) {
+       let container = target.querySelector('.youtube-lazy')
        if (!container) return;
    
        container.innerHTML = `
@@ -365,22 +372,22 @@ function registerEventsListeners() {
 
    document.addEventListener('shown.bs.modal', function (e) {
        const container = e.target.querySelector('.youtube-lazy');
-       onShowContainer(container);
+       onShowContainer(e.target);
    });
    
    document.addEventListener('hidden.bs.modal', function (e) {
        const container = e.target.querySelector('.youtube-lazy');
-       onHideContainer(container);
+       onHideContainer(e.target);
    });
 
    document.addEventListener('shown.bs.collapse', function (e) {
        const container = e.target.querySelector('.youtube-lazy');
-       onShowContainer(container);
+       onShowContainer(e.target);
    });
    
    document.addEventListener('hidden.bs.collapse', function (e) {
        const container = e.target.querySelector('.youtube-lazy');
-       onHideContainer(container);
+       onHideContainer(e.target);
    });
 }
 

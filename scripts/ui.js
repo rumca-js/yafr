@@ -454,3 +454,133 @@ function updateWidgets() {
     $('#highlight-bookmarks').prop('checked', highlight_bookmarks);
     $('#modal-preview').prop('checked', click_behavior_modal_window);
 }
+
+
+// properties
+function getCollapsedPropertyItem(name, data) {
+    let escaped_name = name.replace(/\s+/g, "-");
+
+    htmlOutput = `
+    <a class="btn btn-secondary" data-bs-toggle="collapse" href="#collapse${escaped_name}" role="button" aria-expanded="false" aria-controls="collapse${escaped_name}">
+        ${name} Details
+    </a>
+    <div class="collapse" id="collapse${escaped_name}"><pre>${data}</pre></div>`;
+
+    return htmlOutput;
+}
+
+
+function displayProperty(propertyEntry) {
+   let htmlOutput = "";
+   for (const [key, value] of Object.entries(propertyEntry)) {
+       if (key != "description")
+       {
+           htmlOutput += `
+           <div>
+               <strong>${key}:</strong> ${value ?? "N/A"}
+           </div>
+       `;
+       }
+   }
+
+   return htmlOutput;
+}
+
+
+function isPropertySupported(property) {
+    if (property.name == "Text")
+       return false;
+    if (property.name == "Binary")
+       return false;
+
+    return true;
+}
+
+
+function GetAllPropertiesTextProperty(property) {
+    let htmlOutput = "";
+
+    let property_name = property.name;
+
+    if (!isPropertySupported(property)) {
+        return htmlOutput;
+    }
+
+    htmlOutput += `<h1>${property_name}</h1>`;
+
+    if (property.name == "Text") {
+    }
+    else if (property.name == "Binary") {
+    }
+    else if (property.name == "PropertiesHash") {
+    }
+    else if (property.name == "Streams") {
+        for (const [key, stream_data] of Object.entries(property.data)) {
+            let escapedContents = escapeHtml(stream_data);
+            htmlOutput += getCollapsedPropertyItem(key, escapedContents);
+        }
+    }
+    else if (property.name == "Entries") {
+        htmlOutput += getEntriesList(property.data);
+    }
+    else {
+        for (const [key, value] of Object.entries(property.data)) {
+            if (key == "contents" || key == "text" || key == "binary") {
+                continue
+            }
+
+            if (key == "settings") {
+               let props = displayProperty(value);
+               htmlOutput += `
+               <div>
+                 <strong>${key}:</strong> <div class="cotainer">${props}</div>
+               </div>
+               `;
+            }
+            else {
+               htmlOutput += `
+               <div>
+                   <strong>${key}:</strong> ${value ?? "N/A"}
+               </div>
+                `;
+            }
+        }
+    }
+
+    return htmlOutput;
+}
+
+
+function GetPropertyWithName(page_properties, name) {
+    if (page_properties && page_properties.length > 0) {
+        return page_properties.find(property => property.name === name);
+    }
+    return null;
+}
+
+
+function GetAllPropertiesText(page_properties) {
+    let htmlOutput = "";
+
+    let properties_property = GetPropertyWithName(page_properties, "Properties");
+    if (properties_property) 
+       htmlOutput += GetAllPropertiesTextProperty(properties_property);
+
+    let entries_property = GetPropertyWithName(page_properties, "Entries")
+    if (entries_property) 
+       htmlOutput += GetAllPropertiesTextProperty(entries_property);
+
+    let request_property = GetPropertyWithName(page_properties, "Request")
+    if (request_property) 
+       htmlOutput += GetAllPropertiesTextProperty(request_property);
+
+    let response_property = GetPropertyWithName(page_properties, "Response")
+    if (response_property) 
+       htmlOutput += GetAllPropertiesTextProperty(response_property);
+
+    let headers_property = GetPropertyWithName(page_properties, "Headers")
+    if (headers_property) 
+       htmlOutput += GetAllPropertiesTextProperty(headers_property);
+
+    return htmlOutput;
+}

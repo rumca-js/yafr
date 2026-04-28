@@ -655,3 +655,82 @@ Unfortunately, no one can be told what the Matrix is. You have to see it for you
 </html>
 """
 
+# TODO replace?
+PROJECT_TEMPLATE_MAIN = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>{{title}}</title>
+      
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jszip/dist/jszip.min.js"></script>
+        <script src="https://unpkg.com/sql.js@1.6.0/dist/sql-wasm.js"></script>
+
+        <link  href="styles/viewerzip.css?i=90" rel="stylesheet" crossorigin="anonymous">
+        <script  src="scripts/config_python.js?i=86"></script>
+        <script  src="scripts/library.js?i=86"></script>
+        <script  src="scripts/webtoolkit.js?i=86"></script>
+        <script  src="scripts/entries_library.js?i=86"></script>
+        <script src="scripts/ui.js?i=86"></script>
+        <script src="scripts/project.js?i=86"></script>
+        <script src="scripts/search.js?i=86"></script>
+        <script>
+           click_behavior_modal_window = false;
+           {{script}}
+        </script>
+    </head>
+<body style="padding-bottom: 6em;">
+
+<div id="projectNavbar">
+</div>
+
+<div class="container">
+
+  <div id="statusLine">
+  </div>
+
+  <div id="helpPlace" style="display: none;">
+      <a class="btn btn-primary" href="/check-later-list">Check later</a>
+      <a class="btn btn-primary" href="/sources">Sources</a>
+      <a class="btn btn-primary" href="/status">Status</a>
+      <a class="btn btn-primary" href="/admin">Admin</a>
+
+      <div id="version">
+      </div>
+  </div>
+
+  <span id="progressBarElement">
+  </span>
+  
+  <span id="listData">
+  </span>
+
+  <div id="pagination">
+  </div>
+</div>
+
+
+<!--
+Unfortunately, no one can be told what the Matrix is. You have to see it for yourself.
+-->
+
+
+<footer id="footer" class="text-center text-lg-start bg-body-tertiary text-muted fixed-bottom">
+  <div id="footerLine" class="text-center p-1" style="background-color: rgba(0, 0, 0, 0);">
+  </div>
+
+  <div class="text-center p-1" style="background-color: rgba(0, 0, 0, 0);">
+      <span style="white-space: nowrap;">
+      <a href="https://github.com/rumca-js/yafr/issues">Yafr server</a>.
+      </span>
+  </div>
+</footer>
+
+    </body>
+</html>
+"""

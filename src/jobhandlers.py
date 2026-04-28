@@ -4,7 +4,6 @@ from datetime import datetime
 
 from webtoolkit import (
    BaseUrl,
-   RemoteUrl,
    UrlLocation,
    RemoteServer,
    PageRequestObject,

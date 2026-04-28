@@ -225,6 +225,10 @@ class TaskRunner(object):
                 self.connection.close()
 
             except Exception as E:
+                if self.connection:
+                    self.connection.close()
+                    self.connection = None
+
                 traceback.print_exc()
                 time.sleep(10)
 

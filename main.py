@@ -39,6 +39,7 @@ from linkarchivetools.model import (
 )
 from linkarchivetools.utils.reflected import ReflectedTable
 
+from src.urlhandler import UrlHandler
 from templates.templates import *
 from src.taskrunner import TaskRunner
 from src.controller import Controller
@@ -119,6 +120,7 @@ def parse_search(search, table, tags_table):
         "link": table.c.link,
         "source_url": table.c.source_url,
         "source_id": table.c.source_id,
+        "tag": tags_table.c.tag,
     }
 
     if "==" in search:
@@ -463,8 +465,31 @@ def check_later_clear():
     return render_template_string(html_text)
 
 
+@app.route("/entry-dynamic-data", methods=["GET"])
+def entry_dynamic_detail():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+    entries = Entries(connection)
+    entry = entries.get(id=entry_id)
+
+    script = """
+   let url_location = `/api/dynamic`;
+   let url_address = `${url_location}?link=${link}`;
+   getDynamicJson(url_address, function(data) {
+      let text = GetAllPropertiesText(data);
+      $("#listData").html(text);
+   });
+    """
+
+    script = script.replace("${link}", entry.link)
+    template = PROJECT_TEMPLATE_MAIN.replace("{{script}}", script)
+
+    return render_template_string(template, title=entry.title, script=script)
+
+
 @app.route("/entry-check-later", methods=["GET"])
-def check_later():
+def entry_check_later():
     connection = DbConnection(table_name)
 
     entry_id = request.args.get("id")
@@ -961,6 +986,70 @@ def api_entries():
     json_data["entries"] = json_entries
 
     return jsonify(json_data)
+
+
+@app.route("/api/entry")
+def api_entry():
+    entry_id = request.args.get("id")
+    entries = Entries(connection)
+    entry = entries.get(id=entry_id)
+
+    if entry:
+        socialdata = SocialData(connection=connection)
+        social_data_object = socialdata.get(entry_id=entry.id)
+
+        tags = EntryTags(connection)
+        tags = tags.get_map(entry_id=entry.id)
+
+        if entry.source_id:
+            entry_source = connection.sources_table.get(id=entry.source_id)
+
+            json_entry_data = entry_to_json(entry,
+                                            with_id=True,
+                                            source=entry_source,
+                                            social_data=social_data_object,
+                                            tags=tags)
+        else:
+            json_entry_data = entry_to_json(entry,
+                                            with_id=True,
+                                            source=None,
+                                            social_data=social_data_object,
+                                            tags=tags)
+
+        return jsonify(json_entry_data)
+
+
+@app.route("/api/entry-visit")
+def api_entry_visit():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+    entries = Entries(connection)
+    entry = entries.get(id=entry_id)
+
+    json_data = {}
+    json_data["page_rating_visits"] = entry.page_rating_visits + 1
+
+    connection = DbConnection(table_name)
+    connection.entries_table.update_json_data(entry.id, json_data)
+
+    props = {}
+    props["status"] = True
+    return jsonify(props)
+
+
+@app.route("/api/dynamic")
+def api_dynamic():
+    connection = DbConnection(table_name)
+    link = request.args.get("link")
+
+    handler = UrlHandler(connection=connection, link=link)
+    url = handler.get_link_url()
+    url.get_response()
+
+    props = url.get_all_properties()
+
+    return jsonify(props)
 
 
 @app.route("/api/stats")
