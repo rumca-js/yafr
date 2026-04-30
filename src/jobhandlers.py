@@ -374,6 +374,8 @@ class ResetLinkJobHandler(GenericJobHandler):
         if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
             BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry.id))
 
+        return True
+
 
 class DownloadSocialDataJobHandler(GenericJobHandler):
     def run(self):
