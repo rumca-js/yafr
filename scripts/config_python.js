@@ -30,36 +30,37 @@ function getEntryAPI() {
    return `/api/entries`;
 }
 
-
 function getEntryEditAPI() {
    return `/entry-edit`;
 }
-
 
 function getEntryTagAPI() {
    return `/entry-tag`;
 }
 
-
 function getEntryVoteAPI() {
    return `/entry-vote`;
 }
-
 
 function getEntryUpdateAPI() {
    return `/entry-update`;
 }
 
-
 function getEntryResetAPI() {
    return `/entry-reset`;
 }
-
 
 function getEntryVisitAPI() {
    return `/api/entry-visit`;
 }
 
+function getEntryBookmarkAPI() {
+   return `/entry-bookmark`;
+}
+
+function getEntryUnBookmarkAPI() {
+   return `/entry-unbookmark`;
+}
 
 function getEntryCheckLaterAPI() {
    return `/entry-check-later`;
@@ -69,11 +70,9 @@ function getEntryNotCheckLaterAPI() {
    return `/entry-not-check-later`;
 }
 
-
 function getEntryRemoveAPI() {
    return `/remove-entry`;
 }
-
 
 function getEntryLocalLink(entry) {
     return `?entry_id=${entry.id}`;

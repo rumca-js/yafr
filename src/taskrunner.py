@@ -288,7 +288,12 @@ class TaskRunner(object):
 
         if handler:
             AppLogging(self.connection).debug(f"Running job {job.job} ID:{job.id}")
-            handler.run()
+
+            for item in range(1, 4):
+                if handler.run():
+                    break
+                AppLogging(self.connection).debug(f"Job: {job.job} ID:{job.id} error")
+
             handler.close()
             AppLogging(self.connection).debug(f"Running job {job.job} ID:{job.id} DONE")
 

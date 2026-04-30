@@ -442,6 +442,38 @@ def entry():
     return render_template_string(html_text, entry=entry)
 
 
+@app.route("/entry-bookmark", methods=["GET"])
+def entry_bookmark():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+    entries = Entries(connection=connection)
+    entry = entries.get(id=entry_id)
+
+    if entry:
+        json_data = {}
+        json_data["bookmarked"] = True
+        entries.get_table().update_json_data(entry.id, json_data=json_data)
+
+        return redirect(url_for("search"))
+
+
+@app.route("/entry-unbookmark", methods=["GET"])
+def entry_unbookmark():
+    connection = DbConnection(table_name)
+
+    entry_id = request.args.get("id")
+    entries = Entries(connection=connection)
+    entry = entries.get(id=entry_id)
+
+    if entry:
+        json_data = {}
+        json_data["bookmarked"] = False
+        entries.get_table().update_json_data(entry.id, json_data=json_data)
+
+        return redirect(url_for("search"))
+
+
 @app.route("/check-later-list", methods=["GET"])
 def check_later_list():
     connection = DbConnection(table_name)
@@ -582,6 +614,13 @@ def entry_update():
     entry_id = request.args.get("id")
 
     if entry_id:
+        is_job = BackgroundJob(connection).is_job(job_name=BackgroundJob.JOB_LINK_UPDATE_DATA, subject=str(entry_id))
+
+        if is_job:
+            template_html = STR_TEMPLATE.replace("{template_string}", "NOK - exists")
+            html_text = get_view(template_html, title="OK")
+            return render_template_string(html_text)
+
         BackgroundJob(connection).create_single_job(job_name=BackgroundJob.JOB_LINK_UPDATE_DATA, subject=str(entry_id))
 
         template_html = STR_TEMPLATE.replace("{template_string}", "OK")
@@ -589,7 +628,7 @@ def entry_update():
         return render_template_string(html_text)
 
     else:
-        template_html = STR_TEMPLATE.replace("{template_string}", "NOK")
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK - cannot find entry")
         html_text = get_view(template_html, title="OK")
         return render_template_string(html_text)
 

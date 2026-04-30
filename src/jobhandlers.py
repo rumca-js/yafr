@@ -37,6 +37,20 @@ class GenericJobHandler(object):
         self.job = job
         self.table_name = table_name
 
+    def get_cfg(self):
+        if not self.job:
+            return {}
+
+        cfg = {}
+        if self.job.args != "":
+            try:
+                cfg = json.loads(self.job.args)
+            except ValueError as E:
+                pass
+            except TypeError as E:
+                pass
+        return cfg
+
     def close(self):
         self.connection.backgroundjob.delete(id=self.job.id)
 
@@ -73,6 +87,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
             return False
 
         self.check_source(source)
+
+        return True
 
     def check_source(self, source):
         url = self.get_response_real(source)
@@ -210,6 +226,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
     def handle_valid_response__rss(self, source, url, response):
         source_properties = url.get_properties()
+        source_entries_json = url.get_entries()
 
         sources = Sources(self.connection)
         sources.set(source.url, source_properties)
@@ -218,16 +235,33 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
         entries_where = entries.get_table().get_where({"source_id" : source.id})
         for entry in entries_where:
-            if self.is_entry_to_be_removed(entry):
+            is_entry_in_source_now = False
+            for json_entry in source_entries_json:
+                json_entry_link = json_entry.get("link")
+                if entry.link == json_entry_link:
+                    is_entry_in_source_now = True
+                    break
+
+            if not is_entry_in_source_now and self.is_entry_to_be_removed(entry):
                 entries.delete(id=entry.id)
-            else:
+
+        for source_entry_json in source_entries_json:
+            entry_json_link = source_entry_json.get("link")
+            if self.is_in_db(entry_json_link):
                 continue
 
-        entry_jsons = url.get_entries()
-        for entry_json in entry_jsons:
-            if self.is_entry_ok(entry_json, source):
-                entries.add(entry_json, source)
-                self.on_added_entry(entry_json)
+            if self.is_entry_ok(source_entry_json, source):
+                entries.add(source_entry_json, source)
+                self.on_added_entry(source_entry_json)
+
+    def is_in_db(self, entry_link):
+        entries = Entries(self.connection)
+
+        entries_where = entries.get_table().get_where({"link" :  entry_link})
+        entries_where = list(entries_where)
+        if len(entries_where) > 0:
+            return True
+        return False
 
 
 class UpdateLinkJobHandler(GenericJobHandler):
@@ -241,7 +275,7 @@ class UpdateLinkJobHandler(GenericJobHandler):
             return
 
         entry = entries.get(id=entry_id)
-        self.update_entry(entry)
+        return self.update_entry(entry)
 
     def update_entry(self, entry):
         handler = UrlHandler(connection=self.connection, link=entry.link)
@@ -249,7 +283,7 @@ class UpdateLinkJobHandler(GenericJobHandler):
         response = url.get_response()
         if response is None:
             AppLogging(self.connection).error(f"URL:{enry.link} Response is None")
-            return
+            return False
 
         json_data = {}
         json_data["date_update_last"] = datetime.now()
@@ -284,6 +318,8 @@ class UpdateLinkJobHandler(GenericJobHandler):
         if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
             BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry.id))
 
+        return True
+
 
 class ResetLinkJobHandler(GenericJobHandler):
     def run(self):
@@ -295,7 +331,7 @@ class ResetLinkJobHandler(GenericJobHandler):
             return
 
         entry = entries.get(id=entry_id)
-        self.reset_entry(entry)
+        return self.reset_entry(entry)
 
     def reset_entry(self, entry):
         handler = UrlHandler(connection=self.connection, link=entry.link)
@@ -303,7 +339,7 @@ class ResetLinkJobHandler(GenericJobHandler):
         response = url.get_response()
         if response is None:
             AppLogging(self.connection).error("URL:{enry.link} Response is None")
-            return
+            return False
 
         json_data = {}
         json_data["date_updated"] = datetime.now()
@@ -350,8 +386,7 @@ class DownloadSocialDataJobHandler(GenericJobHandler):
             return
 
         entry = entries.get(id=entry_id)
-        self.download_social_Data(entry)
-        return True
+        return self.download_social_Data(entry)
 
     def download_social_Data(self, entry):
         handler = UrlHandler(connection=self.connection, link=entry.link)
@@ -362,6 +397,7 @@ class DownloadSocialDataJobHandler(GenericJobHandler):
             return False
 
         if self.is_all_none(social_properties):
+            AppLogging(self.connection).error(f"URL:{enry.link} Social properties are all None")
             return False
 
         controller = SocialData(self.connection)
@@ -386,6 +422,8 @@ class AddLinkJobHandler(GenericJobHandler):
     def run(self):
         link_url = self.job.subject
 
+        cfg = self.get_cfg()
+
         entries = Entries(connection=self.connection)
         if entries.exists(link=link_url):
             return
@@ -409,7 +447,12 @@ class AddLinkJobHandler(GenericJobHandler):
             AppLogging(self.connection).error(f"URL:{link_url} Link data are not valid")
             return
 
+        bookmarked = cfg.get("bookmarked")
+        if bookmarked:
+            entry_json["bookmarked"] = True
+
         entries.add(entry_json)
+        return True
 
 
 class CleanupJobHandler(GenericJobHandler):
@@ -427,6 +470,7 @@ class CleanupJobHandler(GenericJobHandler):
         tags.cleanup()
 
         self.add_backgroundjob_history()
+        return True
 
     def add_backgroundjob_history(self):
         self.connection.backgroundjobhistory.truncate()

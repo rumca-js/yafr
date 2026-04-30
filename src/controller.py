@@ -52,7 +52,10 @@ class Controller(object):
                 continue
 
             if not self.is_url_blocked(link_url):
-                BackgroundJob(connection=self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_ADD, subject=link_url)
+                cfg = {}
+                cfg["bookmarked"] = True
+
+                BackgroundJob(connection=self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_ADD, subject=link_url, cfg=cfg)
 
     def is_url_blocked(self, url):
         entry_rules = EntryRules(self.connection)

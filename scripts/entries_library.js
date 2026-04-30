@@ -578,6 +578,8 @@ function getEntryEditMenu(entry) {
     let entry_reset = getEntryResetAPI();
     let entry_check_later = getEntryCheckLaterAPI();
     let entry_not_check_later = getEntryNotCheckLaterAPI();
+    let entry_bookmark = getEntryBookmarkAPI();
+    let entry_unbookmark = getEntryUnBookmarkAPI();
 
     let html = "";
 
@@ -607,6 +609,27 @@ function getEntryEditMenu(entry) {
           </a>
         </li>
     `;
+
+    if (!entry.bookmarked)
+    {
+        html += `
+        <li>
+          <a href="${entry_bookmark}?id=${entry.id}" id="bookmark" class="dropdown-item" title="Bookmark">
+             Bookmark
+          </a>
+        </li>
+	`;
+    }
+    else
+    {
+        html += `
+        <li>
+          <a href="${entry_unbookmark}?id=${entry.id}" id="unbookmark" class="dropdown-item" title="Unbookmark">
+	     Unbookmark
+          </a>
+        </li>
+    `;
+    }
 
     html += `
         <li>
