@@ -395,11 +395,11 @@ class DownloadSocialDataJobHandler(GenericJobHandler):
         url = handler.get_link_url()
         social_properties = url.get_social_properties()
         if social_properties is None:
-            AppLogging(self.connection).error(f"URL:{enry.link} Social properties are None")
+            AppLogging(self.connection).error(f"URL:{entry.link} Social properties are None")
             return False
 
         if self.is_all_none(social_properties):
-            AppLogging(self.connection).error(f"URL:{enry.link} Social properties are all None")
+            AppLogging(self.connection).error(f"URL:{entry.link} Social properties are all None")
             return False
 
         controller = SocialData(self.connection)
