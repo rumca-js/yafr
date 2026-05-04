@@ -206,12 +206,37 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry_id))
 
     def get_links(self, url):
+        accept_link_arguments = False
+
         response = url.get_response()
         if response:
             text = response.get_text()
 
             parser = ContentLinkParser(url.url, text)
-            return parser.get_links()
+            links = parser.get_links()
+
+            if not accept_link_arguments:
+                result = []
+                for link in links:
+                    location = UrlLocation(url=link)
+                    new_location = location.get_no_arg_link()
+                    url = new_location.url
+
+                    if url:
+                        wh = url.find("#")
+                        if wh >= 0: 
+                            url = url[:wh]
+
+                links = result
+
+            result = []
+            for link in links:
+                location = UrlLocation(link)
+                url = location.get_clean()
+                result.append(url)
+
+            return result
+
         return []
 
     def link_to_entry(self, link, source):

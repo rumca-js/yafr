@@ -774,6 +774,13 @@ def remove_all_entries():
     connection.entries_table.truncate()
     connection.socialdata.truncate()
 
+    connection.usertags.truncate()
+    connection.compactedtags.truncate()
+    connection.usercompactedtags.truncate()
+    connection.entrycompactedtags.truncate()
+
+    connection.uservotes.truncate()
+
     html_text = get_view(OK_TEMPLATE, title="Remove all entries")
     return render_template_string(html_text)
 
@@ -816,6 +823,29 @@ def remove_all_social_data():
     connection.socialdata.truncate()
 
     html_text = get_view(OK_TEMPLATE, title="Remove social data OK")
+    return render_template_string(html_text)
+
+
+@app.route("/remove-all-tags")
+def remove_all_tags():
+    connection = DbConnection(table_name)
+
+    connection.usertags.truncate()
+    connection.compactedtags.truncate()
+    connection.usercompactedtags.truncate()
+    connection.entrycompactedtags.truncate()
+
+    html_text = get_view(OK_TEMPLATE, title="Remove tags OK")
+    return render_template_string(html_text)
+
+
+@app.route("/remove-all-votes")
+def remove_all_votes():
+    connection = DbConnection(table_name)
+
+    connection.uservotes.truncate()
+
+    html_text = get_view(OK_TEMPLATE, title="Remove votes OK")
     return render_template_string(html_text)
 
 
@@ -899,6 +929,14 @@ def status():
     stats_map["AppLogging"] = connection.applogging.count()
     stats_map["ConfigurationEntry"] = connection.configurationentry.count()
     stats_map["BackgroundJobs"] = connection.backgroundjob.count()
+    stats_map["BackgroundJobsHistory"] = connection.backgroundjobhistory.count()
+    stats_map["UserTags"] = connection.usertags.count()
+    stats_map["CompactedTags"] = connection.compactedtags.count()
+    stats_map["UserCompactedTags"] = connection.usercompactedtags.count()
+    stats_map["EntryCompactedTags"] = connection.entrycompactedtags.count()
+    stats_map["UserVotes"] = connection.uservotes.count()
+    stats_map["ReadLater"] = connection.readlater.count()
+    stats_map["SearchView"] = connection.searchview.count()
 
     stats_map["System state"] = system.is_system_ok()
 
