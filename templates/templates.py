@@ -55,6 +55,7 @@ ADMIN_TEMPLATE = """
   <li><a href="/jobs">Jobs</a>
   <li><a href="/add-links">Add links</a>
   <li><a href="/add-sources">Add sources</a>
+  <li><a href="/entry-rules">Entry rules</a>
   <li><a href="/block-rules">Block rules</a>
   <li><a href="/configuration">Configuration</a>
 </ul>
@@ -486,6 +487,71 @@ BLOCK_RULES_TEMPLATE = """
   <li><a href="/define-block-rules">Define block rules</a>
   <li><a href="/block-url">Block Url</a>
 </ul>
+"""
+
+
+ENTRY_RULES_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/entry-rule-add">Add rule</a>
+</div>
+
+<h1>Entry rules</h1>
+
+<ul>
+    {% for rule in rules %}
+       <a href="/entry-rule/id={{rule.id}}">{{rule.id}} Name:{{rule.rule_name}} Enabled:{{rule.enabled}}</a>
+    {% endfor %}
+</ul>
+"""
+
+
+ENTRY_RULE_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/entry-rule-remove?id={{rule.id}}">Remove</a>
+</div>
+
+<h1>Entry rule {{rule.rule_name}}</h1>
+
+<div> ID:{{rule.id}} </div>
+<div> Enabled:{{rule.enabled}} </div>
+<div> Priority:{{rule.priority}} </div>
+
+<div> Trigger rule url:{{rule.trigger_rule_url}} </div>
+
+<div> Block:{{rule.block}} </div>
+<div> Trust:{{rule.trust}} </div>
+<div> Auto tag:{{rule.auto_tag}} </div>
+<div> Apply age:{{rule.apply_age_limit}} </div>
+<div> Browser id:{{rule.browser_id}} </div>
+
+<div> Trigger text:{{rule.trigger_text}} </div>
+<div> Trigger text hits:{{rule.trigger_text_hits}} </div>
+<div> Trigger text fields:{{rule.trigger_text_fields}} </div>
+"""
+
+
+ENTRY_RULE_ADD_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/entry-rule-remove?id={{rule.id}}">Remove</a>
+</div>
+
+<form method="POST">
+    <div><label for="rule_name">Rule Name</label></div>
+    <div><input type="search" id="rule_name" name="rule_name" value="{{rule.rule_name}}"/></div>
+    <div><label for="enabled">Enabled</label></div>
+    <div><input type="search" id="enabled" name="enabled" value="{{rule.enabled}}"/></div>
+    <div><label for="block">Block</label></div>
+    <div><input type="search" id="block" name="block" value="{{rule.block}}"/></div>
+    <div><label for="trust">Trust</label></div>
+    <div><input type="search" id="trust" name="trust" value="{{rule.trust}}"/></div>
+   <button type="submit">Save</button>
+</form>
 """
 
 

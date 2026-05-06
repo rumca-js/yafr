@@ -767,6 +767,78 @@ def define_block_rules():
     return render_template_string(html_text, raw_data=raw_data)
 
 
+@app.route("/entry-rules")
+def entry_rules():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    rules = EntryRules(connection = connection)
+
+    urls = rules.get_rule_urls()
+    raw_data = "\n".join(urls)
+
+    html_text = get_view(ENTRY_RULES_TEMPLATE, title="Entry rules")
+    return render_template_string(html_text)
+
+
+@app.route("/entry-rule", methods=["GET", "POST"])
+def entry_rule():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    entry_rule_id = request.args.get("id")
+
+    rules = EntryRules(connection = connection)
+
+    rule = rules.get(id=entry_rule_id)
+
+    html_text = get_view(ENTRY_RULE_TEMPLATE, title="Entry rule")
+    return render_template_string(html_text, rule=rule)
+
+
+@app.route("/entry-rule-add", methods=["GET", "POST"])
+def entry_rule_add():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    if request.method == "POST":
+        rules = EntryRules(connection = connection)
+
+        html_text = get_view(ENTRY_RULE_ADD_TEMPLATE, title="Entry rule")
+        return render_template_string(html_text, rule=rule)
+
+    html_text = get_view(ENTRY_RULE_ADD_TEMPLATE, title="Entry rule")
+    return render_template_string(html_text, rule=rule)
+
+
+@app.route("/entry-rule-edit", methods=["GET", "POST"])
+def entry_rule_edit():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    entry_rule_id = request.args.get("id")
+    if request.method == "POST":
+        html_text = get_view(ENTRY_RULE_EDIT_TEMPLATE, title="Entry rule")
+        return render_template_string(html_text, rule=rule)
+
+    html_text = get_view(ENTRY_RULE_EDIT_TEMPLATE, title="Entry rule")
+    return render_template_string(html_text, rule=rule)
+
+
+@app.route("/entry-rule-remove")
+def entry_rule_remove():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    entry_rule_id = request.args.get("id")
+
+    rules = EntryRules(connection = connection)
+    rules.delete(id=entry_rule_id)
+
+    html_text = get_view(OK_TEMPLATE, title="Remove rule")
+    return render_template_string(html_text)
+
+
 @app.route("/remove-all-entries")
 def remove_all_entries():
     connection = DbConnection(table_name)
