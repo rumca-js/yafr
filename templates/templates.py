@@ -499,11 +499,9 @@ ENTRY_RULES_TEMPLATE = """
 
 <h1>Entry rules</h1>
 
-<ul>
-    {% for rule in rules %}
-       <a href="/entry-rule/id={{rule.id}}">{{rule.id}} Name:{{rule.rule_name}} Enabled:{{rule.enabled}}</a>
-    {% endfor %}
-</ul>
+{% for rule in rules %}
+   <div><a href="/entry-rule?id={{rule.id}}">{{rule.id}} Name:{{rule.rule_name}} Enabled:{{rule.enabled}}</a></div>
+{% endfor %}
 """
 
 

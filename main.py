@@ -774,11 +774,10 @@ def entry_rules():
 
     rules = EntryRules(connection = connection)
 
-    urls = rules.get_rule_urls()
-    raw_data = "\n".join(urls)
+    rule_objects = rules.get_table().get_where({})
 
     html_text = get_view(ENTRY_RULES_TEMPLATE, title="Entry rules")
-    return render_template_string(html_text)
+    return render_template_string(html_text, rules = rule_objects)
 
 
 @app.route("/entry-rule", methods=["GET", "POST"])
@@ -1009,6 +1008,7 @@ def status():
     stats_map["UserVotes"] = connection.uservotes.count()
     stats_map["ReadLater"] = connection.readlater.count()
     stats_map["SearchView"] = connection.searchview.count()
+    stats_map["Block entries"] = connection.blockentry.count()
 
     stats_map["System state"] = system.is_system_ok()
 
