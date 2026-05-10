@@ -12,7 +12,6 @@ from webtoolkit import (
    HTTP_STATUS_TOO_MANY_REQUESTS,
 )
 
-from .controller import Controller
 from linkarchivetools.model import (
    Sources,
    Entries,
@@ -24,8 +23,10 @@ from linkarchivetools.model import (
    ConfigurationEntry,
    CheckLater,
    BackgroundJob,
+   BlockEntry,
 )
 
+from .controller import Controller
 from .entryurlinterface import EntryUrlInterface
 from .controller import Controller
 from .urlhandler import UrlHandler
@@ -73,9 +74,16 @@ class ProcessSourceJobHandler(GenericJobHandler):
             AppLogging(self.connection).debug(f"Source id: {source_id} Source is not enabled")
             return False
 
+        blocks = BlockEntry(self.connection)
+        if blocks.is_blocked(source.url):
+            AppLogging(self.connection).debug(f"Source id: {source_id} Source is blocked by block rules")
+            sources = Sources(connection=self.connection)
+            sources.delete(id=source.id)
+            return False
+
         rules = EntryRules(self.connection)
         if rules.is_url_blocked(source.url):
-            AppLogging(self.connection).debug(f"Source id: {source_id} Source is blocked")
+            AppLogging(self.connection).debug(f"Source id: {source_id} Source is blocked by entry rules")
             sources = Sources(connection=self.connection)
             sources.delete(id=source.id)
             return False
@@ -100,9 +108,6 @@ class ProcessSourceJobHandler(GenericJobHandler):
         if response is not None:
             if response.is_valid():
                 self.handle_valid_response(source, url, response)
-
-                sourcedata = SourceData(self.connection)
-                sourcedata.mark_read(source)
             else:
                 AppLogging(self.connection).error(f"URL:{source.url} Response is invalid")
         else:
@@ -178,7 +183,22 @@ class ProcessSourceJobHandler(GenericJobHandler):
         return url
 
     def handle_valid_response(self, source, url, response):
-        return self.handle_valid_response__rss(source, url, response)
+        """
+        """
+        sourcedata = SourceData(self.connection)
+
+        data = sourcedata.get_source_data(source)
+        if data.body_hash is not None and data.body_hash == url.get_body_hash():
+            """
+            Do not reprocess sources with the same entries
+            """
+            return True
+
+        status = self.handle_valid_response__rss(source, url, response)
+
+        sourcedata.mark_read(source=source, url=url)
+
+        return status
 
     def handle_valid_response__links(self, source, url, response):
         source_properties = url.get_properties()

@@ -66,6 +66,8 @@ ADMIN_TEMPLATE = """
   <li><a href="/remove-all-social-data">Remove all social data</a>
   <li><a href="/remove-all-tags">Remove all tags</a>
   <li><a href="/remove-all-votes">Remove all votes</a>
+  <li><a href="/remove-all-entry-rules">Remove all entry rules</a>
+  <li><a href="/remove-all-block-entries">Remove all block entries</a>
 </ul>
 """
 
@@ -335,6 +337,9 @@ SOURCE_TEMPLATE = """
 <div>XPath:{{source_item.xpath}}</div>
 
 <div>Date fetched:{{source_op_data.date_fetched}}</div>
+<div>Page hash:{{source_op_data.page_hash}}</div>
+<div>Body hash:{{source_op_data.body_hash}}</div>
+<div>Consecutive errors:{{source_op_data.consecutive_errors}}</div>
 
 <form method="POST">
     <div><label for="fetch_period">Fetch period</label></div>
@@ -475,6 +480,24 @@ Will block sources, and entries.
 </form>
 """
 
+
+DEFINE_BLOCK_ENTRIES_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+</div>
+
+<h1>Define block URLs</h1>
+Will block sources, and entries.
+
+<form method="POST">
+    <p>The URLs/feeds below will be blocked. One source URL per line:</p>
+    <textarea name="sources" autofocus>{{raw_data}}</textarea>
+    <br>
+    <button type="submit">Save</button>
+</form>
+"""
+
 BLOCK_RULES_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
@@ -579,10 +602,32 @@ LOGS_TEMPLATE = """
 """
 
 
+ADD_JOB_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/remove-all-jobs">Clear</a>
+</div>
+
+<h1>Add job</h1>
+
+<form method="POST">
+    <div><label for="job_name">Job Name</label></div>
+    <div><input type="search" id="job_name" name="job_name" value=""/></div>
+    <div><label for="subject">Subject</label></div>
+    <div><input type="search" id="subject" name="subject" value=""/></div>
+    <div><label for="args">Args</label></div>
+    <div><input type="search" id="args" name="args" value=""/></div>
+   <button type="submit">Save</button>
+</form>
+"""
+
+
 JOBS_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/add-job">Add job</a>
     <a class="btn btn-primary" href="/remove-all-jobs">Clear</a>
 </div>
 

@@ -48,8 +48,14 @@ class UrlHandler(object):
         return RemoteUrl.get_remote_server_location()
 
     def is_blocked(self):
+        blocks = BlockEntry(self.connection)
+        if blocks.is_blocked(self.link):
+            return True
+
         rules = EntryRules(self.connection)
-        return rules.is_url_blocked()
+        if rules.is_url_blocked(self.link):
+            return True
+        return False
 
     def is_valid(self):
         rules = EntryRules(self.connection)

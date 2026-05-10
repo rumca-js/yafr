@@ -396,14 +396,14 @@ test = ["objgraph", "psutil", "setuptools"]
 
 [[package]]
 name = "idna"
-version = "3.13"
+version = "3.14"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "idna-3.13-py3-none-any.whl", hash = "sha256:892ea0cde124a99ce773decba204c5552b69c3c67ffd5f232eb7696135bc8bb3"},
-    {file = "idna-3.13.tar.gz", hash = "sha256:585ea8fe5d69b9181ec1afba340451fba6ba764af97026f92a91d4eef164a242"},
+    {file = "idna-3.14-py3-none-any.whl", hash = "sha256:e677eaf072e290f7b725f9acf0b3a2bd55f9fd6f7c70abe5f0e34823d0accf69"},
+    {file = "idna-3.14.tar.gz", hash = "sha256:466d810d7a2cc1022bea9b037c39728d51ae7dad40d480fc9b7d7ecf98ba8ee3"},
 ]
 
 [package.extras]
@@ -441,14 +441,14 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "linkarchivetools"
-version = "0.1.70"
+version = "0.1.71"
 description = "Link Archive Tools"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "linkarchivetools-0.1.70-py3-none-any.whl", hash = "sha256:fef07646f35a39919f908aa344f7323aebfd6bc4c294710a6a61e010e08bd4df"},
-    {file = "linkarchivetools-0.1.70.tar.gz", hash = "sha256:fe81e5108259bf921eb7b1f7a271951e6b75adb35b7dfd4dc35aaf5f56dcec4a"},
+    {file = "linkarchivetools-0.1.71-py3-none-any.whl", hash = "sha256:14e723be794792d11f2f6ec37ff78fb4dca05a528e8880c103c34f4e6be6906f"},
+    {file = "linkarchivetools-0.1.71.tar.gz", hash = "sha256:d7318742910922d1a383c88472895c92b3286d16dbcce9223067fbf75e9d67d0"},
 ]
 
 [package.dependencies]
@@ -1245,14 +1245,14 @@ markers = {dev = "python_version == \"3.10\""}
 
 [[package]]
 name = "ua-generator"
-version = "2.0.26"
+version = "2.1.0"
 description = "A random user-agent generator"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "ua_generator-2.0.26-py3-none-any.whl", hash = "sha256:922283a6e950b74df641ab2f31d29d5470e0dfd4659e2474dbee94cd4ab50689"},
-    {file = "ua_generator-2.0.26.tar.gz", hash = "sha256:91e939d80529cfe1bb71e711bad9397b3bdead5440fe9c0445cf07e08fb19d2e"},
+    {file = "ua_generator-2.1.0-py3-none-any.whl", hash = "sha256:c23ddba84c1cf46bf12d7f44ad0a5a247760601c776f1cc0be02e2570626ebc3"},
+    {file = "ua_generator-2.1.0.tar.gz", hash = "sha256:34a68f9860965ad710ae91c1ae91c33a121f505f298efb1652bdc19e01b7d79d"},
 ]
 
 [[package]]
@@ -1269,14 +1269,14 @@ files = [
 
 [[package]]
 name = "urllib3"
-version = "2.6.3"
+version = "2.7.0"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 optional = false
-python-versions = ">=3.9"
+python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "urllib3-2.6.3-py3-none-any.whl", hash = "sha256:bf272323e553dfb2e87d9bfd225ca7b0f467b919d7bbd355436d3fd37cb0acd4"},
-    {file = "urllib3-2.6.3.tar.gz", hash = "sha256:1b62b6884944a57dbe321509ab94fd4d3b307075e0c2eae991ac71ee15ad38ed"},
+    {file = "urllib3-2.7.0-py3-none-any.whl", hash = "sha256:9fb4c81ebbb1ce9531cce37674bbc6f1360472bc18ca9a553ede278ef7276897"},
+    {file = "urllib3-2.7.0.tar.gz", hash = "sha256:231e0ec3b63ceb14667c67be60f2f2c40a518cb38b03af60abc813da26505f4c"},
 ]
 
 [package.extras]
@@ -1330,4 +1330,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "63b85f714437504e28b0c64793fb934f05565e13aa47760ff69c088e4f011bc4"
+content-hash = "a798fe72ecb0b1f919b7fe88a94527d1e9c5e908aa5142d00c1fff80aeae06ef"

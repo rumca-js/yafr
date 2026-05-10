@@ -27,6 +27,7 @@ from linkarchivetools.model import (
    Entries,
    CheckLater,
    EntryRules,
+   BlockEntry,
    SocialData,
    Sources,
    AppLogging,
@@ -729,17 +730,21 @@ def block_rules():
 @app.route("/block-url", methods=["GET", "POST"])
 def block_url():
     connection = DbConnection(table_name)
-    controller = Controller(connection)
 
-    rules = EntryRules(connection = connection)
+    controller = BlockEntry(connection = connection)
 
     if request.method == "POST":
         raw_text = request.form.get("sources", "")
-        rules.add_entry_rules(raw_text)
+
+        split_text = raw_text.split("\n")
+        for line in split_text:
+            stripped = line.strip()
+            if stripped:
+                controller.add(stripped)
         return redirect(url_for("index"))
 
     sources = []
-    html_text = get_view(DEFINE_ENTRY_RULES_TEMPLATE, title="Set Block Rules")
+    html_text = get_view(DEFINE_BLOCK_ENTRIES_TEMPLATE, title="Block URL")
 
     raw_data = ""
 
@@ -749,20 +754,28 @@ def block_url():
 @app.route("/define-block-rules", methods=["GET", "POST"])
 def define_block_rules():
     connection = DbConnection(table_name)
-    controller = Controller(connection)
 
-    rules = EntryRules(connection = connection)
+    controller = BlockEntry(connection = connection)
 
     if request.method == "POST":
+        controller.truncate()
+
         raw_text = request.form.get("sources", "")
-        rules.set_entry_rules(raw_text)
+        split_text = raw_text.split("\n")
+        for line in split_text:
+            stripped = line.strip()
+            if stripped:
+                controller.add(stripped)
         return redirect(url_for("index"))
 
     sources = []
-    html_text = get_view(DEFINE_ENTRY_RULES_TEMPLATE, title="Set Block Rules")
+    html_text = get_view(DEFINE_BLOCK_ENTRIES_TEMPLATE, title="Set Block Rules")
 
-    urls = rules.get_rule_urls()
-    raw_data = "\n".join(urls)
+    blocks = controller.get_table().get_where({})
+
+    raw_data = ""
+    for block in blocks:
+        raw_data += "\r\n" + block.url
 
     return render_template_string(html_text, raw_data=raw_data)
 
@@ -852,6 +865,8 @@ def remove_all_entries():
 
     connection.uservotes.truncate()
 
+    connection.close()
+
     html_text = get_view(OK_TEMPLATE, title="Remove all entries")
     return render_template_string(html_text)
 
@@ -861,6 +876,7 @@ def remove_all_logs():
     connection = DbConnection(table_name)
 
     connection.applogging.truncate()
+    connection.close()
 
     html_text = get_view(OK_TEMPLATE, title="Remove all logs")
     return render_template_string(html_text)
@@ -871,6 +887,7 @@ def remove_all_jobs():
     connection = DbConnection(table_name)
 
     connection.backgroundjob.truncate()
+    connection.close()
 
     html_text = get_view(OK_TEMPLATE, title="Remove all jobs")
     return render_template_string(html_text)
@@ -882,6 +899,7 @@ def remove_all_sources():
 
     connection.sources_table.truncate()
     connection.sourceoperationaldata.truncate()
+    connection.close()
 
     html_text = get_view(OK_TEMPLATE, title="Remove all sources")
     return render_template_string(html_text)
@@ -892,6 +910,7 @@ def remove_all_social_data():
     connection = DbConnection(table_name)
 
     connection.socialdata.truncate()
+    connection.close()
 
     html_text = get_view(OK_TEMPLATE, title="Remove social data OK")
     return render_template_string(html_text)
@@ -905,6 +924,7 @@ def remove_all_tags():
     connection.compactedtags.truncate()
     connection.usercompactedtags.truncate()
     connection.entrycompactedtags.truncate()
+    connection.close()
 
     html_text = get_view(OK_TEMPLATE, title="Remove tags OK")
     return render_template_string(html_text)
@@ -913,10 +933,40 @@ def remove_all_tags():
 @app.route("/remove-all-votes")
 def remove_all_votes():
     connection = DbConnection(table_name)
-
     connection.uservotes.truncate()
+    connection.close()
 
     html_text = get_view(OK_TEMPLATE, title="Remove votes OK")
+    return render_template_string(html_text)
+
+
+@app.route("/remove-all-entry-rules")
+def remove_all_entry_rules():
+    connection = DbConnection(table_name)
+    connection.entry_rules.truncate()
+    connection.close()
+
+    html_text = get_view(OK_TEMPLATE, title="Entry rules OK")
+    return render_template_string(html_text)
+
+
+@app.route("/remove-all-block-entries")
+def remove_all_block_entries():
+    connection = DbConnection(table_name)
+    connection.blockentry.truncate()
+
+    rules_controller = EntryRules(connection)
+    block_entries = BlockEntry(connection)
+
+    if rules_controller.count() != 0 and block_entries.count() == 0:
+        rules = rules_controller.get_where({})
+        for rule in rules:
+            if rule.trigger_rule_url:
+                block_entries.add(rule.trigger_rule_url)
+
+    connection.close()
+
+    html_text = get_view(OK_TEMPLATE, title="Block entry remove OK")
     return render_template_string(html_text)
 
 
@@ -975,13 +1025,37 @@ def jobs():
     html_text = get_view(JOBS_TEMPLATE, title="Jobs")
 
     order_by = [
-            connection.backgroundjob.get_table().c.date_created.desc()
+            connection.backgroundjob.get_table().c.date_created.asc()
             ]
 
     jobs = list(connection.backgroundjob.get_where(order_by=order_by))
     len_jobs = len(jobs)
 
     return render_template_string(html_text, jobs=jobs, len_jobs=len_jobs)
+
+
+@app.route("/add-job", methods=["GET", "POST"])
+def add_job():
+    connection = DbConnection(table_name)
+
+    if request.method == "POST":
+        job_name = request.form.get("job_name", "")
+        args = request.form.get("args", "")
+        subject = request.form.get("subject", "")
+
+        job_controller = BackgroundJob(connection)
+        job_id = job_controller.create_single_job(job_name = job_name, subject=subject, args=args)
+        if job_id is None:
+            template_html = STR_TEMPLATE.replace("{template_string}", "Could not add job")
+            html_text = get_view(template_html, title="NOK")
+            return render_template_string(html_text)
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "Job added")
+        html_text = get_view(template_html, title="NOK")
+        return render_template_string(html_text)
+
+    html_text = get_view(ADD_JOB_TEMPLATE, title="Add job")
+    return render_template_string(html_text, raw_data="")
 
 
 @app.route("/status")
@@ -999,7 +1073,7 @@ def status():
     stats_map["Social data"] = connection.socialdata.count()
     stats_map["AppLogging"] = connection.applogging.count()
     stats_map["ConfigurationEntry"] = connection.configurationentry.count()
-    stats_map["BackgroundJobs"] = connection.backgroundjob.count()
+    stats_map["BackgroundJob"] = connection.backgroundjob.count()
     stats_map["BackgroundJobsHistory"] = connection.backgroundjobhistory.count()
     stats_map["UserTags"] = connection.usertags.count()
     stats_map["CompactedTags"] = connection.compactedtags.count()
