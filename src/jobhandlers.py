@@ -24,6 +24,7 @@ from linkarchivetools.model import (
    CheckLater,
    BackgroundJob,
    BlockEntry,
+   ReflectedTable,
 )
 
 from .controller import Controller
@@ -188,11 +189,14 @@ class ProcessSourceJobHandler(GenericJobHandler):
         sourcedata = SourceData(self.connection)
 
         data = sourcedata.get_source_data(source)
-        if data.body_hash is not None and data.body_hash == url.get_body_hash():
+        if data and data.body_hash is not None and data.body_hash == url.get_body_hash():
             """
             Do not reprocess sources with the same entries
             """
             return True
+
+        table = ReflectedTable(engine=self.connection.engine, connection=self.connection.connection)
+        table.vacuum()
 
         status = self.handle_valid_response__rss(source, url, response)
 
@@ -279,6 +283,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
         entries = Entries(self.connection)
 
         entries_where = entries.get_table().get_where({"source_id" : source.id})
+        entry_ids = []
         for entry in entries_where:
             is_entry_in_source_now = False
             for json_entry in source_entries_json:
@@ -288,7 +293,11 @@ class ProcessSourceJobHandler(GenericJobHandler):
                     break
 
             if not is_entry_in_source_now and self.is_entry_to_be_removed(entry):
-                entries.delete(id=entry.id)
+                entry_ids.append(entry.id)
+
+        for entry_id in entry_ids:
+            print("Removing ID:{}".format(entry_id))
+            entries.delete(id=entry_id)
 
         for source_entry_json in source_entries_json:
             entry_json_link = source_entry_json.get("link")

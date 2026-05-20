@@ -488,7 +488,6 @@ DEFINE_BLOCK_ENTRIES_TEMPLATE = """
 </div>
 
 <h1>Define block URLs</h1>
-Will block sources, and entries.
 
 <form method="POST">
     <p>The URLs/feeds below will be blocked. One source URL per line:</p>
@@ -497,6 +496,24 @@ Will block sources, and entries.
     <button type="submit">Save</button>
 </form>
 """
+
+
+ADD_BLOCK_ENTRIES_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+</div>
+
+<h1>Add block URLs</h1>
+
+<form method="POST">
+    <p>The URLs/feeds below will be blocked. One source URL per line:</p>
+    <textarea name="sources" autofocus>{{raw_data}}</textarea>
+    <br>
+    <button type="submit">Save</button>
+</form>
+"""
+
 
 BLOCK_RULES_TEMPLATE = """
 <div class="nav-buttons">

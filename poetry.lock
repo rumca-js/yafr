@@ -258,14 +258,14 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.3.3"
+version = "8.4.0"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "click-8.3.3-py3-none-any.whl", hash = "sha256:a2bf429bb3033c89fa4936ffb35d5cb471e3719e1f3c8a7c3fff0b8314305613"},
-    {file = "click-8.3.3.tar.gz", hash = "sha256:398329ad4837b2ff7cbe1dd166a4c0f8900c3ca3a218de04466f38f6497f18a2"},
+    {file = "click-8.4.0-py3-none-any.whl", hash = "sha256:40c50b7c6c6adac2823d411041ec84f3f103f1b280d5e9ce0d7f998995832f81"},
+    {file = "click-8.4.0.tar.gz", hash = "sha256:638f1338fe1235c8f4e008e4a8a254fb5c5fbdcbb40ece3c9142ebb78e792973"},
 ]
 
 [package.dependencies]
@@ -396,14 +396,14 @@ test = ["objgraph", "psutil", "setuptools"]
 
 [[package]]
 name = "idna"
-version = "3.14"
+version = "3.15"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
 python-versions = ">=3.8"
 groups = ["main"]
 files = [
-    {file = "idna-3.14-py3-none-any.whl", hash = "sha256:e677eaf072e290f7b725f9acf0b3a2bd55f9fd6f7c70abe5f0e34823d0accf69"},
-    {file = "idna-3.14.tar.gz", hash = "sha256:466d810d7a2cc1022bea9b037c39728d51ae7dad40d480fc9b7d7ecf98ba8ee3"},
+    {file = "idna-3.15-py3-none-any.whl", hash = "sha256:048adeaf8c2d788c40fee287673ccaa74c24ffd8dcf09ffa555a2fbb59f10ac8"},
+    {file = "idna-3.15.tar.gz", hash = "sha256:ca962446ea538f7092a95e057da437618e886f4d349216d2b1e294abfdb65fdc"},
 ]
 
 [package.extras]
@@ -441,14 +441,14 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "linkarchivetools"
-version = "0.1.71"
+version = "0.1.73"
 description = "Link Archive Tools"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "linkarchivetools-0.1.71-py3-none-any.whl", hash = "sha256:14e723be794792d11f2f6ec37ff78fb4dca05a528e8880c103c34f4e6be6906f"},
-    {file = "linkarchivetools-0.1.71.tar.gz", hash = "sha256:d7318742910922d1a383c88472895c92b3286d16dbcce9223067fbf75e9d67d0"},
+    {file = "linkarchivetools-0.1.73-py3-none-any.whl", hash = "sha256:ce2bcb68e1497d29b146ec98ba2b200626b79ffdc70fc2006b8692aba0545463"},
+    {file = "linkarchivetools-0.1.73.tar.gz", hash = "sha256:91d5ddf41e87e17052aa52dbf30a171ac7fbd506ee20a30ea6d36828927de25c"},
 ]
 
 [package.dependencies]
@@ -457,7 +457,7 @@ python-dateutil = ">=2.8.2,<3.0.0"
 requests = ">=2.32.5,<3.0.0"
 sqlalchemy = "*"
 sympy = ">=1.13.2,<2.0.0"
-webtoolkit = ">=0.1.51,<0.2.0"
+webtoolkit = ">=0.1.52,<0.2.0"
 
 [[package]]
 name = "lxml"
@@ -971,14 +971,14 @@ files = [
 
 [[package]]
 name = "requests"
-version = "2.33.1"
+version = "2.34.2"
 description = "Python HTTP for Humans."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "requests-2.33.1-py3-none-any.whl", hash = "sha256:4e6d1ef462f3626a1f0a0a9c42dd93c63bad33f9f1c1937509b8c5c8718ab56a"},
-    {file = "requests-2.33.1.tar.gz", hash = "sha256:18817f8c57c6263968bc123d237e3b8b08ac046f5456bd1e307ee8f4250d3517"},
+    {file = "requests-2.34.2-py3-none-any.whl", hash = "sha256:2a0d60c172f83ac6ab31e4554906c0f3b3588d37b5cb939b1c061f4907e278e0"},
+    {file = "requests-2.34.2.tar.gz", hash = "sha256:f288924cae4e29463698d6d60bc6a4da69c89185ad1e0bcc4104f584e960b9ed"},
 ]
 
 [package.dependencies]
@@ -1287,14 +1287,14 @@ zstd = ["backports-zstd (>=1.0.0) ; python_version < \"3.14\""]
 
 [[package]]
 name = "webtoolkit"
-version = "0.1.51"
+version = "0.1.52"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "webtoolkit-0.1.51-py3-none-any.whl", hash = "sha256:2955d666fc800545ced77a318ee26b8f7d807f91455d301bf3b641681e517904"},
-    {file = "webtoolkit-0.1.51.tar.gz", hash = "sha256:08c1df06e6317fca9827d17aec4ff976712b6887f79977ac2fd2bd7108c6b01d"},
+    {file = "webtoolkit-0.1.52-py3-none-any.whl", hash = "sha256:8e94d901623b22314015d067585fa42cd9a1e4cfc8e00e95b605eaeb73fdda5c"},
+    {file = "webtoolkit-0.1.52.tar.gz", hash = "sha256:2ea484e5eb1b4fb55567f18eb39d9a24aea59eef8f937f1029ef74b962dda1d4"},
 ]
 
 [package.dependencies]
@@ -1330,4 +1330,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "a798fe72ecb0b1f919b7fe88a94527d1e9c5e908aa5142d00c1fff80aeae06ef"
+content-hash = "c081ef8156b2aee794f33a79c800e27cd8c59560b29b632c9b5133953830f1c8"

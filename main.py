@@ -744,7 +744,7 @@ def block_url():
         return redirect(url_for("index"))
 
     sources = []
-    html_text = get_view(DEFINE_BLOCK_ENTRIES_TEMPLATE, title="Block URL")
+    html_text = get_view(ADD_BLOCK_ENTRIES_TEMPLATE, title="Block URL")
 
     raw_data = ""
 
