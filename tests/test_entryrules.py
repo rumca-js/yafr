@@ -1,13 +1,13 @@
 from tests.dbtestcase import DbTestCase
-from src.entryrules import EntryRules
+from linkarchivetools.model.entryrules import EntryRules
 
 
 class EntryRulesTest(DbTestCase):
     def test_add_entry_rule(self):
-        db = self.create_db_connection("test.db")
-        db.entry_rules.truncate()
+        connection = self.create_db_connection("test.db")
+        connection.entry_rules.truncate()
 
-        rules = EntryRules(connection=db)
+        rules = EntryRules(connection=connection)
 
         self.assertEqual(rules.count(), 0)
 
@@ -19,13 +19,13 @@ class EntryRulesTest(DbTestCase):
         self.assertEqual(rules.count(), 1)
         self.assertTrue(result is not None)
         
-        db.close()
+        connection.close()
 
     def test_is_url_blocked__true(self):
-        db = self.create_db_connection("test.db")
-        db.entry_rules.truncate()
+        connection = self.create_db_connection("test.db")
+        connection.entry_rules.truncate()
 
-        rules = EntryRules(connection=db)
+        rules = EntryRules(connection=connection)
 
         self.assertEqual(rules.count(), 0)
 
@@ -36,13 +36,13 @@ class EntryRulesTest(DbTestCase):
         # call tested function
         self.assertTrue(rules.is_url_blocked(test_link))
 
-        db.close()
+        connection.close()
 
     def test_is_url_blocked__false(self):
-        db = self.create_db_connection("test.db")
-        db.entry_rules.truncate()
+        connection = self.create_db_connection("test.db")
+        connection.entry_rules.truncate()
 
-        rules = EntryRules(connection=db)
+        rules = EntryRules(connection=connection)
 
         self.assertEqual(rules.count(), 0)
 
@@ -51,4 +51,4 @@ class EntryRulesTest(DbTestCase):
         # call tested function
         self.assertFalse(rules.is_url_blocked(test_link))
 
-        db.close()
+        connection.close()

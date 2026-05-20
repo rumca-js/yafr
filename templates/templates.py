@@ -331,7 +331,8 @@ SOURCE_TEMPLATE = """
 
 <div>ID:{{source_item.id}}</div>
 <div>Enabled:{{source_item.enabled}}</div>
-<div>Search:<a href="/search?search=source_id=={{source_item.id}}">Search</a></div>
+<div>Type:{{source_item.source_type}}</div>
+<div>Search:<a class="btn btn-primary" href="/search?search=source_id=={{source_item.id}}">Search</a></div>
 <div>Url:<a href="{{source_item.url}}">{{source_item.url}}</a></div>
 <div>Thumbnail:<a href="{{source_item.favicon}}">{{source_item.favicon}}</a></div>
 <div>XPath:{{source_item.xpath}}</div>

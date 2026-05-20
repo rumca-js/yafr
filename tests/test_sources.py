@@ -1,7 +1,7 @@
 from tests.dbtestcase import DbTestCase
-from src.entryrules import EntryRules
-from src.sources import Sources
-from src.backgroundjobs import BackgroundJob
+from linkarchivetools.model.entryrules import EntryRules
+from linkarchivetools.model.sources import Sources
+from linkarchivetools.model.backgroundjobs import BackgroundJob
 
 
 class SourcesTest(DbTestCase):

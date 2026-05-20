@@ -3,7 +3,7 @@ from pathlib import Path
 import shutil
 from sqlalchemy import create_engine
 
-from src.dbconnection import DbConnection
+from linkarchivetools.model import DbConnection
 
 
 class DbTestCase(unittest.TestCase):

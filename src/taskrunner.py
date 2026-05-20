@@ -23,6 +23,12 @@ from .system import System
 from .jobhandlers import *
 
 
+# TODO remove that
+CONFIGURATION_NEWS = "News"
+CONFIGURATION_GALLERY = "Gallery"
+CONFIGURATION_SEARCH_ENGINE = "Search Engine"
+
+
 class TaskRunner(object):
     def __init__(self, table_name):
         self.connection = None
@@ -46,7 +52,7 @@ class TaskRunner(object):
 
             config_entry = ConfigurationEntry(self.connection).get()
             if not config_entry.initialized:
-                self.setup_start()
+                self.update_configuration()
                 self.init_sources(init_sources)
 
             self.controller.close()
@@ -56,22 +62,24 @@ class TaskRunner(object):
         except Exception as e:
             traceback.print_exc()
 
-    def reset_config(self):
+    def setup_start(self):
         config = ConfigurationEntry(self.connection)
+        self.update_configuration(config.get())
 
-        config_entry = config.get()
-
+    def update_configuration(self, config_entry):
+        json_data = {}
         json_data = {}
         json_data["initialized"] = True
         json_data["enable_social_data"] = False
         json_data["new_entries_fetch_social_data"] = False
         json_data["entry_update_fetches_social_data"] = False
+        json_data["initialization_type"] = CONFIGURATION_SEARCH_ENGINE
 
-        self.connection.configurationentry.update_json_data(id=config_entry.id, json_data=json_data)
-        #config.get_table().update_json_data(id=config_entry.id, json_data=json_data)
+        return self.connection.configurationentry.update_json_data(id=config_entry.id, json_data=json_data)
 
     def add_configuration(self):
-        if self.connection.configurationentry.count() != 0:
+        config = ConfigurationEntry(self.connection)
+        if config.count() != 0:
             return
 
         json_data = {}
@@ -84,7 +92,7 @@ class TaskRunner(object):
         json_data["add_access_type"] = ""
         json_data["logging_level"] = 10
         json_data["initialized"] = False
-        json_data["initialization_type"] = ""
+        json_data["initialization_type"] = CONFIGURATION_SEARCH_ENGINE
         json_data["enable_background_jobs"] = True
         json_data["block_job_queue"] = False
         json_data["use_internal_scripts"] = False
@@ -165,7 +173,7 @@ class TaskRunner(object):
         json_data["cleanup_time"] = datetime.now().time()
 
         #config = ConfigurationEntry(self.connection)
-        self.connection.configurationentry.insert_json_data(json_data)
+        return self.connection.configurationentry.insert_json_data(json_data)
 
     def init_sources(self, init_sources):
         if init_sources is None:
@@ -174,9 +182,6 @@ class TaskRunner(object):
         for source_url in init_sources:
             sources = Sources(self.connection)
             sources.set(source_url)
-
-    def setup_start(self):
-        self.reset_config()
 
     def process_jobs(self):
         print("Starting reading")
@@ -242,6 +247,7 @@ class TaskRunner(object):
             return True
 
         """
+        TODO
         if BackgroundJob(self.connection).is_job(job_name = BackgroundJob.JOB_CLEANUP):
             return False
         """
