@@ -3,9 +3,7 @@ import time
 from datetime import datetime
 
 from webtoolkit import (
-   BaseUrl,
    UrlLocation,
-   RemoteServer,
    PageRequestObject,
    ContentLinkParser,
    HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
@@ -57,7 +55,10 @@ class GenericJobHandler(object):
         self.connection.backgroundjob.delete(id=self.job.id)
 
     def run(self):
-        pass
+        """
+        @return True, if job has been processed correctly and should be removed
+        """
+        return True
 
 
 class ProcessSourceJobHandler(GenericJobHandler):
@@ -67,35 +68,35 @@ class ProcessSourceJobHandler(GenericJobHandler):
         sources = Sources(self.connection)
         source = sources.get(id=source_id)
 
-        self.update_source_type(source)
-
         if not source:
             AppLogging(self.connection).debug(f"Source id: {source_id} Could not find source")
-            return False
+            return True
+
+        self.update_source_type(source)
 
         if not source.enabled:
             AppLogging(self.connection).debug(f"Source id: {source_id} Source is not enabled")
-            return False
+            return True
 
         blocks = BlockEntry(self.connection)
         if blocks.is_blocked(source.url):
             AppLogging(self.connection).debug(f"Source id: {source_id} Source is blocked by block rules")
             sources = Sources(connection=self.connection)
             sources.delete(id=source.id)
-            return False
+            return True
 
         rules = EntryRules(self.connection)
         if rules.is_url_blocked(source.url):
             AppLogging(self.connection).debug(f"Source id: {source_id} Source is blocked by entry rules")
             sources = Sources(connection=self.connection)
             sources.delete(id=source.id)
-            return False
+            return True
 
         sources_data = SourceData(self.connection)
         if not sources_data.is_update_needed(source):
             now = datetime.now()
             AppLogging(self.connection).debug(f"{source.url}: Update not needed @ {now}")
-            return False
+            return True
 
         self.check_source(source)
 

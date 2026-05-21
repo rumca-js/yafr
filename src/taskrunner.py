@@ -160,7 +160,7 @@ class TaskRunner(object):
         json_data["thumbnails_as_icons"] = True
         json_data["small_icons"] = True
         json_data["local_icons"] = True
-        #json_data["highlight_bookmarks"] = True
+        json_data["highlight_bookmarks"] = True
         #json_data["click_behavior_modal_window"] = True
         json_data["links_per_page"] = True
         json_data["sources_per_page"] = True
