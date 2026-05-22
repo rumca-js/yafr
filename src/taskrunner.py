@@ -258,7 +258,7 @@ class TaskRunner(object):
         return datetime.now() - job_history.date_created > timedelta(days=1)
 
     def get_job(self):
-        order_by = self.connection.backgroundjob.get_table().c.date_created
+        order_by = self.connection.backgroundjob.get_table().c.date_created.desc()
         jobs = self.connection.backgroundjob.get_where(order_by=[order_by])
         for job in jobs:
             return job
