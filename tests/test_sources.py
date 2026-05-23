@@ -6,13 +6,10 @@ from linkarchivetools.model.backgroundjobs import BackgroundJob
 
 class SourcesTest(DbTestCase):
     def test_set(self):
-        database_name = "test.db"
-        db = self.create_db_connection(database_name)
-        db.entry_rules.truncate()
-        db.sources_table.truncate()
-        db.entries_table.truncate()
+        connection = self.initialize_database()
+        self.disable_web_pages()
 
-        sources = Sources(connection=db)
+        sources = Sources(connection=connection)
         self.assertEqual(sources.count(), 0)
 
         test_link = "https://google.com"

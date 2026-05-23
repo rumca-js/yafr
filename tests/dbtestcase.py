@@ -36,6 +36,7 @@ class DbTestCase(FakeInternetTestCase):
         self.database_name = "test.db"
         self.connection = self.create_db_connection(self.database_name)
 
+        self.connection.configurationentry.truncate()
         self.connection.backgroundjob.truncate()
         self.connection.entry_rules.truncate()
         self.connection.sources_table.truncate()

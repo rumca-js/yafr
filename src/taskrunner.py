@@ -45,8 +45,7 @@ class TaskRunner(object):
         Called from a thread
         """
         try:
-            self.connection = DbConnection(self.table_name)
-            self.controller = Controller(connection=self.connection)
+            self.connect()
 
             self.add_configuration()
 
@@ -55,8 +54,7 @@ class TaskRunner(object):
                 self.update_configuration()
                 self.init_sources(init_sources)
 
-            self.controller.close()
-            self.connection.close()
+            self.close()
 
             self.process_jobs()
         except Exception as e:
@@ -67,7 +65,6 @@ class TaskRunner(object):
         self.update_configuration(config.get())
 
     def update_configuration(self, config_entry):
-        json_data = {}
         json_data = {}
         json_data["initialized"] = True
         json_data["enable_social_data"] = False
@@ -183,6 +180,14 @@ class TaskRunner(object):
             sources = Sources(self.connection)
             sources.set(source_url)
 
+    def connect(self):
+        self.connection = DbConnection(self.table_name)
+        self.controller = Controller(connection=self.connection)
+
+    def close(self):
+        self.connection.close()
+        self.controller.close()
+
     def process_jobs(self):
         print("Starting reading")
 
@@ -192,12 +197,11 @@ class TaskRunner(object):
             try:
                 self.start_reading = False
 
-                self.connection = DbConnection(self.table_name)
-                self.controller = Controller(connection=self.connection)
+                self.connect()
 
                 if not self.is_crawling_server_ok():
                     AppLogging(self.connection).error("Crawling server error")
-                    self.connection.close()
+                    self.close()
                     time.sleep(60)
                     continue
                 AppLogging(self.connection).debug("Crawling server OK")
@@ -212,7 +216,7 @@ class TaskRunner(object):
                     BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_CLEANUP)
 
                     AppLogging(self.connection).debug("Sleeping 10 sec")
-                    self.connection.close()
+                    self.close()
                     system.set_thread_ok()
                     time.sleep(10)
                     continue
@@ -220,7 +224,7 @@ class TaskRunner(object):
 
                 if self.connection.backgroundjob.count() == 0:
                     AppLogging(self.connection).debug("Sleeping 60 sec")
-                    self.connection.close()
+                    self.close()
                     system.set_thread_ok()
                     time.sleep(60)
                     continue
@@ -258,13 +262,13 @@ class TaskRunner(object):
         return datetime.now() - job_history.date_created > timedelta(days=1)
 
     def get_job(self):
-        order_by = self.connection.backgroundjob.get_table().c.date_created.desc()
+        order_by = self.connection.backgroundjob.get_table().c.date_created.asc()
         jobs = self.connection.backgroundjob.get_where(order_by=[order_by])
         for job in jobs:
             return job
 
     def get_job_history(self):
-        order_by = self.connection.backgroundjobhistory.get_table().c.date_created
+        order_by = self.connection.backgroundjobhistory.get_table().c.date_created.asc()
         jobs = self.connection.backgroundjobhistory.get_where(order_by=[order_by])
         for job in jobs:
             return job

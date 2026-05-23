@@ -27,7 +27,6 @@ from linkarchivetools.model import (
    Entries,
    CheckLater,
    EntryRules,
-   BlockEntry,
    SocialData,
    Sources,
    AppLogging,
