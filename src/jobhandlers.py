@@ -99,9 +99,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
             AppLogging(self.connection).debug(f"{source.url}: Update not needed @ {now}")
             return True
 
-        self.check_source(source)
-
-        return True
+        return self.check_source(source)
 
     def update_source_type(self, source):
         if not source.source_type:
@@ -131,6 +129,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 AppLogging(self.connection).error(f"URL:{source.url} Response is invalid")
         else:
             AppLogging(self.connection).error(f"Source ID:{source.id} URL:{source.url} No response")
+            return False
 
         return True
 
