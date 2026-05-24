@@ -1,7 +1,10 @@
 from tests.dbtestcase import DbTestCase
-from linkarchivetools.model.entryrules import EntryRules
-from linkarchivetools.model.sources import Sources
-from linkarchivetools.model.backgroundjobs import BackgroundJob
+from linkarchivetools.model import (
+   EntryRules,
+   Sources,
+   SourceData,
+   BackgroundJob,
+)
 from src.jobhandlers import *
 
 
@@ -14,6 +17,9 @@ class ProcessSourceJobHandlerTest(DbTestCase):
 
         sources = Sources(connection=connection)
         self.assertEqual(sources.count(), 0)
+
+        sourcedata = SourceData(connection)
+        self.assertEqual(sourcedata.count(), 0)
 
         source_id = sources.set(source_url=test_link, source_type=Sources.SOURCE_TYPE_PARSE)
         self.assertTrue(source_id is not None)
@@ -34,6 +40,8 @@ class ProcessSourceJobHandlerTest(DbTestCase):
 
         self.assertEqual(BackgroundJob(connection=connection).count(), 1)
 
+        self.assertEqual(sourcedata.count(), 1)
+
     def test_run__rss(self):
         connection = self.initialize_database()
         self.disable_web_pages()
@@ -46,6 +54,9 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         source_id = sources.set(source_url=test_link, source_type=Sources.SOURCE_TYPE_RSS)
         self.assertTrue(source_id is not None)
         self.assertEqual(sources.count(), 1)
+
+        sourcedata = SourceData(connection)
+        self.assertEqual(sourcedata.count(), 0)
 
         job_id = BackgroundJob(connection=connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source_id))
         self.assertTrue(job_id is not None)
@@ -60,6 +71,7 @@ class ProcessSourceJobHandlerTest(DbTestCase):
 
         self.assertEqual(sources.count(), 1)
         self.assertEqual(BackgroundJob(connection=connection).count(), 1)
+        self.assertEqual(sourcedata.count(), 1)
 
     def test_run__remove(self):
         connection = self.initialize_database()
