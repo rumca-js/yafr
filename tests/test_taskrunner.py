@@ -73,3 +73,26 @@ class TaskRunnerTest(DbTestCase):
 
         self.assertTrue(job)
         self.assertEqual(job, job_1)
+
+    def test_check_sources(self):
+        connection = self.initialize_database()
+        self.disable_web_pages()
+
+        sources = Sources(connection=connection)
+
+        test_link_1 = "https://google.com"
+        test_link_2 = "https://youtube.com"
+
+        source_id_1 = sources.set(source_url=test_link_1, source_type=Sources.SOURCE_TYPE_PARSE)
+        source_id_2 = sources.set(source_url=test_link_2, source_type=Sources.SOURCE_TYPE_PARSE)
+        self.assertTrue(source_id_1 is not None)
+        self.assertTrue(source_id_2 is not None)
+        self.assertEqual(sources.count(), 2)
+
+        runner = TaskRunner(self.database_name)
+        runner.connect()
+
+        # call tested function
+        runner.check_sources()
+
+        self.assertEqual(BackgroundJob(connection=connection).count(), 2)

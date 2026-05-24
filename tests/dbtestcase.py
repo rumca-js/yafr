@@ -41,6 +41,8 @@ class DbTestCase(FakeInternetTestCase):
         self.connection.entry_rules.truncate()
         self.connection.sources_table.truncate()
         self.connection.entries_table.truncate()
+        self.connection.socialdata.truncate()
+        self.connection.sourceoperationaldata.truncate()
 
         self.use_remote_server(self.connection)
 
