@@ -73,6 +73,44 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         self.assertEqual(BackgroundJob(connection=connection).count(), 1)
         self.assertEqual(sourcedata.count(), 1)
 
+    def test_run__unknown_source(self):
+        connection = self.initialize_database()
+        self.disable_web_pages()
+
+        test_link = "https://google.com"
+
+        controller = ConfigurationEntry(connection=connection)
+        self.assertEqual(controller.count(), 1)
+
+        sources = Sources(connection=connection)
+        self.assertEqual(sources.count(), 0)
+
+        sourcedata = SourceData(connection)
+        self.assertEqual(sourcedata.count(), 0)
+
+        source_id = sources.set(source_url=test_link, source_type="")
+        self.assertTrue(source_id is not None)
+        self.assertEqual(sources.count(), 1)
+
+        job_id = BackgroundJob(connection=connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source_id))
+        self.assertTrue(job_id is not None)
+        self.assertEqual(BackgroundJob(connection=connection).count(), 1)
+
+        job = BackgroundJob(connection=connection).get(job_id)
+        self.assertTrue(job)
+
+        handler = ProcessSourceJobHandler(connection = connection, job=job, table_name = self.database_name)
+        # call test function
+        handler.run()
+
+        self.assertEqual(sources.count(), 1)
+        self.assertEqual(BackgroundJob(connection=connection).count(), 1)
+        self.assertEqual(sourcedata.count(), 1)
+        self.assertEqual(controller.count(), 1)
+
+        source = sources.get(source_id)
+        self.assertEqual(source.source_type, Sources.SOURCE_TYPE_PARSE)
+
     def test_run__remove(self):
         connection = self.initialize_database()
         self.disable_web_pages()

@@ -23,12 +23,6 @@ from .system import System
 from .jobhandlers import *
 
 
-# TODO remove that
-CONFIGURATION_NEWS = "News"
-CONFIGURATION_GALLERY = "Gallery"
-CONFIGURATION_SEARCH_ENGINE = "Search Engine"
-
-
 class TaskRunner(object):
     def __init__(self, table_name):
         self.connection = None
@@ -70,7 +64,7 @@ class TaskRunner(object):
         json_data["enable_social_data"] = False
         json_data["new_entries_fetch_social_data"] = False
         json_data["entry_update_fetches_social_data"] = False
-        json_data["initialization_type"] = CONFIGURATION_SEARCH_ENGINE
+        json_data["initialization_type"] = ConfigurationEntry.CONFIGURATION_SEARCH_ENGINE
 
         return self.connection.configurationentry.update_json_data(id=config_entry.id, json_data=json_data)
 
@@ -89,7 +83,7 @@ class TaskRunner(object):
         json_data["add_access_type"] = ""
         json_data["logging_level"] = 10
         json_data["initialized"] = False
-        json_data["initialization_type"] = CONFIGURATION_SEARCH_ENGINE
+        json_data["initialization_type"] = ConfigurationEntry.CONFIGURATION_SEARCH_ENGINE
         json_data["enable_background_jobs"] = True
         json_data["block_job_queue"] = False
         json_data["use_internal_scripts"] = False

@@ -24,6 +24,7 @@ from flask import (
 from linkarchivetools.model import (
    DbConnection,
    BackgroundJob,
+   BlockEntry,
    Entries,
    CheckLater,
    EntryRules,

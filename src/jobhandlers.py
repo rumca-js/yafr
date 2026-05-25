@@ -75,6 +75,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
         self.update_source_type(source)
 
+        source = sources.get(id=source_id)
+
         if not source.enabled:
             AppLogging(self.connection).debug(f"Source id: {source_id} Source is not enabled")
             return True
@@ -104,13 +106,13 @@ class ProcessSourceJobHandler(GenericJobHandler):
     def update_source_type(self, source):
         if not source.source_type:
             config_entry = ConfigurationEntry(self.connection).get()
-            # TODO use types from linkarchivedata
-            if config_entry.initialization_type == "Search Engine":
+            if config_entry.initialization_type == ConfigurationEntry.CONFIGURATION_SEARCH_ENGINE:
                 sources = Sources(connection=self.connection)
-                sources.get_table().update_json_data(source.id, json_data={"source_type":"Parse"})
+                sources.get_table().update_json_data(source.id, json_data={"source_type":Sources.SOURCE_TYPE_PARSE})
+
             else:
                 sources = Sources(connection=self.connection)
-                sources.get_table().update_json_data(source.id, json_data={"source_type":"RSS"})
+                sources.get_table().update_json_data(source.id, json_data={"source_type":Sources.SOURCE_TYPE_RSS})
 
     def check_source(self, source):
         url = self.get_response_real(source)
@@ -201,17 +203,22 @@ class ProcessSourceJobHandler(GenericJobHandler):
         return url
 
     def handle_valid_response(self, source, url, response):
-        # TODO use linkarchivetypes
-        if source.source_type == "RSS":
+        if source.source_type == Sources.SOURCE_TYPE_RSS:
             return self.handle_valid_response__rss(source, url, response)
-        else:
+        elif source.source_type == Sources.SOURCE_TYPE_PARSE:
             return self.handle_valid_response__links(source, url, response)
+        elif not source.source_type:
+            config_entry = ConfigurationEntry(self.connection).get()
+            if config_entry.initialization_type == ConfigurationEntry.CONFIGURATION_SEARCH_ENGINE:
+                return self.handle_valid_response__links(source, url, response)
+            else:
+                return self.handle_valid_response__rss(source, url, response)
 
     def handle_valid_response__links(self, source, url, response):
         source_properties = url.get_properties()
 
         sources = Sources(self.connection)
-        sources.set(source.url, source_properties)
+        sources.set(source.url, source_properties, source_type=source.source_type)
 
         links = self.get_links(url)
         entries = Entries(self.connection)
