@@ -324,6 +324,7 @@ SOURCE_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/source-fetch?id={{source_item.id}}">Fetch</a>
     <a class="btn btn-primary" href="/remove-source?id={{source_item.id}}">Remove</a>
 </div>
 

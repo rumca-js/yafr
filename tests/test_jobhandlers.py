@@ -1,25 +1,31 @@
-from tests.dbtestcase import DbTestCase
+from datetime import datetime, timedelta
+
 from linkarchivetools.model import (
    EntryRules,
+   Entries,
    Sources,
    SourceData,
    BackgroundJob,
 )
 from src.jobhandlers import *
+from tests.dbtestcase import DbTestCase
 
 
 class ProcessSourceJobHandlerTest(DbTestCase):
-    def test_run__parse(self):
+    def test_run__parse__no_social_data(self):
         connection = self.initialize_database()
         self.disable_web_pages()
 
-        test_link = "https://google.com"
+        test_link = "https://page-with-two-links.com"
 
         sources = Sources(connection=connection)
         self.assertEqual(sources.count(), 0)
 
-        sourcedata = SourceData(connection)
-        self.assertEqual(sourcedata.count(), 0)
+        entries = Entries(connection=connection)
+        self.assertEqual(entries.count(), 0)
+
+        sd_controller = SourceData(connection)
+        self.assertEqual(sd_controller.count(), 0)
 
         source_id = sources.set(source_url=test_link, source_type=Sources.SOURCE_TYPE_PARSE)
         self.assertTrue(source_id is not None)
@@ -37,12 +43,48 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         handler.run()
 
         self.assertEqual(sources.count(), 1)
+        self.assertEqual(entries.count(), 2)
 
         self.assertEqual(BackgroundJob(connection=connection).count(), 1)
 
-        self.assertEqual(sourcedata.count(), 1)
+        self.assertEqual(sd_controller.count(), 1)
 
-    def test_run__rss(self):
+    def test_run__rss__no_social_data(self):
+        connection = self.initialize_database()
+        self.disable_web_pages()
+
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=SAMTIMESAMTIMESAMTIMESAM"
+
+        sources = Sources(connection=connection)
+        self.assertEqual(sources.count(), 0)
+
+        entries = Entries(connection=connection)
+        self.assertEqual(entries.count(), 0)
+
+        source_id = sources.set(source_url=test_link, source_type=Sources.SOURCE_TYPE_RSS)
+        self.assertTrue(source_id is not None)
+        self.assertEqual(sources.count(), 1)
+
+        sd_controller = SourceData(connection)
+        self.assertEqual(sd_controller.count(), 0)
+
+        job_id = BackgroundJob(connection=connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source_id))
+        self.assertTrue(job_id is not None)
+        self.assertEqual(BackgroundJob(connection=connection).count(), 1)
+
+        job = BackgroundJob(connection=connection).get(job_id)
+        self.assertTrue(job)
+
+        handler = ProcessSourceJobHandler(connection = connection, job=job, table_name = self.database_name)
+        # call test function
+        handler.run()
+
+        self.assertEqual(sources.count(), 1)
+        self.assertTrue(entries.count() > 0)
+        self.assertEqual(BackgroundJob(connection=connection).count(), 1)
+        self.assertEqual(sd_controller.count(), 1)
+
+    def test_run__rss__updates_social_data(self):
         connection = self.initialize_database()
         self.disable_web_pages()
 
@@ -55,8 +97,16 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         self.assertTrue(source_id is not None)
         self.assertEqual(sources.count(), 1)
 
-        sourcedata = SourceData(connection)
-        self.assertEqual(sourcedata.count(), 0)
+        source = sources.get(source_id)
+        self.assertEqual(source.source_type, Sources.SOURCE_TYPE_RSS)
+
+        sd_controller = SourceData(connection)
+        source_data_id = sd_controller.mark_read(source)
+        self.assertTrue(source_data_id)
+        old_date_fetched = datetime.now() - timedelta(days=2)
+        sd_controller.get_table().update_json_data(id=source_data_id, json_data={"date_fetched" : old_date_fetched})
+
+        self.assertEqual(sd_controller.count(), 1)
 
         job_id = BackgroundJob(connection=connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source_id))
         self.assertTrue(job_id is not None)
@@ -71,7 +121,10 @@ class ProcessSourceJobHandlerTest(DbTestCase):
 
         self.assertEqual(sources.count(), 1)
         self.assertEqual(BackgroundJob(connection=connection).count(), 1)
-        self.assertEqual(sourcedata.count(), 1)
+        self.assertEqual(sd_controller.count(), 1)
+
+        sourcedata = sd_controller.get(source_data_id)
+        self.assertTrue(sourcedata.date_fetched > old_date_fetched)
 
     def test_run__unknown_source(self):
         connection = self.initialize_database()
@@ -85,8 +138,8 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         sources = Sources(connection=connection)
         self.assertEqual(sources.count(), 0)
 
-        sourcedata = SourceData(connection)
-        self.assertEqual(sourcedata.count(), 0)
+        sd_controller = SourceData(connection)
+        self.assertEqual(sd_controller.count(), 0)
 
         source_id = sources.set(source_url=test_link, source_type="")
         self.assertTrue(source_id is not None)
@@ -105,7 +158,7 @@ class ProcessSourceJobHandlerTest(DbTestCase):
 
         self.assertEqual(sources.count(), 1)
         self.assertEqual(BackgroundJob(connection=connection).count(), 1)
-        self.assertEqual(sourcedata.count(), 1)
+        self.assertEqual(sd_controller.count(), 1)
         self.assertEqual(controller.count(), 1)
 
         source = sources.get(source_id)

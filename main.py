@@ -398,6 +398,25 @@ def source_edit():
     return render_template_string(html_text, source=source)
 
 
+@app.route("/source-fetch")
+def source_fetch():
+    connection = DbConnection(table_name)
+
+    source_id = request.args.get("id")
+    if source_id:
+        source = sources.get_table().get(id=source_id)
+
+        job = BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source.id))
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "Added source read job")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+    else:
+        template_html = STR_TEMPLATE.replace("{template_string}", "Cannot fetch source")
+        html_text = get_view(template_html, title="NOK")
+        return render_template_string(html_text)
+
+
 @app.route("/add-sources", methods=["GET", "POST"])
 def add_sources():
     connection = DbConnection(table_name)

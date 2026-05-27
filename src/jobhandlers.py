@@ -221,7 +221,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
         sources.set(source.url, source_properties, source_type=source.source_type)
 
         links = self.get_links(url)
-        entries = Entries(self.connection)
+        entries = Entries(connection=self.connection)
 
         for link in links:
             exists = self.connection.entries_table.exists(link=link)
@@ -240,6 +240,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry_id))
 
     def get_links(self, url):
+        # TODO this should be from configuration
         accept_link_arguments = False
 
         response = url.get_response()
@@ -254,20 +255,22 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 for link in links:
                     location = UrlLocation(url=link)
                     new_location = location.get_no_arg_link()
-                    url = new_location.url
+                    new_location_str = new_location.url
 
-                    if url:
-                        wh = url.find("#")
+                    if new_location_str:
+                        wh = new_location_str.find("#")
                         if wh >= 0: 
-                            url = url[:wh]
+                            new_location_str = new_location_str[:wh]
+
+                    result.append(new_location_str)
 
                 links = result
 
             result = []
             for link in links:
                 location = UrlLocation(link)
-                url = location.get_clean()
-                result.append(url)
+                cleaned_location = location.get_clean()
+                result.append(cleaned_location.url)
 
             return result
 
