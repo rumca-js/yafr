@@ -3,6 +3,7 @@ let all_entries = null;
 let entries_length = 0;
 let search_suggestions = [];
 let original_title = "";
+let common_indicators = null;
 
 
 function getFileName() {
@@ -260,11 +261,73 @@ async function initWorker() {
 }
 
 
+function SetFooterStatusLine() {
+   let error_line = "";
+
+   if (common_indicators.sources_error.status) {
+       error_line += add_text(error_line, "Sources");
+   }
+   if (common_indicators.threads_error.status) {
+       error_line += add_text(error_line, "Threads");
+   }
+   if (common_indicators.jobs_error.status) {
+       error_line += add_text(error_line, "Jobs");
+   }
+   if (common_indicators.configuration_error.status) {
+       error_line += add_text(error_line, "Configuration");
+   }
+   if (common_indicators.internet_error.status) {
+       error_line += add_text(error_line, "Internet");
+   }
+   if (common_indicators.crawling_server_error.status) {
+       error_line += add_text(error_line, "Crawling server");
+   }
+   if (common_indicators.is_reading.status) {
+       error_line += add_text(error_line, common_indicators.is_reading.message);
+   }
+
+   if (error_line == "") {
+       $("#footerLine").html("");
+       $("#footerLine").hide();
+   }
+   else {
+       $("#footerLine").html(error_line);
+       $("#footerLine").show();
+   }
+}
+
+
+function getIndicators(callback=null) {
+    let url_address = getStatusAPI();
+
+    getDynamicJson(url_address, function (data) { 
+       if (callback) {
+         callback(data);
+       }
+    });
+}
+
+function getSystemIndicators() {
+   getIndicators(function(data) {
+       common_indicators = data.indicators;
+
+       SetFooterStatusLine();
+   });
+}
+
+
+function getBasicPageElements() {
+    getSystemIndicators();
+}
+
+
 async function Initialize() {
     let file_name = getFileName();
     original_title = document.title;
 
     $('#searchInput').prop('disabled', true);
+
+    getBasicPageElements();
 
     if (getDefaultFileName()) {
       if (isWorkerNeeded(file_name)) {

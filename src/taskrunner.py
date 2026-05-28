@@ -194,10 +194,17 @@ class TaskRunner(object):
                 self.connect()
 
                 if not self.is_crawling_server_ok():
+                    system = System.get_object()
+                    system.set_crawling_server_fail()
+
                     AppLogging(self.connection).error("Crawling server error")
                     self.close()
                     time.sleep(60)
                     continue
+                else:
+                    system = System.get_object()
+                    system.set_crawling_server_ok()
+
                 AppLogging(self.connection).debug("Crawling server OK")
 
                 self.handle_one_job()

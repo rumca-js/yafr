@@ -403,6 +403,7 @@ document.addEventListener('DOMContentLoaded', () => {
     readConfig();
     updateWidgets();
     registerEventsListeners();
+    getBasicPageElements();
 
     const urlParams = new URLSearchParams(window.location.search);
     const searchParam = urlParams.get('search');

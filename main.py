@@ -1035,6 +1035,9 @@ def remove_entry():
     return render_template_string(html_text)
 
 
+#### System
+
+
 @app.route("/logs")
 def logs():
     connection = DbConnection(table_name)
@@ -1091,12 +1094,7 @@ def add_job():
     return render_template_string(html_text, raw_data="")
 
 
-@app.route("/status")
-def status():
-    connection = DbConnection(table_name)
-
-    system = System.get_object()
-
+def get_stats_map(connection):
     stats_map = {}
 
     stats_map["Entries"] = connection.entries_table.count()
@@ -1117,7 +1115,16 @@ def status():
     stats_map["SearchView"] = connection.searchview.count()
     stats_map["Block entries"] = connection.blockentry.count()
 
+    system = System.get_object()
     stats_map["System state"] = system.is_system_ok()
+    return stats_map
+
+
+@app.route("/status")
+def status():
+    connection = DbConnection(table_name)
+
+    stats_map = get_stats_map(connection)
 
     program_info = OrderedDict()
     program_info["Name"] = __project_name__
@@ -1198,6 +1205,45 @@ def configuration():
 
     html_text = get_view(CONFIGURATION_TEMPLATE, title="Configuration")
     return render_template_string(html_text, configuration=instance_fields)
+
+
+#### Tools
+
+@app.route("/link-test", methods=["GET"])
+def link_test():
+    connection = DbConnection(table_name)
+
+    link = request.args.get("link")
+
+    if link:
+        text = ""
+
+        exists = connection.entries_table.exists(link=link)
+        if exists:
+            text += "Link already exists in entries table"
+
+        blocks = BlockEntry(connection)
+        if blocks.is_blocked(link):
+            text += "Link is blocked by block rules"
+
+        rules = EntryRules(connection)
+        if rules.is_url_blocked(link):
+            text += "Link is blocked by entry rules"
+
+        if not text:
+            text = f"Link {link} is OK"
+
+        template_html = STR_TEMPLATE.replace("{template_string}", text)
+        html_text = get_view(template_html, title="OK")
+        connection.close()
+        return render_template_string(html_text)
+
+    # TODO add form
+    template_html = STR_TEMPLATE.replace("{template_string}",
+                                         f"Provide a link")
+    html_text = get_view(template_html, title="OK")
+    connection.close()
+    return render_template_string(html_text)
 
 
 #### JSON
@@ -1314,18 +1360,19 @@ def api_dynamic():
 def api_stats():
     connection = DbConnection(table_name)
 
-    entries_len = connection.entries_table.count()
-    sources_len = connection.sources_table.count()
-    entry_rules_len = connection.entry_rules.count()
-
-    system = System.get_object()
-
-    stats_map = {}
-    stats_map["entries_len"] = entries_len
-    stats_map["sources_len"] = sources_len
-    stats_map["system_state"] = system.is_system_ok()
+    stats_map = get_stats_map(connection)
 
     return jsonify(stats_map)
+
+
+@app.route("/api/status")
+def api_status():
+    connection = DbConnection(table_name)
+
+    system = System.get_object()
+    indicators = system.get_indicators()
+
+    return jsonify(indicators)
 
 
 @app.route("/api/sources")

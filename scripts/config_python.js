@@ -78,6 +78,9 @@ function getEntryLocalLink(entry) {
     return `?entry_id=${entry.id}`;
 }
 
+function getStatusAPI() {
+   return `/api/status`;
+}
 
 function getHomeLocation() {
     return "/";
