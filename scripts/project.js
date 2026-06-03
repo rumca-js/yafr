@@ -380,6 +380,9 @@ function getEntriesJson(callback=null, page=1, search=null, order_by=null, view=
    if (view != null) {
        params.append("view", view);
    }
+   if (page != null) {
+       params.append("p", page);
+   }
 
    let url_address = `${url_location}?${params.toString()}`;
 
