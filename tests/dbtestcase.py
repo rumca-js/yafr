@@ -20,7 +20,8 @@ class DbTestCase(FakeInternetTestCase):
 
         shutil.copy("data/input.db", file_name)
 
-        return DbConnection(file_name)
+        self.connection = DbConnection(file_name)
+        return self.connection
 
     def use_remote_server(self, connection):
         runner = TaskRunner("table")

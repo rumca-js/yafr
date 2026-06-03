@@ -151,44 +151,80 @@ def parse_search(search, table, tags_table):
     ]
 
 
-def get_entries_for_request(connection, order, limit, offset, search=None):
+def get_view_conditions(view=None):
+    if not view:
+        # TODO linkarchive should contain default view obtainer
+        # views = SearchView()
+        defaults = views_table.get_where({"default" : True})
+        for default in defaults:
+            view = default
+    else:
+        searched_views = views_table.get_where({id : view})
+        for searched_view in searched_views:
+            view = searched_view
+
+
+def get_entries_for_request(connection, order_by, limit, offset, search=None, view_id=None):
     table = connection.entries_table.get_table()
     tags_table = connection.entrycompactedtags.get_table()
     social_table = connection.socialdata.get_table()
+    views_table = connection.searchview
+
+    print(f"View : {view_id}")
+    view = None
+    if not view_id:
+        # TODO linkarchive should contain default view obtainer
+        # views = SearchView()
+        defaults = views_table.get_where({"default" : True})
+        for default in defaults:
+            print("Using default view")
+            view = default
+    else:
+        searched_views = views_table.get_where({"id" : view_id})
+        for searched_view in searched_views:
+            print("Using search view")
+            view = searched_view
+    print(f"Found view {view}")
 
     conditions = parse_search(search, table, tags_table)
 
-    #view_controller = SearchView(connection=connection)
-    #view = view_controller.get()
+    view_conditions = None
+    if view and view.filter_statement == "bookmarked=True":
+        print("Setting view conditions")
+        view_conditions = [table.c.bookmarked == True]
+
+    if not order_by:
+        order_by = view.order_by
+    print(f"Using order by {order_by}")
 
     order_bys = [table.c.date_published.desc()]
-    if order == "-view_count":
+    if order_by == "-view_count":
         order_bys = [social_table.c.view_count.desc()]
-    elif order == "view_count":
+    elif order_by == "view_count":
         order_bys = [social_table.c.view_count.asc()]
-    elif order == "-stars":
+    elif order_by == "-stars":
         order_bys = [social_table.c.stars.desc()]
-    elif order == "stars":
+    elif order_by == "stars":
         order_bys = [social_table.c.stars.asc()]
-    elif order == "-followers_count":
+    elif order_by == "-followers_count":
         order_bys = [social_table.c.followers_count.desc()]
-    elif order == "followers_count":
+    elif order_by == "followers_count":
         order_bys = [social_table.c.followers_count.asc()]
-    elif order == "-date_published":
+    elif order_by == "-date_published":
         order_bys = [table.c.date_published.desc()]
-    elif order == "date_published":
+    elif order_by == "date_published":
         order_bys = [table.c.date_published.asc()]
-    elif order == "-date_created":
+    elif order_by == "-date_created":
         order_bys = [table.c.date_created.desc()]
-    elif order == "date_created":
+    elif order_by == "date_created":
         order_bys = [table.c.date_created.asc()]
-    elif order == "-link":
+    elif order_by == "-link":
         order_bys = [table.c.link.desc()]
-    elif order == "link":
+    elif order_by == "link":
         order_bys = [table.c.link.asc()]
-    elif order == "-page_rating_votes":
+    elif order_by == "-page_rating_votes":
         order_bys = [table.c.page_rating_votes.desc()]
-    elif order == "page_rating_votes":
+    elif order_by == "page_rating_votes":
         order_bys = [table.c.page_rating_votes.asc()]
     else:
         order_bys = [table.c.date_published.desc()]
@@ -210,7 +246,16 @@ def get_entries_for_request(connection, order, limit, offset, search=None):
                      )
 
     if conditions:
-        entries_select = entries_select.where(or_(*conditions))
+        conditions = or_(*conditions)
+        if view_conditions:
+            conditions = and_(*view_conditions, conditions)
+    elif view_conditions:
+        conditions = or_(*view_conditions)
+
+    if conditions is not None:
+        print("Using search conditions")
+        print(conditions)
+        entries_select = entries_select.where(conditions)
     if offset is not None:
         entries_select = entries_select.offset(offset)
     if limit is not None:
@@ -599,8 +644,18 @@ def entry_edit():
     connection = DbConnection(table_name)
 
     entry_id = request.args.get("id")
+    if not entry_id:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK - cannot read ID")
+        html_text = get_view(template_html, title="NOK")
+        return render_template_string(html_text)
+
     entries = Entries(connection)
     entry = entries.get(id=entry_id)
+
+    if not entry:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK - cannot find entry")
+        html_text = get_view(template_html, title="NOK")
+        return render_template_string(html_text)
 
     if request.method == "POST":
         title = request.form.get("title", "")
@@ -884,6 +939,79 @@ def entry_rule_remove():
     return render_template_string(html_text)
 
 
+@app.route("/views")
+def views():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    views = SearchView(connection = connection)
+
+    view_objects = views.get_table().get_where({})
+
+    html_text = get_view(VIEWS_TEMPLATE, title="Views")
+    return render_template_string(html_text, views = view_objects)
+
+
+@app.route("/view")
+def view():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    entry_rule_id = request.args.get("id")
+
+    views = SearchView(connection = connection)
+
+    view = views.get(id=entry_rule_id)
+
+    html_text = get_view(VIEW_TEMPLATE, title="View")
+    return render_template_string(html_text, view=view)
+
+
+@app.route("/view-add", methods=["GET", "POST"])
+def view_add():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    if request.method == "POST":
+        views = SearchView(connection = connection)
+
+        html_text = get_view(VIEW_ADD_TEMPLATE, title="View add")
+        connection.close()
+        return render_template_string(html_text, view=view)
+
+    html_text = get_view(VIEW_ADD_TEMPLATE, title="View add")
+    return render_template_string(html_text, rule=rule)
+
+
+@app.route("/view-edit", methods=["GET", "POST"])
+def view_edit():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    view_id = request.args.get("id")
+    if request.method == "POST":
+        connection.close()
+        html_text = get_view(VIEW_EDIT_TEMPLATE, title="View edit")
+        return render_template_string(html_text, rule=rule)
+
+    html_text = get_view(VIEW_EDIT_TEMPLATE, title="View edit")
+    return render_template_string(html_text, rule=rule)
+
+
+@app.route("/view-remove")
+def view_remove():
+    connection = DbConnection(table_name)
+    controller = Controller(connection)
+
+    view_id = request.args.get("id")
+
+    view = SearchViews(connection = connection)
+    view.delete(id=view_id)
+
+    html_text = get_view(OK_TEMPLATE, title="Remove view")
+    return render_template_string(html_text)
+
+
 @app.route("/remove-all-entries")
 def remove_all_entries():
     connection = DbConnection(table_name)
@@ -979,7 +1107,17 @@ def remove_all_entry_rules():
     connection.entry_rules.truncate()
     connection.close()
 
-    html_text = get_view(OK_TEMPLATE, title="Entry rules OK")
+    html_text = get_view(OK_TEMPLATE, title="Remove entry rules OK")
+    return render_template_string(html_text)
+
+
+@app.route("/remove-all-views")
+def remove_all_views():
+    connection = DbConnection(table_name)
+    connection.searchviews.truncate()
+    connection.close()
+
+    html_text = get_view(OK_TEMPLATE, title="Remove Search views OK")
     return render_template_string(html_text)
 
 
@@ -1258,9 +1396,15 @@ def api_entries():
 
     search = request.args.get("search")
     order_by = request.args.get("order_by")
+    view = request.args.get("view")
 
     json_entries = []
-    entries = get_entries_for_request(connection, order_by, limit, offset, search)
+    entries = get_entries_for_request(connection=connection,
+                                      order_by=order_by,
+                                      limit=limit,
+                                      offset=offset,
+                                      search=search,
+                                      view_id=view)
 
     for entry in entries:
         socialdata = SocialData(connection=connection)
@@ -1294,9 +1438,16 @@ def api_entries():
 
 @app.route("/api/entry")
 def api_entry():
+    connection = DbConnection(table_name)
+
     entry_id = request.args.get("id")
-    entries = Entries(connection)
-    entry = entries.get(id=entry_id)
+    entry_controller = Entries(connection)
+    entry = entry_controller.get(id=entry_id)
+
+    #search_entries = entry_controller.get_table().get_where({"id" : entry_id})
+    #entry=None
+    #for search_entry in search_entries:
+    #    entry = search_entry
 
     if entry:
         socialdata = SocialData(connection=connection)
@@ -1321,6 +1472,9 @@ def api_entry():
                                             tags=tags)
 
         return jsonify(json_entry_data)
+    else:
+        print("Cannot find entry")
+        return jsonify({})
 
 
 @app.route("/api/entry-visit")
@@ -1331,15 +1485,21 @@ def api_entry_visit():
     entries = Entries(connection)
     entry = entries.get(id=entry_id)
 
-    json_data = {}
-    json_data["page_rating_visits"] = entry.page_rating_visits + 1
+    if entry:
+        json_data = {}
+        json_data["page_rating_visits"] = entry.page_rating_visits + 1
 
-    connection = DbConnection(table_name)
-    connection.entries_table.update_json_data(entry.id, json_data)
+        connection = DbConnection(table_name)
+        connection.entries_table.update_json_data(entry.id, json_data)
 
-    props = {}
-    props["status"] = True
-    return jsonify(props)
+        props = {}
+        props["status"] = True
+        return jsonify(props)
+    else:
+        props = {}
+        props["status"] = False
+        print(f"Cannot find entry with ID:{entry_id}")
+        return jsonify(props)
 
 
 @app.route("/api/dynamic")

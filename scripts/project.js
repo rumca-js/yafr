@@ -129,13 +129,14 @@ function performSearchAPI() {
     let page_num = getPageNumber();
     const userInput = $("#searchInput").val();
     let order_by = getQueryParam("order_by");
+    let view = getQueryParam("view");
 
     getEntriesJson(function(data) {
        object_list_data = data;
        fillListData();
        $('#pagination').html(getPaginationText());
        onSearchStop();
-    }, page=page_num, search=userInput, order_by=order_by);
+    }, page=page_num, search=userInput, order_by=order_by, view=view);
 }
 
 
@@ -365,9 +366,23 @@ function onSystemReady() {
 }
 
 
-function getEntriesJson(callback=null, page=1, search=null, order_by=null) {
+function getEntriesJson(callback=null, page=1, search=null, order_by=null, view=null) {
    let url_location = getEntryAPI();
-   let url_address = `${url_location}?p=${page}&search=${search}&order_by=${order_by}`;
+   // TODO most likely there is some fancy javascript to encode it
+   let params = new URLSearchParams({});
+
+   if (search != null) {
+       params.append("search", search);
+   }
+   if (order_by != null) {
+       params.append("order_by", order_by);
+   }
+   if (view != null) {
+       params.append("view", view);
+   }
+
+   let url_address = `${url_location}?${params.toString()}`;
+
    getDynamicJson(url_address, function(data) {
        if (callback) {
           callback(data);

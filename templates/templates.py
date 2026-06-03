@@ -57,6 +57,7 @@ ADMIN_TEMPLATE = """
   <li><a href="/add-sources">Add sources</a>
   <li><a href="/entry-rules">Entry rules</a>
   <li><a href="/block-rules">Block rules</a>
+  <li><a href="/views">Search views</a>
   <li><a href="/configuration">Configuration</a>
 </ul>
 
@@ -68,6 +69,7 @@ ADMIN_TEMPLATE = """
   <li><a href="/remove-all-votes">Remove all votes</a>
   <li><a href="/remove-all-entry-rules">Remove all entry rules</a>
   <li><a href="/remove-all-block-entries">Remove all block entries</a>
+  <li><a href="/remove-all-views">Remove all views</a>
 </ul>
 """
 
@@ -590,6 +592,52 @@ ENTRY_RULE_ADD_TEMPLATE = """
     <div><input type="search" id="block" name="block" value="{{rule.block}}"/></div>
     <div><label for="trust">Trust</label></div>
     <div><input type="search" id="trust" name="trust" value="{{rule.trust}}"/></div>
+   <button type="submit">Save</button>
+</form>
+"""
+
+VIEWS_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/view-add">Add view</a>
+</div>
+
+<h1>Search Views</h1>
+
+{% for view in views %}
+   <div><a href="/view?id={{view.id}}">{{view.id}} Name:{{view.name}} Default:{{view.default}}</a></div>
+{% endfor %}
+"""
+
+
+VIEW_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/view-remove?id={{view.id}}">Remove</a>
+</div>
+
+<h1>View {{view.name}}</h1>
+
+<div> ID:{{view.id}} </div>
+<div> Priority:{{view.priority}} </div>
+<div> Default:{{view.default}} </div>
+<div> Filter statement:{{view.filter_statement}} </div>
+<div> Order by:{{view.order_by}} </div>
+"""
+
+
+VIEW_ADD_TEMPLATE = """
+<div class="nav-buttons">
+    <button class="btn btn-primary" onclick="history.back()">Go back</button>
+    <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="/view-remove?id={{view.id}}">Remove</a>
+</div>
+
+<form method="POST">
+    <div><label for="name">Name</label></div>
+    <div><input type="search" id="name" name="name" value="{{view.name}}"/></div>
    <button type="submit">Save</button>
 </form>
 """
