@@ -193,7 +193,7 @@ def get_entries_for_request(connection, order_by, limit, offset, search=None, vi
         print("Setting view conditions")
         view_conditions = [table.c.bookmarked == True]
 
-    if not order_by:
+    if not order_by and view:
         order_by = view.order_by
     print(f"Using order by {order_by}")
 

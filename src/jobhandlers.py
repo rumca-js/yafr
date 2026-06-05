@@ -486,6 +486,9 @@ class DownloadSocialDataJobHandler(GenericJobHandler):
         """
         Returns indication if json object elements are all true
         """
+        if isinstance(json_obj, list):
+            return True
+
         # indicator of unsupported on crawler buddy
         all_values_are_none = True
         for key, value in json_obj.items():
