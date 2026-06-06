@@ -262,29 +262,31 @@ async function initWorker() {
 }
 
 
-function SetFooterStatusLine() {
-   let error_line = "";
+function SetFooterStatusLine(custom_error = "") {
+   let error_line = custom_error;
 
-   if (common_indicators.sources_error.status) {
-       error_line += add_text(error_line, "Sources");
-   }
-   if (common_indicators.threads_error.status) {
-       error_line += add_text(error_line, "Threads");
-   }
-   if (common_indicators.jobs_error.status) {
-       error_line += add_text(error_line, "Jobs");
-   }
-   if (common_indicators.configuration_error.status) {
-       error_line += add_text(error_line, "Configuration");
-   }
-   if (common_indicators.internet_error.status) {
-       error_line += add_text(error_line, "Internet");
-   }
-   if (common_indicators.crawling_server_error.status) {
-       error_line += add_text(error_line, "Crawling server");
-   }
-   if (common_indicators.is_reading.status) {
-       error_line += add_text(error_line, common_indicators.is_reading.message);
+   if (common_indicators) {
+       if (common_indicators.sources_error && common_indicators.sources_error.status) {
+           error_line += add_text(error_line, "Sources");
+       }
+       if (common_indicators.threads_error && common_indicators.threads_error.status) {
+           error_line += add_text(error_line, "Threads");
+       }
+       if (common_indicators.jobs_error && common_indicators.jobs_error.status) {
+           error_line += add_text(error_line, "Jobs");
+       }
+       if (common_indicators.configuration_error && common_indicators.configuration_error.status) {
+           error_line += add_text(error_line, "Configuration");
+       }
+       if (common_indicators.internet_error && common_indicators.internet_error.status) {
+           error_line += add_text(error_line, "Internet");
+       }
+       if (common_indicators.crawling_server_error && common_indicators.crawling_server_error.status) {
+           error_line += add_text(error_line, "Crawling server");
+       }
+       if (common_indicators.is_reading && common_indicators.is_reading.status) {
+           error_line += add_text(error_line, common_indicators.is_reading.message);
+       }
    }
 
    if (error_line == "") {
@@ -298,14 +300,14 @@ function SetFooterStatusLine() {
 }
 
 
-function getIndicators(callback=null) {
+function getIndicators(callback=null, error_callback=null) {
     let url_address = getStatusAPI();
 
     getDynamicJson(url_address, function (data) { 
        if (callback) {
          callback(data);
        }
-    });
+    }, error_callback);
 }
 
 function getSystemIndicators() {
@@ -313,6 +315,8 @@ function getSystemIndicators() {
        common_indicators = data.indicators;
 
        SetFooterStatusLine();
+   }, function() {
+       SetFooterStatusLine("Connection error");
    });
 }
 

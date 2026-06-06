@@ -34,6 +34,14 @@ function isEmpty( el ){
 }
 
 
+function add_text(line, text) {
+    if (line === "") {
+        return text;
+    }
+    return ", " + text;
+}
+
+
 function getSpinnerText(text = 'Loading...') {
    return `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> ${text}`;
 }
@@ -207,7 +215,7 @@ function getFormattedDate(input_date) {
 
 
 const getDynamicJsonRequestTracker = {};
-function getDynamicJson(url_address, callback = null, errorInHtml = false, retry=true, timeout_s=20000) {
+function getDynamicJson(url_address, callback = null, error_callback = null, retry=true, timeout_s=20000) {
     // Abort previous request if needed
     if (getDynamicJsonRequestTracker[url_address]?.xhr) {
         getDynamicJsonRequestTracker[url_address].xhr.abort();
@@ -230,11 +238,15 @@ function getDynamicJson(url_address, callback = null, errorInHtml = false, retry
             if (status === 'timeout') {
                 console.warn(`Timeout on ${url_address}. Retrying...`);
                 if (getDynamicJsonRequestTracker[url_address].id === requestId) {
-                    getDynamicJson(url_address, callback, errorInHtml);
+                    getDynamicJson(url_address, callback, error_callback);
                 }
             } else {
                 console.error(`Error fetching ${url_address}:`, status, error);
+                error_callback?.(xhr, status, error);
             }
+          }
+          else {
+              error_callback?.(xhr, status, error);
           }
         }
     });

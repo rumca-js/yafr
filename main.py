@@ -1534,7 +1534,7 @@ def api_status():
     system = System.get_object()
     indicators = system.get_indicators()
 
-    return jsonify(indicators)
+    return jsonify({"indicators": indicators})
 
 
 @app.route("/api/sources")

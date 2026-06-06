@@ -33,13 +33,13 @@ class System(object):
     def get_indicators(self):
         data = {}
 
-        data["threads_error"] = {}
-        data["threads_error"]["message"] = ""
-        data["threads_error"]["status"] = not self.is_read_thread_ok()
-
-        data["crawling_server_error"] = {}
-        data["crawling_server_error"]["message"] = ""
-        data["crawling_server_error"]["status"] = not self.crawling_server
+        data["sources_error"] = {"status": False, "message": ""}
+        data["threads_error"] = {"status": not self.is_read_thread_ok(), "message": ""}
+        data["jobs_error"] = {"status": False, "message": ""}
+        data["configuration_error"] = {"status": False, "message": ""}
+        data["internet_error"] = {"status": False, "message": ""}
+        data["crawling_server_error"] = {"status": not self.crawling_server, "message": ""}
+        data["is_reading"] = {"status": False, "message": ""}
 
         return data
 
