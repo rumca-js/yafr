@@ -29,6 +29,10 @@ class TaskRunnerTest(DbTestCase):
         connection = self.initialize_database()
         self.disable_web_pages()
 
+        connection.configurationentry.truncate()
+
+        self.assertEqual(connection.configurationentry.count(), 0)
+
         runner = TaskRunner(self.database_name)
         runner.connect()
 

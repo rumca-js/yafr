@@ -55,6 +55,8 @@ class TaskRunner(object):
             traceback.print_exc()
 
     def setup_start(self):
+        self.add_configuration()
+
         config = ConfigurationEntry(self.connection)
         self.update_configuration(config.get())
 
@@ -123,7 +125,8 @@ class TaskRunner(object):
 
         json_data["prefer_https_links"] = False
         json_data["prefer_non_www_links"] = False
-        #json_data["keep_social_data"] = False
+        json_data["keep_social_data"] = False
+        json_data["browse_entries_fetch_social_data"] = False
         json_data["sources_refresh_period"] = 0
         json_data["days_to_move_to_archive"] = 0
         json_data["days_to_remove_links"] = 0
