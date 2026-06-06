@@ -54,3 +54,24 @@ class InitializationWizardTest(DbTestCase):
         self.assertEqual(config.initialization_type, "search_engine")
         self.assertEqual(config.display_type, "gallery")
         self.connection.close()
+
+    def test_redirect_to_wizard(self):
+        connection = self.create_db_connection("test_redirect.db")
+        connection.configurationentry.truncate() # Ensure not initialized
+        
+        client = app.test_client()
+        response = client.get("/search")
+        
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.location.endswith("/initialization-wizard"))
+        self.connection.close()
+
+    def test_no_redirect_for_scripts(self):
+        connection = self.create_db_connection("test_no_redirect.db")
+        connection.configurationentry.truncate()
+        
+        client = app.test_client()
+        response = client.get("/scripts/ui.js") # ui.js exists in scripts/
+        
+        self.assertEqual(response.status_code, 200)
+        self.connection.close()

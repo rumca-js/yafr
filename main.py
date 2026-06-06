@@ -87,6 +87,19 @@ if not app.config["DB_FILE"].exists():
 runner = TaskRunner(app.config["DB_FILE"])
 
 
+@app.before_request
+def check_initialization():
+    if request.endpoint in ("initialization_wizard", "scripts", "styles", "static"):
+        return
+
+    connection = DbConnection(app.config["DB_FILE"])
+    config = connection.configurationentry.get_first()
+    connection.close()
+
+    if not config or not config.initialized:
+        return redirect(url_for("initialization_wizard"))
+
+
 class PagePagination:
     def __init__(self, request):
         self.request = request
