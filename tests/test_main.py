@@ -73,5 +73,5 @@ class MainTest(DbTestCase):
         client = app.test_client()
         response = client.get(f"/entry-unbookmark?id={entry_id}")
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
 
