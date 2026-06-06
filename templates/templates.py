@@ -748,6 +748,34 @@ CONFIGURATION_TEMPLATE = """
 </form>
 """
 
+INITIALIZATION_WIZARD_TEMPLATE = """
+<div class="nav-buttons">
+    <a class="btn btn-primary" href="/">Home</a>
+</div>
+
+<h1>Initialization Wizard</h1>
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="initialization_type" class="form-label">Initialization Type</label>
+        <select class="form-select" id="initialization_type" name="initialization_type">
+            <option value="search_engine">Search Engine</option>
+            <option value="rss_reader">RSS Reader</option>
+        </select>
+    </div>
+    
+    <div class="mb-3">
+        <label for="display_type" class="form-label">Display Type</label>
+        <select class="form-select" id="display_type" name="display_type">
+            <option value="gallery">Gallery</option>
+            <option value="accordion">Accordion</option>
+        </select>
+    </div>
+    
+    <button type="submit" class="btn btn-success">Initialize</button>
+</form>
+"""
+
 
 PROJECT_TEMPLATE = """
 <!DOCTYPE html>
