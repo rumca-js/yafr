@@ -2,6 +2,7 @@ import unittest
 from pathlib import Path
 import shutil
 from sqlalchemy import create_engine
+from main import app
 
 from linkarchivetools.model import DbConnection
 from webtoolkit.tests import FakeInternetTestCase
@@ -18,6 +19,7 @@ class DbTestCase(FakeInternetTestCase):
         if path.exists():
             path.unlink()
 
+        app.config["DB_FILE"] = file_name
         shutil.copy("data/input.db", file_name)
 
         self.connection = DbConnection(file_name)

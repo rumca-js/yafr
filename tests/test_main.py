@@ -19,34 +19,34 @@ class MainTest(DbTestCase):
     def test_api_status(self):
         connection = self.create_db_connection("test.db")
         connection.truncate()
+        connection.close()
 
         client = app.test_client()
         response = client.get("/api/status")
-        self.assertEqual(response.status_code, 200)
 
-        connection.close()
+        self.assertEqual(response.status_code, 200)
 
     def test_api_stats(self):
         connection = self.create_db_connection("test.db")
         connection.truncate()
+        connection.close()
 
         client = app.test_client()
         response = client.get("/api/stats")
-        self.assertEqual(response.status_code, 200)
 
-        connection.close()
+        self.assertEqual(response.status_code, 200)
 
     def test_api_entries(self):
         connection = self.create_db_connection("test.db")
         connection.truncate()
 
         entry_id = self.add_entry()
+        connection.close()
 
         client = app.test_client()
         response = client.get("/api/entries")
-        self.assertEqual(response.status_code, 200)
 
-        connection.close()
+        self.assertEqual(response.status_code, 200)
 
     def test_entry_bookmark(self):
         connection = self.create_db_connection("test.db")
@@ -54,12 +54,13 @@ class MainTest(DbTestCase):
 
         entry_id = self.add_entry()
         self.assertTrue(entry_id)
+        connection.close()
 
         client = app.test_client()
         response = client.get(f"/entry-bookmark?id={entry_id}")
-        self.assertEqual(response.status_code, 200)
 
-        connection.close()
+        # redirect
+        self.assertEqual(response.status_code, 302)
 
     def test_entry_unbookmark(self):
         connection = self.create_db_connection("test.db")
@@ -67,9 +68,10 @@ class MainTest(DbTestCase):
 
         entry_id = self.add_entry()
         self.assertTrue(entry_id)
+        connection.close()
 
         client = app.test_client()
         response = client.get(f"/entry-unbookmark?id={entry_id}")
+
         self.assertEqual(response.status_code, 200)
 
-        connection.close()
