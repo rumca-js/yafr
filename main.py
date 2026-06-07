@@ -1015,7 +1015,7 @@ def view_edit():
 
     if request.method == "POST":
         json_data = {}
-        json_data["name"] = request.args.get("Name")
+        json_data["name"] = request.args.get("name")
         json_data["default"] = request.args.get("default")
         json_data["priority"] = request.args.get("priority")
         json_data["filter_statement"] = request.args.get("filter_statement")

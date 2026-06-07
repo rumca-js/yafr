@@ -30,8 +30,7 @@ class MainViewsTest(DbTestCase):
         self.connection.close()
 
         client = app.test_client()
-        # The code uses request.args.get even for POST, which is weird, but let's test it as is first
-        response = client.post(f"/view-edit?id={view_id}&Name=Updated+View&default=False&priority=2&filter_statement=test&order_by=id")
+        response = client.post(f"/view-edit?id={view_id}&name=Updated+View&default=False&priority=2&filter_statement=test&order_by=id")
         self.assertEqual(response.status_code, 200)
 
     def test_view_add_post(self):
