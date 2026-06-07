@@ -46,7 +46,7 @@ class Controller(object):
         json_data["add_access_type"] = ""
         json_data["logging_level"] = 10
         json_data["initialized"] = False
-        json_data["initialization_type"] = ConfigurationEntry.CONFIGURATION_SEARCH_ENGINE
+        json_data["initialization_type"] = ConfigurationEntry.CONFIGURATION_NEWS
         json_data["enable_background_jobs"] = True
         json_data["block_job_queue"] = False
         json_data["use_internal_scripts"] = False
@@ -135,7 +135,7 @@ class Controller(object):
         json_data["enable_social_data"] = False
         json_data["new_entries_fetch_social_data"] = False
         json_data["entry_update_fetches_social_data"] = False
-        json_data["initialization_type"] = ConfigurationEntry.CONFIGURATION_SEARCH_ENGINE
+        json_data["initialization_type"] = ConfigurationEntry.CONFIGURATION_NEWS
 
         return self.connection.configurationentry.update_json_data(id=config_entry.id, json_data=json_data)
 

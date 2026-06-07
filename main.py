@@ -1047,6 +1047,7 @@ def view_remove():
     connection.close()
     return render_template_string(html_text)
 
+
 @app.route("/remove-all-entries")
 def remove_all_entries():
     connection = DbConnection(app.config["DB_FILE"])
