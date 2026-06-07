@@ -34,6 +34,7 @@ from linkarchivetools.model import (
    SearchView,
    EntryVotes,
    EntryTags,
+   ConfigurationEntry,
    entry_to_json,
    source_to_json,
    source_and_entries_to_rss,
@@ -84,6 +85,19 @@ if not app.config["DB_FILE"].exists():
 
 
 runner = TaskRunner(app.config["DB_FILE"])
+
+
+@app.before_request
+def check_initialization():
+    if request.endpoint in ("initialization_wizard", "scripts", "styles", "static"):
+        return
+
+    connection = DbConnection(app.config["DB_FILE"])
+    config = connection.configurationentry.get_first()
+    connection.close()
+
+    if not config or not config.initialized:
+        return redirect(url_for("initialization_wizard"))
 
 
 class PagePagination:
@@ -1305,6 +1319,35 @@ def to_bool(variable):
     if variable == "1":
         return True
     return False
+
+
+@app.route("/initialization-wizard", methods=["GET", "POST"])
+def initialization_wizard():
+    connection = DbConnection(app.config["DB_FILE"])
+    config = connection.configurationentry.get_first()
+
+    if request.method == "POST":
+        initialization_type = request.form.get("initialization_type", "")
+        display_type = request.form.get("display_type", "")
+
+        if not config:
+            temp_runner = TaskRunner(app.config["DB_FILE"])
+            temp_runner.connection = connection
+            temp_runner.add_configuration()
+            config = connection.configurationentry.get_first()
+
+        data = {}
+        data["initialized"] = True
+        data["initialization_type"] = initialization_type
+        data["display_type"] = display_type
+
+        connection.configurationentry.update_json_data(id=config.id, json_data=data)
+        connection.close()
+
+        return redirect(url_for("search"))
+
+    html_text = get_view(INITIALIZATION_WIZARD_TEMPLATE, title="Initialization Wizard")
+    return render_template_string(html_text)
 
 
 @app.route("/configuration", methods=["GET", "POST"])
