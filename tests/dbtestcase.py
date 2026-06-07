@@ -4,8 +4,12 @@ import shutil
 from sqlalchemy import create_engine
 from main import app
 
-from linkarchivetools.model import DbConnection
+from linkarchivetools.model import (
+   DbConnection,
+   ConfigurationEntry,
+)
 from webtoolkit.tests import FakeInternetTestCase
+
 from src.taskrunner import TaskRunner
 
 
@@ -34,13 +38,17 @@ class DbTestCase(FakeInternetTestCase):
         return self.connection
 
     def use_remote_server(self, connection):
-        runner = TaskRunner("table")
-        runner.connection = connection
+        from src.controller import Controller
+        controller = Controller(connection)
 
-        config_id = runner.add_configuration()
+        config_id = controller.add_configuration()
+
+        config = ConfigurationEntry(self.connection).get()
+        controller.update_configuration(config)
 
         json_data = {}
         json_data["remote_webtools_server_location"] = "https://0.0.0.0"
+        json_data["initialized"] = True
         connection.configurationentry.update_json_data(id=config_id, json_data=json_data)
 
     def initialize_database(self):

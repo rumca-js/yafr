@@ -93,6 +93,8 @@ def check_initialization():
         return
 
     connection = DbConnection(app.config["DB_FILE"])
+    Controller(connection).add_configuration()
+
     config = connection.configurationentry.get_first()
     connection.close()
 
@@ -1331,9 +1333,7 @@ def initialization_wizard():
         display_type = request.form.get("display_type", "")
 
         if not config:
-            temp_runner = TaskRunner(app.config["DB_FILE"])
-            temp_runner.connection = connection
-            temp_runner.add_configuration()
+            Controller(connection).add_configuration()
             config = connection.configurationentry.get_first()
 
         data = {}

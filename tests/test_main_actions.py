@@ -14,8 +14,7 @@ class MainActionsTest(DbTestCase):
         return entry_id
 
     def test_entry_bookmark(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        connection = self.initialize_database()
 
         entry_id = self.add_entry()
         self.assertTrue(entry_id)
@@ -28,8 +27,7 @@ class MainActionsTest(DbTestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_entry_unbookmark(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        connection = self.initialize_database()
 
         entry_id = self.add_entry()
         self.assertTrue(entry_id)
@@ -41,8 +39,7 @@ class MainActionsTest(DbTestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_entry_check_later(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        connection = self.initialize_database()
 
         entry_id = self.add_entry()
         connection.close()
@@ -53,8 +50,7 @@ class MainActionsTest(DbTestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_entry_vote(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        connection = self.initialize_database()
 
         entry_id = self.add_entry()
         connection.close()

@@ -14,8 +14,7 @@ class MainApiTest(DbTestCase):
         return entry_id
 
     def test_api_status(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        connection = self.initialize_database()
         connection.close()
 
         client = app.test_client()
@@ -25,8 +24,7 @@ class MainApiTest(DbTestCase):
         self.assertTrue(response.is_json)
 
     def test_api_stats(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        connection = self.initialize_database()
         connection.close()
 
         client = app.test_client()
@@ -36,8 +34,7 @@ class MainApiTest(DbTestCase):
         self.assertTrue(response.is_json)
 
     def test_api_entries(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        connection = self.initialize_database()
 
         entry_id = self.add_entry()
         connection.close()
@@ -51,8 +48,7 @@ class MainApiTest(DbTestCase):
         self.assertEqual(len(data["entries"]), 1)
 
     def test_api_entry(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        connection = self.initialize_database()
 
         entry_id = self.add_entry()
         connection.close()
@@ -66,8 +62,7 @@ class MainApiTest(DbTestCase):
         self.assertEqual(data["id"], entry_id)
 
     def test_api_sources(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        connection = self.initialize_database()
         connection.close()
 
         client = app.test_client()
@@ -79,8 +74,7 @@ class MainApiTest(DbTestCase):
         self.assertIn("sources", data)
 
     def test_api_entry_visit(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        connection = self.initialize_database()
 
         entry_id = self.add_entry()
         connection.close()

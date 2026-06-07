@@ -35,13 +35,11 @@ class InitializationWizardTest(DbTestCase):
     def test_initialization_wizard_post_existing(self):
         connection = self.create_db_connection("test_init_existing.db")
         # Ensure it exists but not initialized
-        runner_connection = connection
-        from src.taskrunner import TaskRunner
-        temp_runner = TaskRunner("test_init_existing.db")
-        temp_runner.connection = runner_connection
-        temp_runner.add_configuration()
-        
+        from src.controller import Controller
+        Controller(connection).add_configuration()
+
         client = app.test_client()
+
         response = client.post("/initialization-wizard", data={
             "initialization_type": "search_engine",
             "display_type": "gallery"

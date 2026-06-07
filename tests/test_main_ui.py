@@ -14,44 +14,45 @@ class MainUiTest(DbTestCase):
         return entry_id
 
     def test_root_redirect(self):
+        self.initialize_database()
+        self.connection.close()
         client = app.test_client()
         response = client.get("/")
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.headers["Location"].endswith("/search"))
 
     def test_search_page(self):
-        self.create_db_connection("test.db")
+        self.initialize_database()
         self.connection.close()
         client = app.test_client()
         response = client.get("/search")
         self.assertEqual(response.status_code, 200)
 
     def test_sources_page(self):
-        self.create_db_connection("test.db")
+        self.initialize_database()
         self.connection.close()
         client = app.test_client()
         response = client.get("/sources")
         self.assertEqual(response.status_code, 200)
 
     def test_entry_page(self):
-        connection = self.create_db_connection("test.db")
-        connection.truncate()
+        self.initialize_database()
         entry_id = self.add_entry()
-        connection.close()
+        self.connection.close()
 
         client = app.test_client()
         response = client.get(f"/entry?id={entry_id}")
         self.assertEqual(response.status_code, 200)
 
     def test_status_page(self):
-        self.create_db_connection("test.db")
+        self.initialize_database()
         self.connection.close()
         client = app.test_client()
         response = client.get("/status")
         self.assertEqual(response.status_code, 200)
 
     def test_admin_page(self):
-        self.create_db_connection("test.db")
+        self.initialize_database()
         self.connection.close()
         client = app.test_client()
         response = client.get("/admin")
