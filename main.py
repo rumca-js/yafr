@@ -982,7 +982,7 @@ def view_add():
         return render_template_string(html_text, view=view)
 
     html_text = get_view(VIEW_ADD_TEMPLATE, title="View add")
-    return render_template_string(html_text, rule=rule)
+    return render_template_string(html_text)
 
 
 @app.route("/view-edit", methods=["GET", "POST"])
@@ -991,13 +991,26 @@ def view_edit():
     controller = Controller(connection)
 
     view_id = request.args.get("id")
+    views = SearchView(connection = connection)
+    view = views.get(id=view_id)
+
     if request.method == "POST":
+        json_data["name"] = request.args.get("Name")
+        json_data["default"] = request.args.get("default")
+        json_data["priority"] = request.args.get("priority")
+        json_data["filter_statement"] = request.args.get("filter_statement")
+        json_data["order_by"] = request.args.get("order_by")
+
+        json_data["default"] = json_data["default"] == "True"
+        
+        connection.searchviews.update_json_data(id = view_id, json_data=json_data)
+
         connection.close()
         html_text = get_view(VIEW_EDIT_TEMPLATE, title="View edit")
-        return render_template_string(html_text, rule=rule)
+        return render_template_string(html_text, view=view)
 
-    html_text = get_view(VIEW_EDIT_TEMPLATE, title="View edit")
-    return render_template_string(html_text, rule=rule)
+    html_text = get_view(VIEW_ADD_TEMPLATE, title="View edit")
+    return render_template_string(html_text, view=view)
 
 
 @app.route("/view-remove")
