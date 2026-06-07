@@ -1,5 +1,6 @@
-from tests.dbtestcase import DbTestCase
 from linkarchivetools.model import SearchView
+
+from tests.dbtestcase import DbTestCase
 from main import app
 
 class MainViewsTest(DbTestCase):
@@ -30,7 +31,13 @@ class MainViewsTest(DbTestCase):
         self.connection.close()
 
         client = app.test_client()
-        response = client.post(f"/view-edit?id={view_id}&name=Updated+View&default=False&priority=2&filter_statement=test&order_by=id")
+        response = client.post(f"/view-edit?id={view_id}", data={
+            "name": "Updated View",
+            "default": "False",
+            "priority": "2",
+            "filter_statement": "test",
+            "order_by": "id"
+        })
         self.assertEqual(response.status_code, 200)
 
     def test_view_add_post(self):

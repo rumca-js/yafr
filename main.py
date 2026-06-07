@@ -1015,11 +1015,11 @@ def view_edit():
 
     if request.method == "POST":
         json_data = {}
-        json_data["name"] = request.args.get("name")
-        json_data["default"] = request.args.get("default")
-        json_data["priority"] = request.args.get("priority")
-        json_data["filter_statement"] = request.args.get("filter_statement")
-        json_data["order_by"] = request.args.get("order_by")
+        json_data["name"] = request.form.get("name")
+        json_data["default"] = request.form.get("default")
+        json_data["priority"] = request.form.get("priority")
+        json_data["filter_statement"] = request.form.get("filter_statement")
+        json_data["order_by"] = request.form.get("order_by")
 
         json_data["default"] = json_data["default"] == "True"
 
