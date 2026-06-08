@@ -1347,6 +1347,9 @@ def initialization_wizard():
         data["display_type"] = display_type
 
         connection.configurationentry.update_json_data(id=config.id, json_data=data)
+
+        Controller(connection).initialize()
+
         connection.close()
 
         return redirect(url_for("search"))

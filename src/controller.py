@@ -31,6 +31,13 @@ class Controller(object):
     def __init__(self, connection):
         self.connection = connection
 
+    def initialize(self):
+        self.setup_views()
+
+    def setup_views(self):
+        # TODO
+        pass
+
     def add_configuration(self):
         config = ConfigurationEntry(self.connection)
         if config.count() != 0:

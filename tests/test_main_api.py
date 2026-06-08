@@ -1,5 +1,8 @@
 from tests.dbtestcase import DbTestCase
-from linkarchivetools.model import Entries
+from linkarchivetools.model import (
+   Entries,
+   SearchView,
+)
 from main import app
 
 
@@ -99,11 +102,12 @@ class MainApiTest(DbTestCase):
 
     def test_api_views__not_empty(self):
         connection = self.initialize_database()
-        connection.close()
 
         views = SearchView(connection = connection)
         view_id = views.add()
         view = views.get(id=view_id)
+
+        connection.close()
 
         client = app.test_client()
         response = client.get("/api/views")
