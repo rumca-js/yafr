@@ -272,6 +272,14 @@ class AddLinkJobHandlerTest(DbTestCase):
 
         self.assertEqual(controller.count(), 1)
 
+        entries = controller.get_where({})
+        entries = list(entries)
+
+        self.assertEqual(len(entries), 1)
+        self.assertTrue(entries[0].title)
+        self.assertTrue(entries[0].description)
+        self.assertTrue(entries[0].date_created)
+
     def test_run__cfg(self):
         connection = self.initialize_database()
         self.disable_web_pages()
@@ -295,3 +303,30 @@ class AddLinkJobHandlerTest(DbTestCase):
         handler.run()
 
         self.assertEqual(controller.count(), 1)
+
+    def test_run__date_published(self):
+        connection = self.initialize_database()
+        self.disable_web_pages()
+
+        test_link = "https://www.youtube.com/watch?v=date_published"
+
+        controller = Entries(connection=connection)
+        self.assertEqual(controller.count(), 0)
+
+        job_id = BackgroundJob(connection=connection).create_single_job(job_name=BackgroundJob.JOB_LINK_ADD, subject=test_link)
+        self.assertTrue(job_id is not None)
+
+        job = BackgroundJob(connection=connection).get(job_id)
+        self.assertTrue(job)
+
+        handler = AddLinkJobHandler(connection = connection, job=job, table_name = self.database_name)
+        # call test function
+        handler.run()
+
+        self.assertEqual(controller.count(), 1)
+
+        entries = controller.get_where({})
+        entries = list(entries)
+
+        self.assertEqual(len(entries), 1)
+        self.assertTrue(entries[0].date_published != None)

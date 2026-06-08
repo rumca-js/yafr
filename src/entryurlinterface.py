@@ -17,6 +17,7 @@ class EntryUrlInterface(object):
         entry["description"] = url.get_description()
         entry["status_code"] = url.get_status_code()
         entry["thumbnail"] = url.get_thumbnail()
+        entry["date_published"] = url.get_date_published()
 
         if source:
             entry["source_id"] = source.id

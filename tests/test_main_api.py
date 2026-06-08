@@ -86,3 +86,27 @@ class MainApiTest(DbTestCase):
         self.assertTrue(response.is_json)
         data = response.get_json()
         self.assertTrue(data["status"])
+
+    def test_api_views__empty(self):
+        connection = self.initialize_database()
+        connection.close()
+
+        client = app.test_client()
+        response = client.get("/api/views")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.is_json)
+
+    def test_api_views__not_empty(self):
+        connection = self.initialize_database()
+        connection.close()
+
+        views = SearchView(connection = connection)
+        view_id = views.add()
+        view = views.get(id=view_id)
+
+        client = app.test_client()
+        response = client.get("/api/views")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.is_json)

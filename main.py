@@ -1235,7 +1235,7 @@ def jobs():
     html_text = get_view(JOBS_TEMPLATE, title="Jobs")
 
     order_by = [
-            connection.backgroundjob.get_table().c.date_created.desc()
+            connection.backgroundjob.get_table().c.date_created.asc()
             ]
 
     jobs = list(connection.backgroundjob.get_where(order_by=order_by))
@@ -1617,6 +1617,22 @@ def api_sources():
     json_data["sources"] = json_sources
 
     return jsonify(json_data)
+
+
+@app.route("/api/views")
+def api_views():
+    connection = DbConnection(app.config["DB_FILE"])
+    views = SearchView(connection=connection)
+    view_objects = views.get_table().get_where({})
+
+    json_views = []
+    for view in view_objects:
+        json_views.append({
+            "name": view.name,
+            "default": view.default
+        })
+
+    return jsonify({"views": json_views})
 
 
 def print_file(afile):
