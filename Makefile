@@ -25,3 +25,4 @@ reformat:
 
 test:
 	poetry run python -m unittest discover -s tests -v 2>&1 | tee test_output.txt
+	rm test*.db
