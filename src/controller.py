@@ -9,6 +9,7 @@ from linkarchivetools.model import (
    EntryRules,
    BackgroundJob,
    ConfigurationEntry,
+   SearchView,
 )
 from .urlhandler import UrlHandler
 
@@ -35,8 +36,17 @@ class Controller(object):
         self.setup_views()
 
     def setup_views(self):
-        # TODO
-        pass
+        views = SearchView(self.connection)
+        if self.connection.searchview.count() == 0:
+            view_id = views.add()
+            json_data = {
+                "name": "Default",
+                "default": True,
+                "priority": 1,
+                "filter_statement": "",
+                "order_by": "-date_published"
+            }
+            self.connection.searchview.update_json_data(id=view_id, json_data=json_data)
 
     def add_configuration(self):
         config = ConfigurationEntry(self.connection)
