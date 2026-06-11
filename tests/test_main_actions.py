@@ -59,3 +59,15 @@ class MainActionsTest(DbTestCase):
         response = client.post(f"/entry-vote?id={entry_id}", data={"entry-vote": "1"})
 
         self.assertEqual(response.status_code, 200)
+
+    def test_entry_reset(self):
+        connection = self.initialize_database()
+
+        entry_id = self.add_entry()
+        connection.close()
+
+        client = app.test_client()
+        response = client.get(f"/entry-reset?id={entry_id}")
+
+        self.assertEqual(response.status_code, 200)
+

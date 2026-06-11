@@ -465,12 +465,14 @@ def source_fetch():
 
     source_id = request.args.get("id")
     if source_id:
-        source = sources.get_table().get(id=source_id)
+        controller = Sources(connection)
+        source = controller.get(id=source_id)
 
-        job = BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source.id))
+        job = BackgroundJob(connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source.id))
 
         template_html = STR_TEMPLATE.replace("{template_string}", "Added source read job")
         html_text = get_view(template_html, title="OK")
+        connection.close()
         return render_template_string(html_text)
     else:
         template_html = STR_TEMPLATE.replace("{template_string}", "Cannot fetch source")
@@ -740,7 +742,7 @@ def entry_reset():
     entry_id = request.args.get("id")
 
     if entry_id:
-        BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_RESET_DATA, subject=str(entry_id))
+        BackgroundJob(connection).create_single_job(job_name=BackgroundJob.JOB_LINK_RESET_DATA, subject=str(entry_id))
         connection.close()
 
         template_html = STR_TEMPLATE.replace("{template_string}", "OK")
