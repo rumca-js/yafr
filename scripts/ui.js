@@ -279,18 +279,19 @@ function getSearchSuggestionContainer() {
 }
 
 
-function getOrderButtons() {
+function getOrderButtons(prefix = "") {
 
     let text = "";
     for (const style of getOrderPossibilities())
     {
         let style_real = style[0];
         let style_name = style[1];
+        let id = prefix + "order" + style_real;
         text += `
                 <li>
                     <div class="dropdown-item form-check">
-                        <input class="form-check-input me-2" type="radio" name="order_by" id="order${style_real}" value="${style_real}">
-                        <label class="form-check-label" for="order${style_real}">Order by ${style_name}</label>
+                        <input class="form-check-input me-2" type="radio" name="order_by" id="${id}" value="${style_real}">
+                        <label class="form-check-label" for="${id}">Order by ${style_name}</label>
                     </div>
                 </li>
           `;
@@ -300,16 +301,17 @@ function getOrderButtons() {
 }
 
 
-function getViewButtons() {
+function getViewButtons(prefix = "") {
 
     let text = "";
     for (const style of getViewStyles())
     {
+        let id = prefix + "view-" + style;
         text += `
                 <li>
                     <div class="dropdown-item form-check">
-                        <input class="form-check-input me-2" type="radio" name="viewMode" id="view-${style}" value="${style}">
-                        <label class="form-check-label" for="view-${style}">${style}</label>
+                        <input class="form-check-input me-2" type="radio" name="viewMode" id="${id}" value="${style}">
+                        <label class="form-check-label" for="${id}">${style}</label>
                     </div>
                 </li>
                 `;
@@ -319,79 +321,134 @@ function getViewButtons() {
 }
 
 
+function getThemeButtons(prefix = "") {
+	return `
+                <li>
+                    <div class="dropdown-item form-check">
+                        <input class="form-check-input me-2" type="radio" name="theme" id="${prefix}displayLight" value="style-light">
+                        <label class="form-check-label" for="${prefix}displayLight">Light</label>
+                    </div>
+                </li>
+                <li>
+                    <div class="dropdown-item form-check">
+                        <input class="form-check-input me-2" type="radio" name="theme" id="${prefix}displayDark" value="style-dark">
+                        <label class="form-check-label" for="${prefix}displayDark">Dark</label>
+                    </div>
+                </li>`;
+}
+
+
+function getCheckBoxes(prefix = "")  {
+	return `
+                <li>
+                    <div class="dropdown-item form-check">
+                        <input class="form-check-input me-2" type="checkbox" name="showIcons" id="${prefix}showIcons">
+                        <label class="form-check-label" for="${prefix}showIcons">Show icons</label>
+                    </div>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                    <div class="dropdown-item form-check">
+                        <input class="form-check-input me-2" type="checkbox" name="modal-preview" id="${prefix}modal-preview">
+                        <label class="form-check-label" for="${prefix}modal-preview" title="Click on entry opens preview">Modal preview</label>
+                    </div>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                    <div class="dropdown-item form-check">
+                        <input class="form-check-input me-2" type="checkbox" name="directLinks" id="${prefix}directLinks">
+                        <label class="form-check-label" for="${prefix}directLinks" title="Links lead directly to URL">Direct links</label>
+                    </div>
+                </li>
+
+                <li><hr class="dropdown-divider"></li>
+
+                <li>
+                    <div class="dropdown-item form-check">
+                        <input class="form-check-input me-2" type="checkbox" name="highlight-bookmarks" id="${prefix}highlight-bookmarks">
+                        <label class="form-check-label" for="${prefix}highlight-bookmarks" title="Highlights bookmarks">Highlight bookmark</label>
+                    </div>
+                </li>
+		`;
+}
+
+
 function getNavBarViewMenu() {
-    let view_buttons = getViewButtons();
-    let order_buttons = getOrderButtons();
 
     return `
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="navbarViewDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               View
             </a>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarViewDropdown">
-                <!-- View Type Radio Group -->
-                ${view_buttons}
-
-                <li><hr class="dropdown-divider"></li>
-
-                <!-- Theme Radio Group -->
-                <li>
-                    <div class="dropdown-item form-check">
-                        <input class="form-check-input me-2" type="radio" name="theme" id="displayLight" value="style-light">
-                        <label class="form-check-label" for="displayLight">Light</label>
-                    </div>
-                </li>
-                <li>
-                    <div class="dropdown-item form-check">
-                        <input class="form-check-input me-2" type="radio" name="theme" id="displayDark" value="style-dark">
-                        <label class="form-check-label" for="displayDark">Dark</label>
-                    </div>
-                </li>
-
-                <li><hr class="dropdown-divider"></li>
-
-                <!-- Order Radio Group -->
-                ${order_buttons}
-
-                <li><hr class="dropdown-divider"></li>
-
-                <!-- Checkboxes -->
-                <li>
-                    <div class="dropdown-item form-check">
-                        <input class="form-check-input me-2" type="checkbox" id="showIcons">
-                        <label class="form-check-label" for="showIcons">Show icons</label>
-                    </div>
-                </li>
-
-                <li><hr class="dropdown-divider"></li>
-
-                <li>
-                    <div class="dropdown-item form-check">
-                        <input class="form-check-input me-2" type="checkbox" id="modal-preview">
-                        <label class="form-check-label" for="directLinks" title="Click on entry opens preview">Modal preview</label>
-                    </div>
-                </li>
-
-                <li><hr class="dropdown-divider"></li>
-
-                <li>
-                    <div class="dropdown-item form-check">
-                        <input class="form-check-input me-2" type="checkbox" id="directLinks">
-                        <label class="form-check-label" for="directLinks" title="Links lead directly to URL">Direct links</label>
-                    </div>
-                </li>
-
-                <li><hr class="dropdown-divider"></li>
-
-                <li>
-                    <div class="dropdown-item form-check">
-                        <input class="form-check-input me-2" type="checkbox" id="highlight-bookmarks">
-                        <label class="form-check-label" for="directLinks" title="Highlights bookmarks">Highlight bookmark</label>
-                    </div>
-                </li>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarViewDropdown" id="navBarViewDiv">
+		<div></div>
             </ul>
           </li>
           `;
+}
+
+
+function getConfigurationElements() {
+    let view_buttons = getViewButtons("help-");
+    let order_buttons = getOrderButtons("help-");
+    let theme_buttons = getThemeButtons("help-");
+    let check_boxes = getCheckBoxes("help-");
+
+    return `
+    <div class="card mb-3 shadow-sm">
+        <div class="card-body">
+            <h6 class="card-subtitle mb-3 text-muted">View Settings</h6>
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Views
+                    </button>
+                    <ul class="dropdown-menu">
+                        ${view_buttons}
+                    </ul>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Order by
+                    </button>
+                    <ul class="dropdown-menu">
+                        ${order_buttons}
+                    </ul>
+                </div>
+
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Theme
+                    </button>
+                    <ul class="dropdown-menu">
+		        ${theme_buttons}
+                    </ul>
+                </div>
+
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Checks
+                    </button>
+                    <ul class="dropdown-menu">
+		        ${check_boxes}
+                    </ul>
+                </div>
+            </div>
+            
+            <h6 class="card-subtitle mb-3 text-muted">Quick Links</h6>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-primary" href="/check-later-list">Check later</a>
+                <a class="btn btn-primary" href="/sources">Sources</a>
+                <a class="btn btn-primary" href="/status">Status</a>
+                <a class="btn btn-primary" href="/admin">Admin</a>
+            </div>
+        </div>
+    </div>
+    `;
 }
 
 
@@ -449,10 +506,10 @@ function updateWidgets() {
     $('input[name="theme"][value="' + view_display_style + '"]').prop('checked', true);
     $('input[name="order_by"][value="' + sort_function + '"]').prop('checked', true);
 
-    $('#showIcons').prop('checked', view_show_icons);
-    $('#directLinks').prop('checked', entries_direct_links);
-    $('#highlight-bookmarks').prop('checked', highlight_bookmarks);
-    $('#modal-preview').prop('checked', click_behavior_modal_window);
+    $('input[name="showIcons"').prop('checked', view_show_icons);
+    $('input[name="directLinks"').prop('checked', entries_direct_links);
+    $('input[name="highlight-bookmarks"').prop('checked', highlight_bookmarks);
+    $('input[name="modal-preview"').prop('checked', click_behavior_modal_window);
 }
 
 

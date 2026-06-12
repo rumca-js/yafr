@@ -286,14 +286,14 @@ files = [
 
 [[package]]
 name = "filelock"
-version = "3.29.1"
+version = "3.29.3"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "filelock-3.29.1-py3-none-any.whl", hash = "sha256:85199dfd706869641b72b2e8955d5416a4b2b7dc4b0e8e6d97b4cc1299a6983b"},
-    {file = "filelock-3.29.1.tar.gz", hash = "sha256:d97e6b1b9757569626c58caa07dc4beb1613f4a2938b1e8cc81afca398906c9e"},
+    {file = "filelock-3.29.3-py3-none-any.whl", hash = "sha256:e58333029cc9b925f39aad59b1d8f0a1ad836af4e60d7217f4a4dba87461261d"},
+    {file = "filelock-3.29.3.tar.gz", hash = "sha256:7fc1b3f39cf172fd8203812043c57b8a65aef9969f38b6704f628b881f761a84"},
 ]
 
 [[package]]
@@ -461,14 +461,14 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "linkarchivetools"
-version = "0.1.78"
+version = "0.1.79"
 description = "Link Archive Tools"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "linkarchivetools-0.1.78-py3-none-any.whl", hash = "sha256:122a7a591847a220164ffd489266b7d884024ae17bbd4e66f4ac31b7cb9fce5c"},
-    {file = "linkarchivetools-0.1.78.tar.gz", hash = "sha256:db4e502779c41732b0fef76909178b5f7999bd29b55bbc8b6903d02571976eb9"},
+    {file = "linkarchivetools-0.1.79-py3-none-any.whl", hash = "sha256:a059d649cdf9b53765a46cfb0eae1d9cdba26b33a8c87798540e9e18a3a67735"},
+    {file = "linkarchivetools-0.1.79.tar.gz", hash = "sha256:238feec100cfa5b262ca0d66013bf31af7bd3cc6fcc807a42b35ae3351a1dc80"},
 ]
 
 [package.dependencies]

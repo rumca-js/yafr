@@ -830,10 +830,7 @@ PROJECT_TEMPLATE = """
   </div>
 
   <div id="helpPlace" style="display: none;">
-      <a class="btn btn-primary" href="/check-later-list">Check later</a>
-      <a class="btn btn-primary" href="/sources">Sources</a>
-      <a class="btn btn-primary" href="/status">Status</a>
-      <a class="btn btn-primary" href="/admin">Admin</a>
+      <div id="configurationElements"></div>
 
       <div id="version">
       </div>

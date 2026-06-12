@@ -30,6 +30,10 @@ function getEntryAPI() {
    return `/api/entries`;
 }
 
+function getViewsAPI() {
+   return `/api/views`;
+}
+
 function getEntryEditAPI() {
    return `/entry-edit`;
 }

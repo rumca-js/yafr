@@ -21,8 +21,8 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         sources = Sources(connection=connection)
         self.assertEqual(sources.count(), 0)
 
-        entries = Entries(connection=connection)
-        self.assertEqual(entries.count(), 0)
+        entry_controller = Entries(connection=connection)
+        self.assertEqual(entry_controller.count(), 0)
 
         sd_controller = SourceData(connection)
         self.assertEqual(sd_controller.count(), 0)
@@ -43,7 +43,12 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         handler.run()
 
         self.assertEqual(sources.count(), 1)
-        self.assertEqual(entries.count(), 2)
+        self.assertEqual(entry_controller.count(), 2)
+
+        entries = list(entry_controller.get_where({}))
+        self.assertEqual(len(entries), 2)
+        self.assertTrue(entries[0].link == "https://link1.com" or entries[1].link == "https://link1.com")
+        self.assertTrue(entries[0].link == "https://link2.com" or entries[1].link == "https://link2.com")
 
         self.assertEqual(BackgroundJob(connection=connection).count(), 1)
 
@@ -58,8 +63,8 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         sources = Sources(connection=connection)
         self.assertEqual(sources.count(), 0)
 
-        entries = Entries(connection=connection)
-        self.assertEqual(entries.count(), 0)
+        entry_controller = Entries(connection=connection)
+        self.assertEqual(entry_controller.count(), 0)
 
         source_id = sources.set(source_url=test_link, source_type=Sources.SOURCE_TYPE_RSS)
         self.assertTrue(source_id is not None)
@@ -80,7 +85,7 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         handler.run()
 
         self.assertEqual(sources.count(), 1)
-        self.assertTrue(entries.count() > 0)
+        self.assertTrue(entry_controller.count() > 0)
         self.assertEqual(BackgroundJob(connection=connection).count(), 1)
         self.assertEqual(sd_controller.count(), 1)
 

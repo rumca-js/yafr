@@ -310,6 +310,29 @@ function getIndicators(callback=null, error_callback=null) {
     }, error_callback);
 }
 
+
+function getViews(error_callback=null) {
+    let url_address = getViewsAPI();
+
+    getDynamicJson(url_address, function (data) { 
+       let text = "";
+
+       data.views.forEach(view => {
+	  let id = `search-view-id-${view.id}`;
+	  text += `
+	      <div>
+	       <li class="dropdown-item">
+                  <input class="form-check-input me-2" type="radio" name="viewSelector" value=${view.id} id=${id}>
+                   <label class="form-check-label" for="${id}">${view.name}</label>
+	       </li>
+	     </div>`;
+       });
+       $("#navBarViewDiv").html(text);
+
+    }, error_callback);
+}
+
+
 function getSystemIndicators() {
    getIndicators(function(data) {
        common_indicators = data.indicators;
@@ -323,6 +346,7 @@ function getSystemIndicators() {
 
 function getBasicPageElements() {
     getSystemIndicators();
+    getViews();
 }
 
 

@@ -220,6 +220,10 @@ function registerEventsListeners() {
    //-----------------------------------------------
    $(document).on('click', '#helpButton', function(e) {
        $("#helpPlace").toggle();
+       if ($("#helpPlace").is(":visible")) {
+           $("#configurationElements").html(getConfigurationElements());
+           updateWidgets();
+       }
    });
    
    
@@ -274,6 +278,18 @@ function registerEventsListeners() {
    $(document).on('change', 'input[name="viewMode"]', function () {
        view_display_type = $(this).val();
        fillListData();
+   });
+
+
+   //-----------------------------------------------
+   $(document).on('change', 'input[name="viewSelector"]', function () {
+    search_view_id = $(this).val();
+
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('view', search_view_id);
+    window.history.pushState({}, '', currentUrl);
+
+    performSearch();
    });
    
    
@@ -399,11 +415,9 @@ document.addEventListener('DOMContentLoaded', () => {
     $("#projectList").html(getProjectListText());
 
     const searchContainer = document.getElementById('searchContainer');
-
     readConfig();
     updateWidgets();
     registerEventsListeners();
-    getBasicPageElements();
 
     const urlParams = new URLSearchParams(window.location.search);
     const searchParam = urlParams.get('search');
@@ -420,6 +434,8 @@ document.addEventListener('DOMContentLoaded', () => {
             $("#statusLine").html("Cannot initialize search system");
         }
     }
-
-    $("#system-information").html(getSystemInformationHtml());
+    else {
+        getBasicPageElements();
+        onSystemReady();
+    }
 });

@@ -1633,6 +1633,7 @@ def api_views():
     json_views = []
     for view in view_objects:
         json_views.append({
+            "id": view.id,
             "name": view.name,
             "default": view.default
         })
