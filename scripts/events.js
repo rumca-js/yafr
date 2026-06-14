@@ -360,7 +360,6 @@ function registerEventsListeners() {
           container.innerHTML = `
            <iframe
                src="${src}"
-               title="YouTube video"
                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                allowfullscreen>
            </iframe>
