@@ -137,6 +137,7 @@ def parse_search(search, table, tags_table):
         "link": table.c.link,
         "source_url": table.c.source_url,
         "source_id": table.c.source_id,
+        #"source_title": table.c.source_title,
         "tag": tags_table.c.tag,
     }
 
@@ -163,6 +164,7 @@ def parse_search(search, table, tags_table):
           table.c.description.ilike(f"%{search}%"),
           table.c.link.ilike(f"%{search}%"),
           table.c.source_url.ilike(f"%{search}%"),
+          #table.c.source_title.ilike(f"%{search}%"),
           tags_table.c.tag.ilike(f"%{search}%"),
     ]
 
@@ -414,9 +416,14 @@ def source(source_id):
         source_op = source_ops[0]
 
     if request.method == "POST":
+        data = {}
         data["fetch_period"] = request.form.get("fetch_period", 0)
+        data["language"] = request.form.get("language")
+        data["auto_tag"] = request.form.get("auto_tag")
         data["xpath"] = request.form.get("xpath", "")
+
         connection.sources_table.update_json_data(id=source_op.id, json_data=data)
+
         html_text = get_view(OK_TEMPLATE, title="Updated")
         connection.close()
         return render_template_string(html_text)

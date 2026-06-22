@@ -328,28 +328,33 @@ SOURCE_TEMPLATE = """
     <a class="btn btn-primary" href="/">Home</a>
     <a class="btn btn-primary" href="/source-fetch?id={{source_item.id}}">Fetch</a>
     <a class="btn btn-primary" href="/remove-source?id={{source_item.id}}">Remove</a>
+    <a class="btn btn-primary" href="/search?search=source_id=={{source_item.id}}">Search</a>
 </div>
 
-<h1>Source {{source_item.title}}</h1>
+<h1>{{source_item.title}}</h1>
 
 <div>ID:{{source_item.id}}</div>
+<div>Url:<a href="{{source_item.url}}">{{source_item.url}}</a></div>
 <div>Enabled:{{source_item.enabled}}</div>
 <div>Type:{{source_item.source_type}}</div>
-<div>Search:<a class="btn btn-primary" href="/search?search=source_id=={{source_item.id}}">Search</a></div>
-<div>Url:<a href="{{source_item.url}}">{{source_item.url}}</a></div>
 <div>Thumbnail:<a href="{{source_item.favicon}}">{{source_item.favicon}}</a></div>
-<div>XPath:{{source_item.xpath}}</div>
 
+<p>
 <div>Date fetched:{{source_op_data.date_fetched}}</div>
 <div>Page hash:{{source_op_data.page_hash}}</div>
 <div>Body hash:{{source_op_data.body_hash}}</div>
 <div>Consecutive errors:{{source_op_data.consecutive_errors}}</div>
+</p>
 
 <form method="POST">
     <div><label for="fetch_period">Fetch period</label></div>
     <div><input type="search" id="fetch_period" name="fetch_period" value="{{source_item.fetch_period}}"/></div>
     <div><label for="xpath">Link acceptance 're' expression</label></div>
     <div><input type="search" id="xpath" name="xpath" value="{{source_item.xpath}}"/></div>
+    <div><label for="language">Language</label></div>
+    <div><input type="search" id="language" name="language" value="{{source_item.language}}"/></div>
+    <div><label for="auto_tag">Auto tag</label></div>
+    <div><input type="search" id="auto_tag" name="auto_tag" value="{{source_item.auto_tag}}"/></div>
     <button type="submit">Save</button>
 </form>
 """

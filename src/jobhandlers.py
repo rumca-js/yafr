@@ -9,6 +9,7 @@ from webtoolkit import (
    ContentLinkParser,
    HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
    HTTP_STATUS_TOO_MANY_REQUESTS,
+   DateUtils,
 )
 
 from linkarchivetools.model import (
@@ -95,13 +96,44 @@ class ProcessSourceJobHandler(GenericJobHandler):
             sources.delete(id=source.id)
             return True
 
-        sources_data = SourceData(self.connection)
-        if not sources_data.is_update_needed(source):
+        sd_controller = SourceData(self.connection)
+        if not sd_controller.is_update_needed(source):
             now = datetime.now()
             AppLogging(self.connection).debug(f"{source.url}: Update not needed @ {now}")
             return True
 
+        # if channel does not publish once a month, check it only once a day
+        entry = self.get_newest_entry(source)
+        if entry:
+            datetime_diff = datetime.now() - entry.date_published 
+            if datetime_diff.days > 30:
+                source_data = sd_controller.get_source_data(source)
+                if source_data and source_data.date_fetched:
+                    fetch_time_diff = datetime.now() - source_data.date_fetched
+                    if fetch_time_diff.days <= 0:
+                        sd_controller = SourceData(self.connection)
+                        sd_controller.mark_read(source)
+                        return True
+
         return self.check_source(source)
+
+    def get_newest_entry(self, source):
+        entries = Entries(connection=self.connection)
+        date_published = None
+        return_entry = None
+
+        #order_by = entries.get_table().get_table().c.date_published.desc()
+        #entries_where = entries.get_table().get_where({"source_id" : source.id}, order_by=order_by)
+        entries_where = entries.get_table().get_where({"source_id" : source.id})
+        for entry in entries_where:
+            if date_published is None:
+                date_published = entry.date_published
+                return_entry = entry
+            elif entry.date_published > date_published:
+                date_published = entry.date_published
+                return_entry = entry
+
+        return return_entry
 
     def update_source_type(self, source):
         if not source.source_type:
@@ -123,10 +155,21 @@ class ProcessSourceJobHandler(GenericJobHandler):
         response = url.get_response()
         if response is not None:
             if response.is_valid():
-                self.handle_valid_response(source, url, response)
+                sd_controller = SourceData(self.connection)
+                page_same = False
 
-                sourcedata = SourceData(self.connection)
-                sourcedata.mark_read(source)
+                source_data = sd_controller.get_source_data(source)
+                if source_data and source_data.page_hash and url.get_hash() and source_data.page_hash == url.get_hash():
+                    page_same = True
+
+                if source_data and source_data.body_hash and url.get_body_hash() and source_data.body_hash == url.get_body_hash():
+                    page_same = True
+
+                if not page_same:
+                    self.handle_valid_response(source, url, response)
+
+                sd_controller = SourceData(self.connection)
+                sd_controller.mark_read(source, url)
             else:
                 AppLogging(self.connection).error(f"URL:{source.url} Response is invalid")
         else:
@@ -203,6 +246,10 @@ class ProcessSourceJobHandler(GenericJobHandler):
         return url
 
     def handle_valid_response(self, source, url, response):
+        source_properties = url.get_properties()
+        sources = Sources(self.connection)
+        sources.set(source.url, source_properties, source_type=source.source_type)
+
         if source.source_type == Sources.SOURCE_TYPE_RSS:
             return self.handle_valid_response__rss(source, url, response)
         elif source.source_type == Sources.SOURCE_TYPE_PARSE:
@@ -215,11 +262,6 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 return self.handle_valid_response__rss(source, url, response)
 
     def handle_valid_response__links(self, source, url, response):
-        source_properties = url.get_properties()
-
-        sources = Sources(self.connection)
-        sources.set(source.url, source_properties, source_type=source.source_type)
-
         links = self.get_links(url)
         entries = Entries(connection=self.connection)
 
@@ -232,7 +274,13 @@ class ProcessSourceJobHandler(GenericJobHandler):
         entry_json = self.link_to_entry(link, source)
         if self.is_entry_ok(entry_json, source):
             entries = Entries(self.connection)
+
+            entry_json = self.update_entry_with_source(entry_json, source)
             entry_id = entries.add(entry_json, source)
+            if source.auto_tag:
+                tags_controller = EntryTags(connection=self.connection)
+                tags_controller.set(entry_id = entry_id, tags=source.auto_tag)
+
             entry = entries.get(id=entry_id)
 
             config_entry = ConfigurationEntry(self.connection).get()
@@ -287,12 +335,30 @@ class ProcessSourceJobHandler(GenericJobHandler):
         return entry
 
     def handle_valid_response__rss(self, source, url, response):
-        source_properties = url.get_properties()
         source_entries_json = url.get_entries()
 
-        sources = Sources(self.connection)
-        sources.set(source.url, source_properties)
+        if not self.is_new_entry(source, source_entries_json):
+            return
 
+        self.delete_source_entries(source, source_entries_json)
+        entries = Entries(self.connection)
+
+        for source_entry_json in source_entries_json:
+            entry_json_link = source_entry_json.get("link")
+            if self.is_in_db(entry_json_link):
+                continue
+
+            if self.is_entry_ok(source_entry_json, source):
+                source_entry_json = self.update_entry_with_source(source_entry_json, source)
+
+                entry_id = entries.add(source_entry_json, source)
+                if source.auto_tag:
+                    tags_controller = EntryTags(connection=self.connection)
+                    tags_controller.set(entry_id = entry_id, tags=source.auto_tag)
+
+                self.on_added_entry(source_entry_json)
+
+    def delete_source_entries(self, source, source_entries_json):
         entries = Entries(self.connection)
 
         entries_where = entries.get_table().get_where({"source_id" : source.id})
@@ -309,17 +375,31 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 entry_ids.append(entry.id)
 
         for entry_id in entry_ids:
-            print("Removing ID:{}".format(entry_id))
             entries.delete(id=entry_id)
 
+    def is_new_entry(self, source, source_entries_json):
+        new_entry = False
+        sd_controller = SourceData(self.connection)
+        source_data = sd_controller.get_source_data(source)
         for source_entry_json in source_entries_json:
-            entry_json_link = source_entry_json.get("link")
-            if self.is_in_db(entry_json_link):
-                continue
+            date_published = source_entry_json.get("date_published")
+            if date_published:
+                if DateUtils.to_utc_date(source_data.date_fetched) <= date_published:
+                    new_entry = True
+            else:
+                new_entry = True
+        return new_entry
 
-            if self.is_entry_ok(source_entry_json, source):
-                entries.add(source_entry_json, source)
-                self.on_added_entry(source_entry_json)
+    def update_entry_with_source(self, entry_json, source):
+        if not source:
+            return
+
+        if source.language:
+            entry_json["language"] = source.language
+        if source.age > 0:
+            entry_json["age"] = source.age
+
+        return entry_json
 
     def is_in_db(self, entry_link):
         entries = Entries(self.connection)
