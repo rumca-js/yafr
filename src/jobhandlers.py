@@ -381,6 +381,13 @@ class ProcessSourceJobHandler(GenericJobHandler):
         new_entry = False
         sd_controller = SourceData(self.connection)
         source_data = sd_controller.get_source_data(source)
+
+        if not source_data:
+            return True
+
+        if not source_data.date_fetched:
+            return True
+
         for source_entry_json in source_entries_json:
             date_published = source_entry_json.get("date_published")
             if date_published:
