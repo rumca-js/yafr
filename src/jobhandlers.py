@@ -70,28 +70,37 @@ class ProcessSourceJobHandler(GenericJobHandler):
         sources = Sources(self.connection)
         source = sources.get(id=source_id)
 
+        if self.check_source_entry_conditions(sources, source):
+            return True
+
+        if self.check_if_old_source_checked_once_a_day(sources, source):
+            return True
+
+        return self.check_source(source)
+
+    def check_source_entry_conditions(self, sources, source):
         if not source:
-            AppLogging(self.connection).debug(f"Source id: {source_id} Could not find source")
+            AppLogging(self.connection).debug(f"Could not find source")
             return True
 
         self.update_source_type(source)
 
-        source = sources.get(id=source_id)
+        source = sources.get(id=source.id)
 
         if not source.enabled:
-            AppLogging(self.connection).debug(f"Source id: {source_id} Source is not enabled")
+            AppLogging(self.connection).debug(f"Source id: {source.id} Source is not enabled")
             return True
 
         blocks = BlockEntry(self.connection)
         if blocks.is_blocked(source.url):
-            AppLogging(self.connection).debug(f"Source id: {source_id} Source is blocked by block rules")
+            AppLogging(self.connection).debug(f"Source id: {source.id} Source is blocked by block rules")
             sources = Sources(connection=self.connection)
             sources.delete(id=source.id)
             return True
 
         rules = EntryRules(self.connection)
         if rules.is_url_blocked(source.url):
-            AppLogging(self.connection).debug(f"Source id: {source_id} Source is blocked by entry rules")
+            AppLogging(self.connection).debug(f"Source id: {source.id} Source is blocked by entry rules")
             sources = Sources(connection=self.connection)
             sources.delete(id=source.id)
             return True
@@ -102,20 +111,23 @@ class ProcessSourceJobHandler(GenericJobHandler):
             AppLogging(self.connection).debug(f"{source.url}: Update not needed @ {now}")
             return True
 
+        return False
+
+    def check_if_old_source_checked_once_a_day(self, sources, source):
         # if channel does not publish once a month, check it only once a day
         entry = self.get_newest_entry(source)
         if entry:
-            datetime_diff = datetime.now() - entry.date_published 
-            if datetime_diff.days > 30:
-                source_data = sd_controller.get_source_data(source)
-                if source_data and source_data.date_fetched:
-                    fetch_time_diff = datetime.now() - source_data.date_fetched
-                    if fetch_time_diff.days <= 0:
-                        sd_controller = SourceData(self.connection)
-                        sd_controller.mark_read(source)
-                        return True
-
-        return self.check_source(source)
+            if entry.date_published:
+                datetime_diff = datetime.now() - entry.date_published 
+                if datetime_diff.days > 30:
+                    sd_controller = SourceData(self.connection)
+                    source_data = sd_controller.get_source_data(source)
+                    if source_data and source_data.date_fetched:
+                        fetch_time_diff = datetime.now() - source_data.date_fetched
+                        if fetch_time_diff.days <= 0:
+                            sd_controller.mark_read(source)
+                            return True
+        return False
 
     def get_newest_entry(self, source):
         entries = Entries(connection=self.connection)
@@ -127,8 +139,9 @@ class ProcessSourceJobHandler(GenericJobHandler):
         entries_where = entries.get_table().get_where({"source_id" : source.id})
         for entry in entries_where:
             if date_published is None:
-                date_published = entry.date_published
-                return_entry = entry
+                if entry.date_published:
+                    date_published = entry.date_published
+                    return_entry = entry
             elif entry.date_published > date_published:
                 date_published = entry.date_published
                 return_entry = entry
@@ -158,6 +171,17 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 sd_controller = SourceData(self.connection)
                 page_same = False
 
+                if not self.is_source_entry(source):
+                    AppLogging(self.connection).debug(f"Source {source.id} does not have any entries in db!")
+
+                    new_data={}
+                    new_data["page_hash"] = None
+                    new_data["body_hash"] = None
+                    new_data["date_fetched"] = None
+                    op_data = sd_controller.get_source_data(source=source)
+                    if op_data:
+                        sd_controller.get_table().update_json_data(id=op_data.id, json_data=new_data)
+
                 source_data = sd_controller.get_source_data(source)
                 if source_data and source_data.page_hash and url.get_hash() and source_data.page_hash == url.get_hash():
                     page_same = True
@@ -177,6 +201,14 @@ class ProcessSourceJobHandler(GenericJobHandler):
             return False
 
         return True
+
+    def is_source_entry(self, source):
+        if source:
+            entries = Entries(self.connection)
+            entries_where = entries.get_table().get_where({"source_id" : source.id})
+            entries_where = list(entries_where)
+            return len(entries_where) != 0
+        return False
 
     def get_response_real(self, source):
         while True:
