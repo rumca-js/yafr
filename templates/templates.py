@@ -327,8 +327,8 @@ SOURCE_TEMPLATE = """
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
     <a class="btn btn-primary" href="/source-fetch?id={{source_item.id}}">Fetch</a>
-    <a class="btn btn-primary" href="/remove-source?id={{source_item.id}}">Remove</a>
     <a class="btn btn-primary" href="/search?search=source_id=={{source_item.id}}">Search</a>
+    <a class="btn btn-primary" href="/remove-source?id={{source_item.id}}">Remove</a>
 </div>
 
 <h1>{{source_item.title}}</h1>
@@ -755,8 +755,13 @@ CONFIGURATION_TEMPLATE = """
 
 <form method="POST">
 {% for config_setting, config_value in configuration.items() %}
+    {% if config_setting == "instance_description" %}
     <div><label for="{{config_setting}}">{{config_setting}}</label></div>
-    <div><input type="search" id="{{config_setting}}" name="{{config_setting}}" value="{{config_value}}"/></div>
+    <div><textarea type="search" id="{{config_setting}}" name="{{config_setting}}" size="30">{{config_value}}</textarea></div>
+    {% else %}
+    <div><label for="{{config_setting}}">{{config_setting}}</label></div>
+    <div><input type="search" id="{{config_setting}}" name="{{config_setting}}" value="{{config_value}}" size="30"/></div>
+    {% endif %}
 {% endfor %}
    <button type="submit">Search</button>
 </form>

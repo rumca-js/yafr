@@ -258,14 +258,14 @@ files = [
 
 [[package]]
 name = "click"
-version = "8.4.1"
+version = "8.4.2"
 description = "Composable command line interface toolkit"
 optional = false
 python-versions = ">=3.10"
 groups = ["main", "dev"]
 files = [
-    {file = "click-8.4.1-py3-none-any.whl", hash = "sha256:482be17c6991b8c19c5429a1e995d9b0efdbb63172824c41f99965dc0ade8ec2"},
-    {file = "click-8.4.1.tar.gz", hash = "sha256:918b5633eddf6b41c32d4f454bf0de810065c74e3f7dbf8ee5452f8be88d3e96"},
+    {file = "click-8.4.2-py3-none-any.whl", hash = "sha256:e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76"},
+    {file = "click-8.4.2.tar.gz", hash = "sha256:9a6cea6e60b17ebe0a44c5cc636d94f09bd66142c1cd7d8b4cd731c4917a15f6"},
 ]
 
 [package.dependencies]
@@ -461,14 +461,14 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "linkarchivetools"
-version = "0.1.85"
+version = "0.1.86"
 description = "Link Archive Tools"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "linkarchivetools-0.1.85-py3-none-any.whl", hash = "sha256:7c3c9a7241948348e44a56874bbc6380786948456845ddeb3b936470a7039f98"},
-    {file = "linkarchivetools-0.1.85.tar.gz", hash = "sha256:e3dfa2bca059aae5230925ec4fbb2cc6032b96ac2931aa7f0dd706b8d820c8b9"},
+    {file = "linkarchivetools-0.1.86-py3-none-any.whl", hash = "sha256:ea8600aa9cb87882f7047af463e5d21c0e5bb54d91b7673bf254ac03be541319"},
+    {file = "linkarchivetools-0.1.86.tar.gz", hash = "sha256:af4063e6a5cce64194263f229918c7db00a8e6845b142598a436a7e928e447bc"},
 ]
 
 [package.dependencies]

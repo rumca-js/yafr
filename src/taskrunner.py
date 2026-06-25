@@ -21,6 +21,7 @@ from linkarchivetools.model import (
 from .controller import Controller
 from .system import System
 from .jobhandlers import *
+from .wizard import Wizard
 
 
 class TaskRunner(object):
@@ -34,7 +35,7 @@ class TaskRunner(object):
 
         self.start_reading = True
 
-    def start(self, init_sources=None):
+    def start(self):
         """
         Called from a thread
         """
@@ -46,8 +47,8 @@ class TaskRunner(object):
 
             config_entry = ConfigurationEntry(self.connection).get()
             if not config_entry.initialized:
-                controller.update_configuration(config_entry)
-                self.init_sources(init_sources)
+                wizard = Wizard(self.connection)
+                wziard.init(config_entry)
 
             self.close()
 
@@ -59,14 +60,6 @@ class TaskRunner(object):
         controller = Controller(self.connection)
         controller.add_configuration()
         controller.update_configuration(ConfigurationEntry(self.connection).get())
-
-    def init_sources(self, init_sources):
-        if init_sources is None:
-            return
-
-        for source_url in init_sources:
-            sources = Sources(self.connection)
-            sources.set(source_url)
 
     def connect(self):
         self.connection = DbConnection(self.table_name)

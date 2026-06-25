@@ -108,7 +108,98 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         self.assertTrue(source_data.date_fetched)
         self.assertTrue(source_data.date_fetched > datetime_start)
 
-    def test_run__rss__no_social_data(self):
+    def test_run__rss__reads_entries(self):
+        connection = self.initialize_database()
+        self.disable_web_pages()
+
+        datetime_start = datetime.now()
+
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=SAMTIMESAMTIMESAMTIMESAM"
+
+        sources = Sources(connection=connection)
+        self.assertEqual(sources.count(), 0)
+
+        entry_controller = Entries(connection=connection)
+        self.assertEqual(entry_controller.count(), 0)
+
+        source_id = sources.set(
+            source_url=test_link, source_type=Sources.SOURCE_TYPE_RSS
+        )
+        self.assertTrue(source_id is not None)
+        self.assertEqual(sources.count(), 1)
+
+        sd_controller = SourceData(connection)
+        self.assertEqual(sd_controller.count(), 0)
+
+        job_id = BackgroundJob(connection=connection).create_single_job(
+            job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source_id)
+        )
+        self.assertTrue(job_id is not None)
+        self.assertEqual(BackgroundJob(connection=connection).count(), 1)
+
+        job = BackgroundJob(connection=connection).get(job_id)
+        self.assertTrue(job)
+
+        handler = ProcessSourceJobHandler(
+            connection=connection, job=job, table_name=self.database_name
+        )
+        # call test function
+        handler.run()
+
+        self.assertTrue(entry_controller.count() > 0)
+
+    def test_run__rss__reads_entries__sets_language_age(self):
+        connection = self.initialize_database()
+        self.disable_web_pages()
+
+        datetime_start = datetime.now()
+
+        test_link = "https://www.youtube.com/feeds/videos.xml?channel_id=SAMTIMESAMTIMESAMTIMESAM"
+
+        sources = Sources(connection=connection)
+        self.assertEqual(sources.count(), 0)
+
+        entry_controller = Entries(connection=connection)
+        self.assertEqual(entry_controller.count(), 0)
+
+        source_id = sources.set(
+            source_url=test_link, source_type=Sources.SOURCE_TYPE_RSS
+        )
+        self.assertTrue(source_id is not None)
+        self.assertEqual(sources.count(), 1)
+
+        json_data = {}
+        json_data["language"] = 'it'
+        json_data["age"] = 5
+        sources.get_table().update_json_data(source_id, json_data=json_data)
+
+        sd_controller = SourceData(connection)
+        self.assertEqual(sd_controller.count(), 0)
+
+        job_id = BackgroundJob(connection=connection).create_single_job(
+            job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source_id)
+        )
+        self.assertTrue(job_id is not None)
+        self.assertEqual(BackgroundJob(connection=connection).count(), 1)
+
+        job = BackgroundJob(connection=connection).get(job_id)
+        self.assertTrue(job)
+
+        handler = ProcessSourceJobHandler(
+            connection=connection, job=job, table_name=self.database_name
+        )
+        # call test function
+        handler.run()
+
+        self.assertEqual(sources.count(), 1)
+        self.assertTrue(entry_controller.count() > 0)
+        self.assertEqual(BackgroundJob(connection=connection).count(), 1)
+
+        for entry in entry_controller.get_where({}):
+            self.assertEqual(entry.language, 'it')
+            self.assertEqual(entry.age, 5)
+
+    def test_run__rss__creates_source_data(self):
         connection = self.initialize_database()
         self.disable_web_pages()
 
@@ -159,7 +250,7 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         self.assertTrue(source_data.date_fetched)
         self.assertTrue(source_data.date_fetched > datetime_start)
 
-    def test_run__rss__updates_social_data(self):
+    def test_run__rss__updates_source_data(self):
         connection = self.initialize_database()
         self.disable_web_pages()
 
@@ -249,7 +340,47 @@ class ProcessSourceJobHandlerTest(DbTestCase):
         self.assertEqual(controller.count(), 1)
 
         source = sources.get(source_id)
-        self.assertEqual(source.source_type, Sources.SOURCE_TYPE_PARSE)
+        self.assertEqual(source.source_type, Sources.SOURCE_TYPE_RSS)
+
+    def test_run__rss__updates__source(self):
+        connection = self.initialize_database()
+        self.disable_web_pages()
+
+        sources = Sources(connection=connection)
+        self.assertEqual(sources.count(), 0)
+
+        test_link = "https://page-with-language.com"
+
+        source_id = sources.set(
+            source_url=test_link, source_type=Sources.SOURCE_TYPE_RSS
+        )
+
+        sd_controller = SourceData(connection)
+        self.assertEqual(sd_controller.count(), 0)
+
+        job_id = BackgroundJob(connection=connection).create_single_job(
+            job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source_id)
+        )
+        self.assertTrue(job_id is not None)
+        self.assertEqual(BackgroundJob(connection=connection).count(), 1)
+
+        job = BackgroundJob(connection=connection).get(job_id)
+        self.assertTrue(job)
+
+        handler = ProcessSourceJobHandler(
+            connection=connection, job=job, table_name=self.database_name
+        )
+        # call test function
+        handler.run()
+
+        self.assertEqual(sources.count(), 1)
+        self.assertEqual(BackgroundJob(connection=connection).count(), 1)
+
+        source = sources.get(source_id)
+
+        self.assertEqual(source.source_type, Sources.SOURCE_TYPE_RSS)
+        self.assertEqual(source.title, "Page with a 'it' language")
+        self.assertEqual(source.language, "it")
 
     def test_run__remove(self):
         connection = self.initialize_database()

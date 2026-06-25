@@ -70,6 +70,11 @@ class ProcessSourceJobHandler(GenericJobHandler):
         sources = Sources(self.connection)
         source = sources.get(id=source_id)
 
+        if source:
+            self.update_source_type(source)
+
+        source = sources.get(id=source_id)
+
         if self.check_source_entry_conditions(sources, source):
             return True
 
@@ -82,10 +87,6 @@ class ProcessSourceJobHandler(GenericJobHandler):
         if not source:
             AppLogging(self.connection).debug(f"Could not find source")
             return True
-
-        self.update_source_type(source)
-
-        source = sources.get(id=source.id)
 
         if not source.enabled:
             AppLogging(self.connection).debug(f"Source id: {source.id} Source is not enabled")
@@ -172,14 +173,14 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 page_same = False
 
                 if not self.is_source_entry(source):
-                    AppLogging(self.connection).debug(f"Source {source.id} does not have any entries in db!")
+                    # AppLogging(self.connection).debug(f"Source {source.id} does not have any entries in db!")
 
-                    new_data={}
-                    new_data["page_hash"] = None
-                    new_data["body_hash"] = None
-                    new_data["date_fetched"] = None
                     op_data = sd_controller.get_source_data(source=source)
                     if op_data:
+                        new_data={}
+                        new_data["page_hash"] = None
+                        new_data["body_hash"] = None
+                        new_data["date_fetched"] = None
                         sd_controller.get_table().update_json_data(id=op_data.id, json_data=new_data)
 
                 source_data = sd_controller.get_source_data(source)
@@ -220,7 +221,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
             if response:
                 if (response.get_status_code() == HTTP_STATUS_TOO_MANY_REQUESTS or
                     response.get_status_code() == HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS):
-                    AppLogging(self.connection).debug("Retry of request")
+                    AppLogging(self.connection).debug("Retry of request. Waiting")
+                    time.sleep(20)
                     continue
             if response is None:
                 AppLogging(self.connection).error(f"Source ID:{source.id} URL:{source.url} No response")
@@ -309,15 +311,18 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
             entry_json = self.update_entry_with_source(entry_json, source)
             entry_id = entries.add(entry_json, source)
-            if source.auto_tag:
-                tags_controller = EntryTags(connection=self.connection)
-                tags_controller.set(entry_id = entry_id, tags=source.auto_tag)
+            if entry_id is not None:
+                if source.auto_tag:
+                    tags_controller = EntryTags(connection=self.connection)
+                    tags_controller.set(entry_id = entry_id, tags=source.auto_tag)
 
-            entry = entries.get(id=entry_id)
+                entry = entries.get(id=entry_id)
 
-            config_entry = ConfigurationEntry(self.connection).get()
-            if config_entry.enable_social_data and config_entry.new_entries_fetch_social_data:
-                BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry_id))
+                config_entry = ConfigurationEntry(self.connection).get()
+                if config_entry.enable_social_data and config_entry.new_entries_fetch_social_data:
+                    BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry_id))
+            else:
+                AppLogging(self.connection).error("Could not add entry")
 
     def get_links(self, url):
         # TODO this should be from configuration
@@ -384,11 +389,14 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 source_entry_json = self.update_entry_with_source(source_entry_json, source)
 
                 entry_id = entries.add(source_entry_json, source)
-                if source.auto_tag:
-                    tags_controller = EntryTags(connection=self.connection)
-                    tags_controller.set(entry_id = entry_id, tags=source.auto_tag)
+                if entry_id is not None:
+                    if source.auto_tag:
+                        tags_controller = EntryTags(connection=self.connection)
+                        tags_controller.set(entry_id = entry_id, tags=source.auto_tag)
 
-                self.on_added_entry(source_entry_json)
+                    self.on_added_entry(source_entry_json)
+                else:
+                    AppLogging(self.connection).error("Could not add entry")
 
     def delete_source_entries(self, source, source_entries_json):
         entries = Entries(self.connection)
@@ -650,7 +658,10 @@ class AddLinkJobHandler(GenericJobHandler):
         if bookmarked:
             entry_json["bookmarked"] = True
 
-        entries.add(entry_json)
+        entry_id = entries.add(entry_json)
+        if entry_id is None:
+            AppLogging(self.connection).error("Could not add entry")
+
         return True
 
 
