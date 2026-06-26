@@ -341,8 +341,8 @@ SOURCE_TEMPLATE = """
 
 <p>
 <div>Date fetched:{{source_op_data.date_fetched}}</div>
-<div>Page hash:{{source_op_data.page_hash}}</div>
-<div>Body hash:{{source_op_data.body_hash}}</div>
+<div>Page hash:{{page_hash}}</div>
+<div>Body hash:{{body_hash}}</div>
 <div>Consecutive errors:{{source_op_data.consecutive_errors}}</div>
 </p>
 
@@ -709,7 +709,7 @@ JOBS_TEMPLATE = """
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
     <a class="btn btn-primary" href="/add-job">Add job</a>
-    <a class="btn btn-primary" href="/remove-all-jobs">Clear</a>
+    <a class="btn btn-primary" href="/remove-all-jobs">Remove All</a>
 </div>
 
 <h1>Jobs {{len_jobs}}</h1>
@@ -720,6 +720,7 @@ JOBS_TEMPLATE = """
              ID:{{job.id}}, 
              [{{job.date_created}}]
              {{job.job}}: {{job.subject}},
+             <a class="btn btn-secondary btn-sm" href="/remove-job?id={{job.id}}">X</a>
         </div>
     {% endfor %}
 </div>

@@ -183,12 +183,12 @@ class ProcessSourceJobHandler(GenericJobHandler):
                         new_data["date_fetched"] = None
                         sd_controller.get_table().update_json_data(id=op_data.id, json_data=new_data)
 
-                source_data = sd_controller.get_source_data(source)
-                if source_data and source_data.page_hash and url.get_hash() and source_data.page_hash == url.get_hash():
-                    page_same = True
+                #source_data = sd_controller.get_source_data(source)
+                #if source_data and source_data.page_hash and url.get_hash() and source_data.page_hash == url.get_hash():
+                #    page_same = True
 
-                if source_data and source_data.body_hash and url.get_body_hash() and source_data.body_hash == url.get_body_hash():
-                    page_same = True
+                #if source_data and source_data.body_hash and url.get_body_hash() and source_data.body_hash == url.get_body_hash():
+                #    page_same = True
 
                 if not page_same:
                     self.handle_valid_response(source, url, response)
@@ -374,8 +374,9 @@ class ProcessSourceJobHandler(GenericJobHandler):
     def handle_valid_response__rss(self, source, url, response):
         source_entries_json = url.get_entries()
 
-        if not self.is_new_entry(source, source_entries_json):
-            return
+        # TODO - if job was created then it should be processed?
+        #if not self.is_new_entry(source, source_entries_json):
+        #    return
 
         self.delete_source_entries(source, source_entries_json)
         entries = Entries(self.connection)

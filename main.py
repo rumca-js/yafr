@@ -40,6 +40,7 @@ from linkarchivetools.model import (
    source_and_entries_to_rss,
 )
 from linkarchivetools.utils.reflected import ReflectedTable
+from webtoolkit import json_encode_field
 
 from src.urlhandler import UrlHandler
 from templates.templates import *
@@ -431,7 +432,14 @@ def source(source_id):
     if source_item:
         html_text = get_view(SOURCE_TEMPLATE, title=source_item.title)
 
-        return render_template_string(html_text, source_item=source_item, source_op_data = source_op)
+        if source_op:
+            page_hash = json_encode_field(source_op.page_hash)
+            body_hash = json_encode_field(source_op.body_hash)
+        else:
+            page_hash = None
+            body_hash = None
+
+        return render_template_string(html_text, source_item=source_item, source_op_data = source_op,  page_hash = page_hash, body_hash = body_hash)
     else:
         html_text = get_view(NOK_TEMPLATE, title="Cannot find source")
         return render_template_string(html_text)
@@ -1211,7 +1219,7 @@ def remove_entry():
     entry_id = request.args.get("id")
 
     entry = connection.entries_table.get(id=entry_id)
-    if source:
+    if entry:
         connection.entries_table.delete_where({"id" : entry.id})
 
     html_text = get_view(OK_TEMPLATE, title="Remove entry")
@@ -1275,6 +1283,22 @@ def add_job():
 
     html_text = get_view(ADD_JOB_TEMPLATE, title="Add job")
     return render_template_string(html_text, raw_data="")
+
+
+@app.route("/remove-job")
+def remove_job():
+    connection = DbConnection(app.config["DB_FILE"])
+
+    job_id = request.args.get("id")
+
+    job = connection.backgroundjob.get(id=job_id)
+    if job:
+        connection.backgroundjob.delete_where({"id" : job.id})
+        html_text = get_view(OK_TEMPLATE, title="Remove job")
+        return render_template_string(html_text)
+    else:
+        html_text = get_view(template_html, title="Cannot find this job")
+        return render_template_string(html_text)
 
 
 def get_stats_map(connection):
