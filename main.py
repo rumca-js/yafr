@@ -88,12 +88,17 @@ if not app.config["DB_FILE"].exists():
 runner = TaskRunner(app.config["DB_FILE"])
 
 
+def get_connection():
+    connection = DbConnection(app.config["DB_FILE"])
+    return connection
+
+
 @app.before_request
 def check_initialization():
     if request.endpoint in ("initialization_wizard", "scripts", "styles", "static"):
         return
 
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     Controller(connection).add_configuration()
 
     config = connection.configurationentry.get_first()
@@ -318,7 +323,7 @@ def main_index():
 
 @app.route("/index")
 def index():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     config = connection.configurationentry.get_first()
     html_text = get_view(INDEX_TEMPLATE, title=config.instance_title)
     return render_template_string(html_text, version=__version__, title=config.instance_title)
@@ -336,7 +341,7 @@ def styles(filename):
 
 @app.route("/search")
 def search():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     config = connection.configurationentry.get_first()
 
     default_values = {}
@@ -347,7 +352,7 @@ def search():
 
 @app.route("/sources")
 def sources():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     search = request.args.get("search")
 
@@ -391,7 +396,7 @@ def sources():
 
 @app.route("/sources-fetch-period", methods=["GET", "POST"])
 def sources_fetch_period():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     if request.method == "POST":
         fetch_period = request.form.get("fetch-period", 0)
@@ -408,7 +413,7 @@ def sources_fetch_period():
 
 @app.route("/source/<int:source_id>", methods=["GET", "POST"])
 def source(source_id):
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     source_item = connection.sources_table.get(id=source_id)
     source_ops = list(connection.sourceoperationaldata.get_where({"source_obj_id" : source_id}))
@@ -447,7 +452,7 @@ def source(source_id):
 
 @app.route("/source-edit", methods=["GET", "POST"])
 def source_edit():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     source_id = request.args.get("id")
     controller = Sources(connection)
@@ -476,7 +481,7 @@ def source_edit():
 
 @app.route("/source-fetch")
 def source_fetch():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     source_id = request.args.get("id")
     if source_id:
@@ -497,7 +502,7 @@ def source_fetch():
 
 @app.route("/add-sources", methods=["GET", "POST"])
 def add_sources():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     if request.method == "POST":
         raw_text = request.form.get("sources", "")
@@ -516,7 +521,7 @@ def add_sources():
 
 @app.route("/add-links", methods=["GET", "POST"])
 def add_links():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     if request.method == "POST":
         raw_text = request.form.get("sources", "")
@@ -535,7 +540,7 @@ def add_links():
 
 @app.route("/entry", methods=["GET"])
 def entry():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
     entries = Entries(connection=connection)
@@ -547,7 +552,7 @@ def entry():
 
 @app.route("/entry-bookmark")
 def entry_bookmark():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
     entries = Entries(connection=connection)
@@ -564,7 +569,7 @@ def entry_bookmark():
 
 @app.route("/entry-unbookmark")
 def entry_unbookmark():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
     entries = Entries(connection=connection)
@@ -581,7 +586,7 @@ def entry_unbookmark():
 
 @app.route("/check-later-list")
 def check_later_list():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     check_controller = CheckLater(connection=connection)
     entries = check_controller.get_entries()
@@ -592,7 +597,7 @@ def check_later_list():
 
 @app.route("/check-later-clear", methods=["GET"])
 def check_later_clear():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     check_controller = CheckLater(connection=connection)
     check_controller.truncate()
@@ -604,7 +609,7 @@ def check_later_clear():
 
 @app.route("/entry-dynamic-data", methods=["GET"])
 def entry_dynamic_detail():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
     entries = Entries(connection)
@@ -627,7 +632,7 @@ def entry_dynamic_detail():
 
 @app.route("/entry-check-later", methods=["GET"])
 def entry_check_later():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
 
@@ -652,7 +657,7 @@ def entry_check_later():
 
 @app.route("/entry-not-check-later", methods=["GET"])
 def entry_not_check_later():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
 
@@ -676,7 +681,7 @@ def entry_not_check_later():
 
 @app.route("/entry-edit", methods=["GET", "POST"])
 def entry_edit():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
     if not entry_id:
@@ -725,7 +730,7 @@ def entry_edit():
 
 @app.route("/entry-update")
 def entry_update():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
 
@@ -752,7 +757,7 @@ def entry_update():
 
 @app.route("/entry-reset")
 def entry_reset():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
 
@@ -772,7 +777,7 @@ def entry_reset():
 
 @app.route("/entry-vote", methods=["GET", "POST"])
 def entry_vote():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
     current_vote = 0
@@ -796,7 +801,7 @@ def entry_vote():
 
 @app.route("/entry-tag", methods=["GET", "POST"])
 def entry_tag():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     table = ReflectedTable(connection.engine, connection.connection)
     table.vacuum()
 
@@ -824,7 +829,7 @@ def entry_tag():
 
 @app.route("/rss/<int:source_id>")
 def rss(source_id):
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     source = connection.sources_table.get(id=source_id)
     entries = connection.entries_table.get_where({"source_id":source_id})
@@ -848,7 +853,7 @@ def block_rules():
 
 @app.route("/block-url", methods=["GET", "POST"])
 def block_url():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     controller = BlockEntry(connection = connection)
 
@@ -873,7 +878,7 @@ def block_url():
 
 @app.route("/define-block-rules", methods=["GET", "POST"])
 def define_block_rules():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     controller = BlockEntry(connection = connection)
 
@@ -903,7 +908,7 @@ def define_block_rules():
 
 @app.route("/entry-rules")
 def entry_rules():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     controller = Controller(connection)
 
     rules = EntryRules(connection = connection)
@@ -916,7 +921,7 @@ def entry_rules():
 
 @app.route("/entry-rule")
 def entry_rule():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     controller = Controller(connection)
 
     entry_rule_id = request.args.get("id")
@@ -931,7 +936,7 @@ def entry_rule():
 
 @app.route("/entry-rule-add", methods=["GET", "POST"])
 def entry_rule_add():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     controller = Controller(connection)
 
     if request.method == "POST":
@@ -947,7 +952,7 @@ def entry_rule_add():
 
 @app.route("/entry-rule-edit", methods=["GET", "POST"])
 def entry_rule_edit():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     controller = Controller(connection)
 
     entry_rule_id = request.args.get("id")
@@ -962,7 +967,7 @@ def entry_rule_edit():
 
 @app.route("/entry-rule-remove")
 def entry_rule_remove():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     controller = Controller(connection)
 
     entry_rule_id = request.args.get("id")
@@ -976,7 +981,7 @@ def entry_rule_remove():
 
 @app.route("/views")
 def views():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     controller = Controller(connection)
 
     views = SearchView(connection = connection)
@@ -989,7 +994,7 @@ def views():
 
 @app.route("/view")
 def view():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     controller = Controller(connection)
 
     entry_rule_id = request.args.get("id")
@@ -1004,7 +1009,7 @@ def view():
 
 @app.route("/view-add", methods=["GET", "POST"])
 def view_add():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     controller = Controller(connection)
 
     if request.method == "POST":
@@ -1023,7 +1028,7 @@ def view_add():
 
 @app.route("/view-edit", methods=["GET", "POST"])
 def view_edit():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     controller = Controller(connection)
 
     view_id = request.args.get("id")
@@ -1053,7 +1058,7 @@ def view_edit():
 
 @app.route("/view-remove")
 def view_remove():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     controller = Controller(connection)
 
     view_id = request.args.get("id")
@@ -1067,7 +1072,7 @@ def view_remove():
 
 @app.route("/remove-all-entries")
 def remove_all_entries():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     connection.entries_table.truncate()
     connection.socialdata.truncate()
@@ -1085,9 +1090,103 @@ def remove_all_entries():
     return render_template_string(html_text)
 
 
+@app.route("/remove-entries-no-source")
+def remove_entries_no_source():
+    from sqlalchemy import (
+        MetaData,
+        Table,
+        select,
+        delete,
+    )
+
+    connection = get_connection()
+    #connection = DbConnection(app.config["DB_FILE"])
+
+    connection.entries_table.delete_where({"source_id" : None})
+
+    text = ""
+    ids = []
+
+    entries = connection.entries_table.get_where({"source_id" : None})
+    for entry in entries:
+        ids.append(int(entry.id))
+        text += f"<div>{entry.id} {entry.link} {entry.source_id} {entry.date_published}</div>"
+
+    """
+    entries = connection.entries_table.get_where({"source_id" : None})
+
+    columns = entries = connection.entries_table.get_column_names()
+    for column in columns:
+        text += f"<div>'{column}'</div>"
+
+    ids = []
+
+    entries = connection.entries_table.get_where({"source_id" : None})
+    for entry in entries:
+        ids.append(str(entry.id))
+        text += f"<div>{entry.id} {entry.link} {entry.source_id} {entry.date_published}</div>"
+        #text += f"<div>T:{type(entry.id)}</div>"
+        #text += f"<div>T:{isinstance(entry.id, int)}</div>"
+        #text += f"<div>T:{type(entry.source_id)}</div>"
+
+    text += "<div>------------------</div>"
+
+    entries2 = connection.entries_table.get_where({"source_id" : None})
+    for entry in entries2:
+        #ids.append(str(entry.id))
+        text += f"<div>'{entry.id}' {entry.link} {entry.source_id} {entry.date_published}</div>"
+        #text += f"<div>T:{type(entry.id)}</div>"
+        #text += f"<div>T:{isinstance(entry.id, int)}</div>"
+        #text += f"<div>T:{type(entry.source_id)}</div>"
+
+    entries = Entries(connection)
+    entry = entries.get(id=505)
+    if entry is None:
+        text += " dupa1"
+        template_html = STR_TEMPLATE.replace("{template_string}", text)
+        html_text = get_view(template_html, title="Remove entries")
+
+        return render_template_string(html_text)
+    """
+
+    """
+    entry = connection.entries_table.get(id=505)
+    if entry is None:
+        text += " dupa2"
+        template_html = STR_TEMPLATE.replace("{template_string}", text)
+        html_text = get_view(template_html, title="Remove entries")
+
+        return render_template_string(html_text)
+
+    for id in ids:
+        text += f"<div>removing: {id}</div>"
+        row_count = connection.entries_table.delete(id=id)
+
+        destination_table = connection.entries_table.get_table()
+        print(destination_table)
+        print(id)
+
+        stmt = delete(destination_table).where(destination_table.c.id == id)
+
+        result = connection.connection.execute(stmt)
+        connection.connection.commit()
+
+        print(result.rowcount)  # number of rows deleted
+
+        text += f"<div>removed?: {row_count}</div>"
+    """
+
+    connection.close()
+
+    template_html = STR_TEMPLATE.replace("{template_string}", text)
+    html_text = get_view(template_html, title="Remove entries")
+
+    return render_template_string(html_text)
+
+
 @app.route("/remove-all-logs")
 def remove_all_logs():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     connection.applogging.truncate()
     connection.close()
@@ -1098,7 +1197,7 @@ def remove_all_logs():
 
 @app.route("/remove-all-jobs")
 def remove_all_jobs():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     connection.backgroundjob.truncate()
     connection.close()
@@ -1109,7 +1208,7 @@ def remove_all_jobs():
 
 @app.route("/remove-all-sources")
 def remove_all_sources():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     connection.sources_table.truncate()
     connection.sourceoperationaldata.truncate()
@@ -1121,7 +1220,7 @@ def remove_all_sources():
 
 @app.route("/remove-all-social-data")
 def remove_all_social_data():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     connection.socialdata.truncate()
     connection.close()
@@ -1132,7 +1231,7 @@ def remove_all_social_data():
 
 @app.route("/remove-all-tags")
 def remove_all_tags():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     connection.usertags.truncate()
     connection.compactedtags.truncate()
@@ -1146,7 +1245,7 @@ def remove_all_tags():
 
 @app.route("/remove-all-votes")
 def remove_all_votes():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     connection.uservotes.truncate()
     connection.close()
 
@@ -1156,7 +1255,7 @@ def remove_all_votes():
 
 @app.route("/remove-all-entry-rules")
 def remove_all_entry_rules():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     connection.entry_rules.truncate()
     connection.close()
 
@@ -1166,7 +1265,7 @@ def remove_all_entry_rules():
 
 @app.route("/remove-all-views")
 def remove_all_views():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     connection.searchview.truncate()
     connection.close()
 
@@ -1176,7 +1275,7 @@ def remove_all_views():
 
 @app.route("/remove-all-block-entries")
 def remove_all_block_entries():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     connection.blockentry.truncate()
 
     rules_controller = EntryRules(connection)
@@ -1196,7 +1295,7 @@ def remove_all_block_entries():
 
 @app.route("/remove-source")
 def remove_source():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     source_id = request.args.get("id")
 
@@ -1214,7 +1313,7 @@ def remove_source():
 
 @app.route("/remove-entry")
 def remove_entry():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
 
@@ -1231,7 +1330,7 @@ def remove_entry():
 
 @app.route("/logs")
 def logs():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     html_text = get_view(LOGS_TEMPLATE, title="Logs")
 
@@ -1247,7 +1346,7 @@ def logs():
 
 @app.route("/jobs")
 def jobs():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     html_text = get_view(JOBS_TEMPLATE, title="Jobs")
 
@@ -1263,7 +1362,7 @@ def jobs():
 
 @app.route("/add-job", methods=["GET", "POST"])
 def add_job():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     if request.method == "POST":
         job_name = request.form.get("job_name", "")
@@ -1287,15 +1386,48 @@ def add_job():
 
 @app.route("/remove-job")
 def remove_job():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     job_id = request.args.get("id")
 
     job = connection.backgroundjob.get(id=job_id)
     if job:
         connection.backgroundjob.delete_where({"id" : job.id})
-        html_text = get_view(OK_TEMPLATE, title="Remove job")
+        return redirect(url_for("jobs"))
+    else:
+        html_text = get_view(template_html, title="Cannot find this job")
         return render_template_string(html_text)
+
+
+@app.route("/enable-job")
+def enable_job():
+    connection = get_connection()
+
+    job_id = request.args.get("id")
+
+    job = connection.backgroundjob.get(id=job_id)
+    if job:
+        json_data={}
+        json_data["enabled"] = True
+        connection.backgroundjob.update_json_data(id=job.id, json_data=json_data)
+        return redirect(url_for("jobs"))
+    else:
+        html_text = get_view(template_html, title="Cannot find this job")
+        return render_template_string(html_text)
+
+
+@app.route("/disable-job")
+def disable_job():
+    connection = get_connection()
+
+    job_id = request.args.get("id")
+
+    job = connection.backgroundjob.get(id=job_id)
+    if job:
+        json_data={}
+        json_data["enabled"] = False
+        connection.backgroundjob.update_json_data(id=job.id, json_data=json_data)
+        return redirect(url_for("jobs"))
     else:
         html_text = get_view(template_html, title="Cannot find this job")
         return render_template_string(html_text)
@@ -1329,7 +1461,7 @@ def get_stats_map(connection):
 
 @app.route("/status")
 def status():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     stats_map = get_stats_map(connection)
 
@@ -1343,7 +1475,7 @@ def status():
 
 @app.route("/admin")
 def admin():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     html_text = get_view(ADMIN_TEMPLATE, title="Admin")
     return render_template_string(html_text)
@@ -1363,7 +1495,7 @@ def to_bool(variable):
 
 @app.route("/initialization-wizard", methods=["GET", "POST"])
 def initialization_wizard():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     config = connection.configurationentry.get_first()
 
     if request.method == "POST":
@@ -1393,7 +1525,7 @@ def initialization_wizard():
 
 @app.route("/configuration", methods=["GET", "POST"])
 def configuration():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     system = System.get_object()
     config = connection.configurationentry.get_first()
@@ -1409,6 +1541,8 @@ def configuration():
         track_user_navigation = request.form.get("track_user_navigation", "")
         track_user_actions = request.form.get("track_user_actions", "")
         track_user_searches = request.form.get("track_user_searches", "")
+        enable_background_jobs = request.form.get("enable_background_jobs", "")
+        show_icons = request.form.get("show_icons", "")
 
         data = {}
         if title != "None":
@@ -1428,6 +1562,8 @@ def configuration():
         data["track_user_navigation"] = to_bool(track_user_navigation)
         data["track_user_actions"] = to_bool(track_user_actions)
         data["track_user_searches"] = to_bool(track_user_searches)
+        data["enable_background_jobs"] = to_bool(enable_background_jobs)
+        data["show_icons"] = to_bool(show_icons)
 
         connection.configurationentry.update_json_data(id=config.id, json_data=data)
         connection.close()
@@ -1435,11 +1571,13 @@ def configuration():
         html_text = get_view(OK_TEMPLATE, title="Changes applied")
         return render_template_string(html_text)
 
-    instance_fields = {}
+    instance_fields = OrderedDict()
     instance_fields["instance_title"] = config.instance_title
     instance_fields["instance_description"] = config.instance_description
     instance_fields["initialization_type"] = config.initialization_type
+    instance_fields["enable_background_jobs"] = config.enable_background_jobs
     instance_fields["display_type"] = config.display_type
+    instance_fields["show_icons"] = config.show_icons
     instance_fields["remote_webtools_server_location"] = config.remote_webtools_server_location
     instance_fields["enable_social_data"] = config.enable_social_data
     instance_fields["new_entries_fetch_social_data"] = config.new_entries_fetch_social_data
@@ -1455,40 +1593,37 @@ def configuration():
 
 #### Tools
 
-@app.route("/link-test", methods=["GET"])
+@app.route("/link-test", methods=["GET", "POST"])
 def link_test():
-    connection = DbConnection(app.config["DB_FILE"])
+    if request.method == "POST":
+        connection = get_connection()
 
-    link = request.args.get("link")
+        link = request.form.get("link")
 
-    if link:
         text = ""
 
         exists = connection.entries_table.exists(link=link)
         if exists:
-            text += "Link already exists in entries table"
+            text += "<div>Link already exists in entries table</div>"
 
         blocks = BlockEntry(connection)
         if blocks.is_blocked(link):
-            text += "Link is blocked by block rules"
+            text += "<div>Link is blocked by block rules</div>"
 
         rules = EntryRules(connection)
         if rules.is_url_blocked(link):
-            text += "Link is blocked by entry rules"
+            text += "<div>Link is blocked by entry rules</div>"
 
         if not text:
-            text = f"Link {link} is OK"
+            text = f"<div>Link {link} is OK</div>"
 
         template_html = STR_TEMPLATE.replace("{template_string}", text)
         html_text = get_view(template_html, title="OK")
         connection.close()
         return render_template_string(html_text)
 
-    # TODO add form
-    template_html = STR_TEMPLATE.replace("{template_string}",
-                                         f"Provide a link")
+    template_html = TEST_LINK_TEMPLATE
     html_text = get_view(template_html, title="OK")
-    connection.close()
     return render_template_string(html_text)
 
 
@@ -1496,7 +1631,7 @@ def link_test():
 
 @app.route("/api/entries")
 def api_entries():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     pagination = PagePagination(request)
     limit = pagination.get_limit()
@@ -1505,6 +1640,8 @@ def api_entries():
     search = request.args.get("search")
     order_by = request.args.get("order_by")
     view = request.args.get("view")
+
+    config = connection.configurationentry.get_first()
 
     json_entries = []
     entries = get_entries_for_request(connection=connection,
@@ -1529,6 +1666,9 @@ def api_entries():
                                             source=entry_source,
                                             social_data=social_data_object,
                                             tags=tags)
+            if not config.show_icons:
+                del json_entry_data["thumbnail"]
+
             json_entries.append(json_entry_data)
         else:
             json_entry_data = entry_to_json(entry,
@@ -1536,6 +1676,10 @@ def api_entries():
                                             source=None,
                                             social_data=social_data_object,
                                             tags=tags)
+
+            if not config.show_icons:
+                del json_entry_data["thumbnail"]
+
             json_entries.append(json_entry_data)
 
     json_data = {}
@@ -1546,7 +1690,7 @@ def api_entries():
 
 @app.route("/api/entry")
 def api_entry():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
     entry_controller = Entries(connection)
@@ -1587,7 +1731,7 @@ def api_entry():
 
 @app.route("/api/entry-visit")
 def api_entry_visit():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     entry_id = request.args.get("id")
     entries = Entries(connection)
@@ -1597,7 +1741,6 @@ def api_entry_visit():
         json_data = {}
         json_data["page_rating_visits"] = entry.page_rating_visits + 1
 
-        connection = DbConnection(app.config["DB_FILE"])
         connection.entries_table.update_json_data(entry.id, json_data)
 
         props = {}
@@ -1612,7 +1755,7 @@ def api_entry_visit():
 
 @app.route("/api/dynamic")
 def api_dynamic():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     link = request.args.get("link")
 
     handler = UrlHandler(connection=connection, link=link)
@@ -1626,7 +1769,7 @@ def api_dynamic():
 
 @app.route("/api/stats")
 def api_stats():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     stats_map = get_stats_map(connection)
 
@@ -1635,7 +1778,7 @@ def api_stats():
 
 @app.route("/api/status")
 def api_status():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     system = System.get_object()
     indicators = system.get_indicators()
@@ -1645,7 +1788,7 @@ def api_status():
 
 @app.route("/api/sources")
 def api_sources():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
 
     pagination = PagePagination(request)
     limit = pagination.get_limit()
@@ -1666,7 +1809,7 @@ def api_sources():
 
 @app.route("/api/views")
 def api_views():
-    connection = DbConnection(app.config["DB_FILE"])
+    connection = get_connection()
     views = SearchView(connection=connection)
     view_objects = views.get_table().get_where({})
 

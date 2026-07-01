@@ -221,9 +221,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
             if response:
                 if (response.get_status_code() == HTTP_STATUS_TOO_MANY_REQUESTS or
                     response.get_status_code() == HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS):
-                    AppLogging(self.connection).debug("Retry of request. Waiting")
-                    time.sleep(20)
-                    continue
+                    AppLogging(self.connection).warning("Retry of request")
+                    return
             if response is None:
                 AppLogging(self.connection).error(f"Source ID:{source.id} URL:{source.url} No response")
                 return
@@ -541,7 +540,7 @@ class ResetLinkJobHandler(GenericJobHandler):
             return False
 
         json_data = {}
-        json_data["date_updated"] = datetime.now()
+        json_data["date_update_last"] = datetime.now()
 
         if url.get_title():
             json_data["title"] = url.get_title()

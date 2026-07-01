@@ -94,23 +94,34 @@ class TaskRunner(object):
 
                 AppLogging(self.connection).debug("Crawling server OK")
 
-                self.handle_one_job()
+                config_entry = ConfigurationEntry(self.connection).get()
+
+                if config_entry.enable_background_jobs:
+                    self.handle_one_job()
+
+                    if self.connection.backgroundjob.count() == 0:
+                        self.check_sources()
+
+                    if self.connection.backgroundjob.count() == 0:
+                        self.add_update_jobs()
+
+                    if self.is_time_to_clean():
+                        BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_CLEANUP)
+
+                        AppLogging(self.connection).debug("Sleeping 10 sec")
+                        self.close()
+                        system.set_thread_ok()
+                        time.sleep(10)
+                        continue
 
                 if self.connection.backgroundjob.count() == 0:
-                    self.check_sources()
-
-                if self.is_time_to_clean():
-                    self.add_update_jobs()
-                    BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_CLEANUP)
-
-                    AppLogging(self.connection).debug("Sleeping 10 sec")
+                    AppLogging(self.connection).debug("Sleeping 60 sec")
                     self.close()
                     system.set_thread_ok()
-                    time.sleep(10)
+                    time.sleep(60)
                     continue
 
-
-                if self.connection.backgroundjob.count() == 0:
+                if not config_entry.enable_background_jobs:
                     AppLogging(self.connection).debug("Sleeping 60 sec")
                     self.close()
                     system.set_thread_ok()
@@ -151,7 +162,7 @@ class TaskRunner(object):
 
     def get_job(self):
         order_by = self.connection.backgroundjob.get_table().c.date_created.asc()
-        jobs = self.connection.backgroundjob.get_where(order_by=[order_by])
+        jobs = self.connection.backgroundjob.get_where({"enabled":True}, order_by=[order_by])
         for job in jobs:
             return job
 
@@ -228,7 +239,7 @@ class TaskRunner(object):
 
         days_to_update = 5
 
-        date_cutoff = datetime.now(timezone.utc) - timedelta(days=days_to_update)
+        date_cutoff = datetime.now() - timedelta(days=days_to_update)
 
         table = self.connection.entries_table.get_table()
         entries_select = (select(table)
