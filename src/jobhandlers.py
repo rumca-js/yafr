@@ -222,6 +222,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 if (response.get_status_code() == HTTP_STATUS_TOO_MANY_REQUESTS or
                     response.get_status_code() == HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS):
                     AppLogging(self.connection).warning("Retry of request")
+                    # for reddit this blocked other jobs - adding new links
                     return
             if response is None:
                 AppLogging(self.connection).error(f"Source ID:{source.id} URL:{source.url} No response")
