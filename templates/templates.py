@@ -435,9 +435,11 @@ ENTRY_EDIT_TEMPLATE = """
     <div><label for="description">Description</label></div>
     <div><textarea type="search" id="description" name="description">{{entry.description}}</textarea></div>
     <div><label for="language">Language</label></div>
-    <div><input type="search" id="language" name="language" value="{{entry.language}}"/></div>
+    <div><input type="search" id="language" name="language" value="{{properties.language}}"/></div>
+    <div><label for="date_published">Date published</label></div>
+    <div><input type="search" id="date_published" name="date_published" value="{{entry.date_published}}"/></div>
     <div><label for="age">Age</label></div>
-    <div><input type="search" id="age" name="age" value="{{entry.age}}"/></div>
+    <div><input type="search" id="age" name="age" value="{{properties.age}}"/></div>
    <button type="submit">Save</button>
 </form>
 """

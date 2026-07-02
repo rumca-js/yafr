@@ -40,7 +40,7 @@ from linkarchivetools.model import (
    source_and_entries_to_rss,
 )
 from linkarchivetools.utils.reflected import ReflectedTable
-from webtoolkit import json_encode_field
+from webtoolkit import json_encode_field, DateUtils
 
 from src.urlhandler import UrlHandler
 from templates.templates import *
@@ -703,6 +703,7 @@ def entry_edit():
         description = request.form.get("description", "")
         age = request.form.get("age", "")
         language = request.form.get("language", "")
+        date_published = request.form.get("date_published", "")
 
         age_int = 0
         try:
@@ -716,6 +717,7 @@ def entry_edit():
         json["description"] = description
         json["language"] = language
         json["age"] = age_int
+        json["date_published"] = DateUtils.parse_datetime(date_published)
 
         entries.get_table().update_json_data(id=entry_id, json_data=json)
         connection.close()
@@ -725,7 +727,10 @@ def entry_edit():
         return render_template_string(html_text)
 
     html_text = get_view(ENTRY_EDIT_TEMPLATE, title="Edit entry")
-    return render_template_string(html_text, entry=entry)
+    properties = {}
+    properties["language"] = entry.language if entry.language else ""
+    properties["age"] = entry.age if entry.age else 0
+    return render_template_string(html_text, entry=entry, properties=properties)
 
 
 @app.route("/entry-update")
@@ -1111,70 +1116,6 @@ def remove_entries_no_source():
     for entry in entries:
         ids.append(int(entry.id))
         text += f"<div>{entry.id} {entry.link} {entry.source_id} {entry.date_published}</div>"
-
-    """
-    entries = connection.entries_table.get_where({"source_id" : None})
-
-    columns = entries = connection.entries_table.get_column_names()
-    for column in columns:
-        text += f"<div>'{column}'</div>"
-
-    ids = []
-
-    entries = connection.entries_table.get_where({"source_id" : None})
-    for entry in entries:
-        ids.append(str(entry.id))
-        text += f"<div>{entry.id} {entry.link} {entry.source_id} {entry.date_published}</div>"
-        #text += f"<div>T:{type(entry.id)}</div>"
-        #text += f"<div>T:{isinstance(entry.id, int)}</div>"
-        #text += f"<div>T:{type(entry.source_id)}</div>"
-
-    text += "<div>------------------</div>"
-
-    entries2 = connection.entries_table.get_where({"source_id" : None})
-    for entry in entries2:
-        #ids.append(str(entry.id))
-        text += f"<div>'{entry.id}' {entry.link} {entry.source_id} {entry.date_published}</div>"
-        #text += f"<div>T:{type(entry.id)}</div>"
-        #text += f"<div>T:{isinstance(entry.id, int)}</div>"
-        #text += f"<div>T:{type(entry.source_id)}</div>"
-
-    entries = Entries(connection)
-    entry = entries.get(id=505)
-    if entry is None:
-        text += " dupa1"
-        template_html = STR_TEMPLATE.replace("{template_string}", text)
-        html_text = get_view(template_html, title="Remove entries")
-
-        return render_template_string(html_text)
-    """
-
-    """
-    entry = connection.entries_table.get(id=505)
-    if entry is None:
-        text += " dupa2"
-        template_html = STR_TEMPLATE.replace("{template_string}", text)
-        html_text = get_view(template_html, title="Remove entries")
-
-        return render_template_string(html_text)
-
-    for id in ids:
-        text += f"<div>removing: {id}</div>"
-        row_count = connection.entries_table.delete(id=id)
-
-        destination_table = connection.entries_table.get_table()
-        print(destination_table)
-        print(id)
-
-        stmt = delete(destination_table).where(destination_table.c.id == id)
-
-        result = connection.connection.execute(stmt)
-        connection.connection.commit()
-
-        print(result.rowcount)  # number of rows deleted
-
-        text += f"<div>removed?: {row_count}</div>"
-    """
 
     connection.close()
 
