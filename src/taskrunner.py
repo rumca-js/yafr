@@ -237,6 +237,7 @@ class TaskRunner(object):
         if not number_of_update_entries:
             return
 
+        # TODO should be part of configuration
         days_to_update = 5
 
         date_cutoff = datetime.now() - timedelta(days=days_to_update)

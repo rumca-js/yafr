@@ -26,7 +26,7 @@ class UrlHandler(object):
                 if not location:
                     location = RemoteUrl.get_remote_server_location()
 
-                url = RemoteUrl(request=request, remote_server_location=location)
+                url = RemoteUrl(request=request, remote_server_location=location, client_id=config.instance_title)
                 url.url = request.url # TODO remove it
             else:
                 url = BaseUrl(request=request)
