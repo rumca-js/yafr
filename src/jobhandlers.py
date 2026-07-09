@@ -2,10 +2,12 @@ import subprocess
 import time
 import json
 from datetime import datetime
+from pathlib import Path
 
 from webtoolkit import (
    UrlLocation,
    PageRequestObject,
+   YouTubeVideoHandler,
    ContentLinkParser,
    HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
    HTTP_STATUS_TOO_MANY_REQUESTS,
@@ -517,6 +519,16 @@ class UpdateLinkJobHandler(GenericJobHandler):
         config_entry = ConfigurationEntry(self.connection).get()
         if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
             BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry.id))
+
+        # TODO move to job download audio
+        if config_entry.entry_update_download_music:
+            handler = YouTubeVideoHandler(url = entry.link)
+            if handler.is_handled_by():
+                path  = Path(".") / 'downloads'
+                path.mkdir(parents=True, exist_ok=True)
+
+                downloader = YtDownloader(cwd=str(path), url=entry.link)
+                downloader.download_audio()
 
         return True
 

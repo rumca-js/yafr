@@ -181,6 +181,9 @@ class TaskRunner(object):
         sources = Sources(self.connection)
 
         for source in sources.get_table().get_where():
+            if not source.enabled:
+                continue
+
             source_data = sd_controller.get_source_data(source)
             if not source_data:
                 job = BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source.id))
@@ -189,7 +192,7 @@ class TaskRunner(object):
         order_by = [table.c.date_fetched.asc()]
         for sd in sd_controller.get_table().get_where(order_by=order_by):
             source = sources.get_table().get(id=sd.source_obj_id)
-            if source:
+            if source and source.enabled:
                 if sd_controller.is_update_needed(source):
                     job = BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source.id))
 

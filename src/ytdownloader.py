@@ -8,9 +8,9 @@ def progress_hook(d):
 
 
 class YtDownloader(object):
-    def __init__(self, home_dir, video_url):
-        self.home_dir = home_dir
-        self.video_url = video_url
+    def __init__(self, cwd, url):
+        self.home_dir = cwd
+        self.video_url = url
 
     def get_audio_download_options(self):
         home_dir = self.home_dir
