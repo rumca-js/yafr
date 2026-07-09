@@ -8,4 +8,8 @@ def main():
     engine = create_engine(f"sqlite:///{file_name}")
     create_tables(engine)
 
+    file_name = "data/table.db"
+    engine = create_engine(f"sqlite:///{file_name}")
+    create_tables(engine)
+
 main()

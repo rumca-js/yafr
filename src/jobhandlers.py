@@ -462,6 +462,202 @@ class ProcessSourceJobHandler(GenericJobHandler):
         return False
 
 
+class LinkDownloadJobHandler(GenericJobHandler):
+    """!
+    downloads entry
+    """
+
+    def run(self):
+        """
+        path = ConfigurationEntry.get().get_download_path()
+
+        url = obj.subject
+        AppLogging.notify("Downloading page:".format(url))
+
+        wget = wget.Wget(url, cwd=path)
+        wget.download_all()
+
+        AppLogging.notify(
+            "Page has been downloaded:{} Time:{}".format(url, self.get_time_diff())
+        )
+
+        return True
+        """
+        pass
+
+
+class LinkAudioDownloadJobHandler(GenericJobHandler):
+    """!
+    downloads entry music
+    """
+
+    def run(self):
+        handler = YouTubeVideoHandler(url = entry.link)
+        if handler.is_handled_by():
+            # TODO use location from config
+            path  = Path(".") / 'downloads'
+            path.mkdir(parents=True, exist_ok=True)
+
+            downloader = YtDownloader(cwd=str(path), url=entry.link)
+            downloader.download_audio()
+
+        """
+        obj = self.obj
+
+        c = Configuration.get_object()
+        data = self.get_data(obj)
+
+        url = data["url"]
+        title = data["title"]
+        author = data["author"]
+        album = data["album"]
+
+        AppLogging.notify("Downloading music: " + url + " " + title)
+
+        if not UrlLocation(url).is_youtube():
+            AppLogging.error("Unsupported download operation URL:{}".format(url))
+            return True
+
+        file_name = self.get_file_name(data)
+        path = ConfigurationEntry.get().get_download_path()
+
+        yt = ytdlp.YTDLP(url, cwd=path)
+        if not yt.download_audio(file_name):
+            AppLogging.error("Could not download music: " + url + " " + title)
+            return
+
+        id3 = id3v2.Id3v2(file_name, data=data, cwd=path)
+        id3.tag()
+
+        elapsed_sec = self.get_time_diff()
+
+        AppLogging.notify(
+            "Downloading music done: {} {}. Time:{}".format(url, title, elapsed_sec)
+        )
+
+        return True
+
+    def get_data(self, obj):
+        title = ""
+        author = None
+        album = None
+
+        url = obj.subject
+
+        entries = LinkDataController.objects.filter(link=url)
+        if entries.exists():
+            entry = entries[0]
+            title = entry.title
+            author = entry.author
+            album = entry.album
+
+        data = {
+            "author": str(author),
+            "album": str(album),
+            "title": str(title),
+            "url": url,
+        }
+
+        return data
+
+    def get_file_name(self, data):
+        file_name = Path(str(data["title"]) + ".mp3")
+        if data["album"]:
+            file_name = Path(data["album"]) / file_name
+
+        if data["author"]:
+            file_name = Path(data["author"]) / file_name
+
+        file_name = fix_path_for_os(str(file_name))
+
+        return file_name
+        """
+        return True
+
+
+class LinkVideoDownloadJobHandler(GenericJobHandler):
+    """!
+    downloads entry video
+    """
+
+    def run(self):
+        handler = YouTubeVideoHandler(url = entry.link)
+        if handler.is_handled_by():
+            path  = Path(".") / 'downloads'
+            path.mkdir(parents=True, exist_ok=True)
+
+            downloader = YtDownloader(cwd=str(path), url=entry.link)
+            downloader.download_video()
+        """
+        obj = self.obj
+        c = Configuration.get_object()
+
+        data = self.get_data(obj)
+
+        url = data["url"]
+        title = data["title"]
+        author = data["author"]
+        album = data["album"]
+
+        if not UrlLocation(url).is_youtube():
+            AppLogging.error("Unsupported download operation URL:{}".format(url))
+            return True
+
+        AppLogging.info("Downloading music: " + url + " " + title)
+
+        file_name = self.get_file_name(data)
+        path = ConfigurationEntry.get().get_download_path()
+
+        yt = ytdlp.YTDLP(url, cwd=path)
+        if not yt.download_video("file.mp4"):
+            AppLogging.error("Could not download video: " + url + " " + title)
+            return
+
+        elapsed_sec = self.get_time_diff()
+        AppLogging.notify(
+            "Downloading video done: {} {}. Time:{}".format(url, title, elapsed_sec)
+        )
+
+        return True
+
+    def get_data(self, obj):
+        title = ""
+        author = None
+        album = None
+
+        url = obj.subject
+
+        entries = LinkDataController.objects.filter(link=url)
+        if entries.exists():
+            entry = entries[0]
+            title = entry.title
+            author = entry.author
+            album = entry.album
+
+        data = {
+            "author": str(author),
+            "album": str(album),
+            "title": str(title),
+            "url": url,
+        }
+
+        return data
+
+    def get_file_name(self, data):
+        file_name = Path(str(data["title"]) + ".mp3")
+        if data["album"]:
+            file_name = Path(data["album"]) / file_name
+
+        if data["author"]:
+            file_name = Path(data["author"]) / file_name
+
+        file_name = fix_path_for_os(str(file_name))
+
+        return file_name
+        """
+        return True
+
+
 class UpdateLinkJobHandler(GenericJobHandler):
     def run(self):
         entries = Entries(self.connection)
@@ -520,15 +716,9 @@ class UpdateLinkJobHandler(GenericJobHandler):
         if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
             BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry.id))
 
-        # TODO move to job download audio
-        if config_entry.entry_update_download_music:
-            handler = YouTubeVideoHandler(url = entry.link)
-            if handler.is_handled_by():
-                path  = Path(".") / 'downloads'
-                path.mkdir(parents=True, exist_ok=True)
-
-                downloader = YtDownloader(cwd=str(path), url=entry.link)
-                downloader.download_audio()
+        # TODO does not work
+        #if config_entry.entry_update_download_audio:
+        #    BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry.id))
 
         return True
 
