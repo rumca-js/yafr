@@ -31,6 +31,7 @@ from .controller import Controller
 from .entryurlinterface import EntryUrlInterface
 from .controller import Controller
 from .urlhandler import UrlHandler
+from .ytdownloader import YtDownloader
 
 
 class GenericJobHandler(object):
