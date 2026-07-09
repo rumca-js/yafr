@@ -74,6 +74,18 @@ function getEntryNotCheckLaterAPI() {
    return `/entry-not-check-later`;
 }
 
+function getDownloadEntryAPI() {
+   return `/entry-download`;
+}
+
+function getDownloadAudioEntryAPI() {
+   return `/entry-download-audio`;
+}
+
+function getDownloadVideoEntryAPI() {
+   return `/entry-download-video`;
+}
+
 function getEntryRemoveAPI() {
    return `/remove-entry`;
 }

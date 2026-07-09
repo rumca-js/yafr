@@ -483,7 +483,14 @@ class LinkDownloadJobHandler(GenericJobHandler):
 
         return True
         """
-        pass
+        entries = Entries(self.connection)
+
+        try:
+            entry_id = int(self.job.subject)
+        except Exception as E:
+            AppLogging(self.connection).exc(E)
+            return
+        return True
 
 
 class LinkAudioDownloadJobHandler(GenericJobHandler):
@@ -492,15 +499,6 @@ class LinkAudioDownloadJobHandler(GenericJobHandler):
     """
 
     def run(self):
-        handler = YouTubeVideoHandler(url = entry.link)
-        if handler.is_handled_by():
-            # TODO use location from config
-            path  = Path(".") / 'downloads'
-            path.mkdir(parents=True, exist_ok=True)
-
-            downloader = YtDownloader(cwd=str(path), url=entry.link)
-            downloader.download_audio()
-
         """
         obj = self.obj
 
@@ -572,6 +570,22 @@ class LinkAudioDownloadJobHandler(GenericJobHandler):
 
         return file_name
         """
+        entries = Entries(self.connection)
+
+        try:
+            entry_id = int(self.job.subject)
+        except Exception as E:
+            AppLogging(self.connection).exc(E)
+            return
+
+        handler = YouTubeVideoHandler(url = entry.link)
+        if handler.is_handled_by():
+            # TODO use location from config
+            path  = Path(".") / 'downloads'
+            path.mkdir(parents=True, exist_ok=True)
+
+            downloader = YtDownloader(cwd=str(path), url=entry.link)
+            downloader.download_audio()
         return True
 
 
@@ -581,13 +595,6 @@ class LinkVideoDownloadJobHandler(GenericJobHandler):
     """
 
     def run(self):
-        handler = YouTubeVideoHandler(url = entry.link)
-        if handler.is_handled_by():
-            path  = Path(".") / 'downloads'
-            path.mkdir(parents=True, exist_ok=True)
-
-            downloader = YtDownloader(cwd=str(path), url=entry.link)
-            downloader.download_video()
         """
         obj = self.obj
         c = Configuration.get_object()
@@ -655,6 +662,20 @@ class LinkVideoDownloadJobHandler(GenericJobHandler):
 
         return file_name
         """
+        entries = Entries(self.connection)
+
+        try:
+            entry_id = int(self.job.subject)
+        except Exception as E:
+            AppLogging(self.connection).exc(E)
+            return
+        handler = YouTubeVideoHandler(url = entry.link)
+        if handler.is_handled_by():
+            path  = Path(".") / 'downloads'
+            path.mkdir(parents=True, exist_ok=True)
+
+            downloader = YtDownloader(cwd=str(path), url=entry.link)
+            downloader.download_video()
         return True
 
 

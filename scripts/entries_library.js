@@ -580,6 +580,9 @@ function getEntryEditMenu(entry) {
     let entry_not_check_later = getEntryNotCheckLaterAPI();
     let entry_bookmark = getEntryBookmarkAPI();
     let entry_unbookmark = getEntryUnBookmarkAPI();
+    let download_link = getDownloadEntryAPI();
+    let download_audio_link = getDownloadAudioEntryAPI();
+    let download_video_link = getDownloadVideoEntryAPI();
 
     let html = "";
 
@@ -653,6 +656,21 @@ function getEntryEditMenu(entry) {
         <li>
           <a href="${entry_reset}?id=${entry.id}" id="Reset" class="dropdown-item" title="Reset">
              Reset
+          </a>
+        </li>
+        <li>
+          <a href="${download_link}?id=${entry.id}" id="Download" class="dropdown-item" title="Download">
+             Download
+          </a>
+        </li>
+        <li>
+          <a href="${download_audio_link}?id=${entry.id}" id="DownloadAudio" class="dropdown-item" title="Download Audio">
+             Download Audio
+          </a>
+        </li>
+        <li>
+          <a href="${download_video_link}?id=${entry.id}" id="DownloadVideo" class="dropdown-item" title="Download Video">
+             Download Video
           </a>
         </li>
         <li>

@@ -780,6 +780,87 @@ def entry_reset():
         return render_template_string(html_text)
 
 
+@app.route("/entry-download")
+def entry_download():
+    connection = get_connection()
+
+    entry_id = request.args.get("id")
+
+    if entry_id:
+        is_job = BackgroundJob(connection).is_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD, subject=str(entry_id))
+
+        if is_job:
+            template_html = STR_TEMPLATE.replace("{template_string}", "NOK - exists")
+            html_text = get_view(template_html, title="OK")
+            return render_template_string(html_text)
+
+        BackgroundJob(connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD, subject=str(entry_id))
+        connection.close()
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+    else:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK - cannot find entry")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+
+@app.route("/entry-download-audio")
+def entry_download_audio():
+    connection = get_connection()
+
+    entry_id = request.args.get("id")
+
+    if entry_id:
+        is_job = BackgroundJob(connection).is_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_MUSIC, subject=str(entry_id))
+
+        if is_job:
+            template_html = STR_TEMPLATE.replace("{template_string}", "NOK - exists")
+            html_text = get_view(template_html, title="OK")
+            return render_template_string(html_text)
+
+        BackgroundJob(connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_MUSIC, subject=str(entry_id))
+        connection.close()
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+    else:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK - cannot find entry")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+
+@app.route("/entry-download-video")
+def entry_download_video():
+    connection = get_connection()
+
+    entry_id = request.args.get("id")
+
+    if entry_id:
+        is_job = BackgroundJob(connection).is_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_VIDEO, subject=str(entry_id))
+
+        if is_job:
+            template_html = STR_TEMPLATE.replace("{template_string}", "NOK - exists")
+            html_text = get_view(template_html, title="OK")
+            return render_template_string(html_text)
+
+        BackgroundJob(connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_VIDEO, subject=str(entry_id))
+        connection.close()
+
+        template_html = STR_TEMPLATE.replace("{template_string}", "OK")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+    else:
+        template_html = STR_TEMPLATE.replace("{template_string}", "NOK - cannot find entry")
+        html_text = get_view(template_html, title="OK")
+        return render_template_string(html_text)
+
+
 @app.route("/entry-vote", methods=["GET", "POST"])
 def entry_vote():
     connection = get_connection()
