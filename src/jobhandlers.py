@@ -490,6 +490,9 @@ class LinkDownloadJobHandler(GenericJobHandler):
         except Exception as E:
             AppLogging(self.connection).exc(E)
             return
+
+        entry = entries.get(id=entry_id)
+
         return True
 
 
@@ -577,6 +580,8 @@ class LinkAudioDownloadJobHandler(GenericJobHandler):
         except Exception as E:
             AppLogging(self.connection).exc(E)
             return
+
+        entry = entries.get(id=entry_id)
 
         handler = YouTubeVideoHandler(url = entry.link)
         if handler.is_handled_by():
@@ -669,6 +674,9 @@ class LinkVideoDownloadJobHandler(GenericJobHandler):
         except Exception as E:
             AppLogging(self.connection).exc(E)
             return
+
+        entry = entries.get(id=entry_id)
+
         handler = YouTubeVideoHandler(url = entry.link)
         if handler.is_handled_by():
             path  = Path(".") / 'downloads'
