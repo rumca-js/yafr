@@ -63,6 +63,7 @@ ADMIN_TEMPLATE = """
 
 <ul>
   <li><a href="/link-test">Test link</a>
+  <li><a href="/download-list">Download list</a>
 </ul>
 
 <ul>

@@ -1,6 +1,7 @@
 import subprocess
 import time
 import json
+import shutil
 from datetime import datetime
 from pathlib import Path
 
@@ -590,7 +591,26 @@ class LinkAudioDownloadJobHandler(GenericJobHandler):
             path.mkdir(parents=True, exist_ok=True)
 
             downloader = YtDownloader(cwd=str(path), url=entry.link)
-            downloader.download_audio()
+
+            file_name = None
+            try:
+                file_name = downloader.download_audio()
+            except Exception as E:
+                print(f"Could not download audio {entry.link}")
+                return
+
+            if entry.title and file_name:
+                file_name = Path(file_name)
+                if file_name.exists():
+                    dst_file = path / (entry.title + ".mp3")
+                    if file_name != dst_file:
+                        if dst_file.exists():
+                            dst_file.unlink()
+
+                        print(f"'{file_name}'")
+                        print(f"'{dst_file}'")
+                        # TODO why that does not worik?
+                        #shutil.move(file_name, dst_file)
         return True
 
 
@@ -683,7 +703,27 @@ class LinkVideoDownloadJobHandler(GenericJobHandler):
             path.mkdir(parents=True, exist_ok=True)
 
             downloader = YtDownloader(cwd=str(path), url=entry.link)
-            downloader.download_video()
+
+            file_name = None
+            try:
+                file_name = downloader.download_video()
+            except Exception as E:
+                print(f"Could not download audio {entry.link}")
+                return
+
+            if entry.title and file_name:
+                file_name = Path(file_name)
+                if file_name.exists():
+                    dst_file = path / (entry.title + ".mp4")
+                    if file_name != dst_file:
+                        if dst_file.exists():
+                            dst_file.unlink()
+
+                        print(f"'{file_name}'")
+                        print(f"'{dst_file}'")
+                        shutil.move(file_name, dst_file)
+        return True
+
         return True
 
 
