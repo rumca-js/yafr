@@ -34,10 +34,16 @@ class YtDownloader(object):
 
         ydl_opts = {
             'format': 'bestvideo+bestaudio/best',
-            'merge_output_format' : 'mp4',
+            #'merge_output_format' : 'mp4',
+            'merge_output_format' : 'mkv',
             'outtmpl': f'{home_dir}/%(title)s.%(ext)s',
+            #'js_runtimes': {'deno' : {'path': ':/home/rumcajs/.deno/bin/deno'}, "node" : {"path" : "/usr/bin/nodejs"}},
             #'progress_hooks': [progress_hook],
             #'js_runtimes': {'deno' : {"path" : "path"}},
+            #'postprocessors': [{
+            #  'key': 'FFmpegMerger',
+            #}]
+            "postprocessor_args" : { "ffmpeg" : ["-c:a", "libmp3lame", "-q:a","2"]},
         }
         return ydl_opts
 
