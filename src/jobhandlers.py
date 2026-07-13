@@ -186,7 +186,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
                         new_data["body_hash"] = None
                         new_data["date_fetched"] = None
                         sd_controller.get_table().update_json_data(id=op_data.id, json_data=new_data)
-
+                
+                # TODO
                 #source_data = sd_controller.get_source_data(source)
                 #if source_data and source_data.page_hash and url.get_hash() and source_data.page_hash == url.get_hash():
                 #    page_same = True
@@ -722,7 +723,6 @@ class LinkVideoDownloadJobHandler(GenericJobHandler):
                         print(f"'{file_name}'")
                         print(f"'{dst_file}'")
                         shutil.move(file_name, dst_file)
-        return True
 
         return True
 
