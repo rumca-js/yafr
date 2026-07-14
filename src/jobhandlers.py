@@ -37,11 +37,22 @@ from .urlhandler import UrlHandler
 from .ytdownloader import YtDownloader
 
 
+def move_to_db(config, entry, file):
+    connection = config.connection
+
+    # TODO implement
+    # with open(file, "rb") as fh:
+    #     bytes = fh.readall()
+    #     connection.modelfiles.insert_json_data()
+
+
+
 class GenericJobHandler(object):
     def __init__(self, connection, job, table_name):
         self.connection = connection
         self.job = job
         self.table_name = table_name
+        self.start_processing_time = DateUtils.get_datetime_now_utc()
 
     def get_cfg(self):
         if not self.job:
@@ -65,6 +76,12 @@ class GenericJobHandler(object):
         @return True, if job has been processed correctly and should be removed
         """
         return True
+
+    def get_time_diff(self):
+        """
+        To obtain difference in seconds call total_seconds()
+        """
+        return DateUtils.get_datetime_now_utc() - self.start_processing_time
 
 
 class ProcessSourceJobHandler(GenericJobHandler):
@@ -485,7 +502,9 @@ class LinkDownloadJobHandler(GenericJobHandler):
 
         return True
         """
+
         entries = Entries(self.connection)
+        AppLogging(self.connection).info("Downloading entry ID:".format(self.job.subject))
 
         try:
             entry_id = int(self.job.subject)
@@ -494,6 +513,17 @@ class LinkDownloadJobHandler(GenericJobHandler):
             return
 
         entry = entries.get(id=entry_id)
+        if not entry:
+            AppLogging(self.connection).error("Could not find entry")
+            return True
+
+        AppLogging(self.connection).error("Downloading link is not yet supported")
+
+        if False:
+            # TODO file needs to be moved
+            config_entry = ConfigurationEntry(self.connection).get()
+            if config_entry.enable_file_support:
+                move_to_db(config_entry, entry, dst_file)
 
         return True
 
@@ -505,77 +535,12 @@ class LinkAudioDownloadJobHandler(GenericJobHandler):
 
     def run(self):
         """
-        obj = self.obj
-
-        c = Configuration.get_object()
-        data = self.get_data(obj)
-
-        url = data["url"]
-        title = data["title"]
-        author = data["author"]
-        album = data["album"]
-
-        AppLogging.notify("Downloading music: " + url + " " + title)
-
-        if not UrlLocation(url).is_youtube():
-            AppLogging.error("Unsupported download operation URL:{}".format(url))
-            return True
-
-        file_name = self.get_file_name(data)
-        path = ConfigurationEntry.get().get_download_path()
-
-        yt = ytdlp.YTDLP(url, cwd=path)
-        if not yt.download_audio(file_name):
-            AppLogging.error("Could not download music: " + url + " " + title)
-            return
-
         id3 = id3v2.Id3v2(file_name, data=data, cwd=path)
         id3.tag()
-
-        elapsed_sec = self.get_time_diff()
-
-        AppLogging.notify(
-            "Downloading music done: {} {}. Time:{}".format(url, title, elapsed_sec)
-        )
-
-        return True
-
-    def get_data(self, obj):
-        title = ""
-        author = None
-        album = None
-
-        url = obj.subject
-
-        entries = LinkDataController.objects.filter(link=url)
-        if entries.exists():
-            entry = entries[0]
-            title = entry.title
-            author = entry.author
-            album = entry.album
-
-        data = {
-            "author": str(author),
-            "album": str(album),
-            "title": str(title),
-            "url": url,
-        }
-
-        return data
-
-    def get_file_name(self, data):
-        file_name = Path(str(data["title"]) + ".mp3")
-        if data["album"]:
-            file_name = Path(data["album"]) / file_name
-
-        if data["author"]:
-            file_name = Path(data["author"]) / file_name
-
-        file_name = fix_path_for_os(str(file_name))
-
-        return file_name
         """
         entries = Entries(self.connection)
+
+        AppLogging(self.connection).info("Downloading audio from entry ID:".format(self.job.subject))
 
         try:
             entry_id = int(self.job.subject)
@@ -584,6 +549,9 @@ class LinkAudioDownloadJobHandler(GenericJobHandler):
             return
 
         entry = entries.get(id=entry_id)
+        if not entry:
+            AppLogging(self.connection).error("Could not find entry")
+            return
 
         handler = YouTubeVideoHandler(url = entry.link)
         if handler.is_handled_by():
@@ -610,8 +578,20 @@ class LinkAudioDownloadJobHandler(GenericJobHandler):
 
                         print(f"'{file_name}'")
                         print(f"'{dst_file}'")
-                        # TODO why that does not worik?
-                        #shutil.move(file_name, dst_file)
+
+                        try:
+                            shutil.move(file_name, dst_file)
+                        except Exception as E:
+                            AppLogging(self.connection).exc(E)
+
+                        config_entry = ConfigurationEntry(self.connection).get()
+                        if config_entry.enable_file_support:
+                            move_to_db(config_entry, entry, dst_file)
+
+        AppLogging(self.connection).notify(
+            "Entry has been downloaded:{} Time:{}".format(entry.link, self.get_time_diff())
+        )
+
         return True
 
 
@@ -632,63 +612,10 @@ class LinkVideoDownloadJobHandler(GenericJobHandler):
         author = data["author"]
         album = data["album"]
 
-        if not UrlLocation(url).is_youtube():
-            AppLogging.error("Unsupported download operation URL:{}".format(url))
-            return True
-
-        AppLogging.info("Downloading music: " + url + " " + title)
-
-        file_name = self.get_file_name(data)
-        path = ConfigurationEntry.get().get_download_path()
-
-        yt = ytdlp.YTDLP(url, cwd=path)
-        if not yt.download_video("file.mp4"):
-            AppLogging.error("Could not download video: " + url + " " + title)
-            return
-
-        elapsed_sec = self.get_time_diff()
-        AppLogging.notify(
-            "Downloading video done: {} {}. Time:{}".format(url, title, elapsed_sec)
-        )
-
-        return True
-
-    def get_data(self, obj):
-        title = ""
-        author = None
-        album = None
-
-        url = obj.subject
-
-        entries = LinkDataController.objects.filter(link=url)
-        if entries.exists():
-            entry = entries[0]
-            title = entry.title
-            author = entry.author
-            album = entry.album
-
-        data = {
-            "author": str(author),
-            "album": str(album),
-            "title": str(title),
-            "url": url,
-        }
-
-        return data
-
-    def get_file_name(self, data):
-        file_name = Path(str(data["title"]) + ".mp3")
-        if data["album"]:
-            file_name = Path(data["album"]) / file_name
-
-        if data["author"]:
-            file_name = Path(data["author"]) / file_name
-
-        file_name = fix_path_for_os(str(file_name))
-
-        return file_name
         """
         entries = Entries(self.connection)
+
+        AppLogging(self.connection).info("Downloading video from entry ID:".format(self.job.subject))
 
         try:
             entry_id = int(self.job.subject)
@@ -697,6 +624,9 @@ class LinkVideoDownloadJobHandler(GenericJobHandler):
             return
 
         entry = entries.get(id=entry_id)
+        if not entry:
+            AppLogging(self.connection).error("Could not find entry")
+            return
 
         handler = YouTubeVideoHandler(url = entry.link)
         if handler.is_handled_by():
@@ -722,7 +652,19 @@ class LinkVideoDownloadJobHandler(GenericJobHandler):
 
                         print(f"'{file_name}'")
                         print(f"'{dst_file}'")
-                        shutil.move(file_name, dst_file)
+
+                        try:
+                            shutil.move(file_name, dst_file)
+                        except Exception as E:
+                            AppLogging(self.connection).exc(E)
+
+                        config_entry = ConfigurationEntry(self.connection).get()
+                        if config_entry.enable_file_support:
+                            move_to_db(config_entry, entry, dst_file)
+
+                    AppLogging(self.connection).notify(
+                        "Entry has been downloaded:{} Time:{}".format(entry.link, self.get_time_diff())
+                    )
 
         return True
 
