@@ -540,7 +540,7 @@ class LinkAudioDownloadJobHandler(GenericJobHandler):
         """
         entries = Entries(self.connection)
 
-        AppLogging(self.connection).info("Downloading audio from entry ID:".format(self.job.subject))
+        AppLogging(self.connection).info("Downloading audio from entry ID:{}".format(self.job.subject))
 
         try:
             entry_id = int(self.job.subject)
@@ -565,8 +565,14 @@ class LinkAudioDownloadJobHandler(GenericJobHandler):
             try:
                 file_name = downloader.download_audio()
             except Exception as E:
-                print(f"Could not download audio {entry.link}")
+                AppLogging(self.connection).error(f"Could not download audio {entry.link}")
+                AppLogging(self.connection).exc(E)
                 return
+
+            if len(downloader.errors) > 0:
+                for error in downloader.errors:
+                    AppLogging(self.connection).error(f"YtDownloader error {error}")
+                return True
 
             if entry.title and file_name:
                 file_name = Path(file_name)
@@ -582,11 +588,16 @@ class LinkAudioDownloadJobHandler(GenericJobHandler):
                         try:
                             shutil.move(file_name, dst_file)
                         except Exception as E:
+                            AppLogging(self.connection).error(f"Could not move audio {entry.link}")
                             AppLogging(self.connection).exc(E)
 
                         config_entry = ConfigurationEntry(self.connection).get()
                         if config_entry.enable_file_support:
                             move_to_db(config_entry, entry, dst_file)
+            else:
+                AppLogging(self.connection).error(f"{entry.link}: No title, or filename")
+        else:
+            AppLogging(self.connection).error(f"{entry.link}: No handler for download")
 
         AppLogging(self.connection).notify(
             "Entry has been downloaded:{} Time:{}".format(entry.link, self.get_time_diff())

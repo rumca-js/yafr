@@ -843,6 +843,7 @@ function getEntryOpParameters(entry) {
     if (entry.page_rating_visits != null) {
        text += `<div>Visits: ${entry.page_rating_visits}</div>`;
     }
+    text += `<div>ID: ${entry.id}</div>`;
 
     return text;
 }

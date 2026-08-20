@@ -11,6 +11,7 @@ class YtDownloader(object):
     def __init__(self, cwd, url):
         self.home_dir = cwd
         self.video_url = url
+        self.errors = []
 
     def get_audio_download_options(self):
         home_dir = self.home_dir
@@ -69,7 +70,7 @@ class YtDownloader(object):
                 return final_file_path
                 
         except Exception as e:
-            print(f"\nAn error occurred: {e}")
+            self.errors.append(str(e))
             return None
 
     def download_audio(self):
