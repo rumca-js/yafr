@@ -564,10 +564,10 @@ def add_links():
         raw_text = request.form.get("sources", "")
 
         controller = Controller(connection)
-        controller.add_links_text(raw_text)
+        link_ids = controller.add_links_text(raw_text)
         connection.close()
 
-        template_html = STR_TEMPLATE.replace("{template_string}", "Wait until links are added")
+        template_html = STR_TEMPLATE.replace("{template_string}", "Added")
         html_text = get_view(template_html, title="OK")
         return render_template_string(html_text)
 

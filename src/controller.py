@@ -11,7 +11,7 @@ from linkarchivetools.model import (
    ConfigurationEntry,
    SearchView,
 )
-from .urlhandler import UrlHandler
+from .entrydatabuilder import EntryDataBuilder
 
 
 
@@ -160,25 +160,28 @@ class Controller(object):
         self.start_reading = True
 
         sources = Sources(self.connection)
+        source_ids = []
 
         for source_url in source_urls:
             if sources.exists(source_url=source_url):
                 continue
 
             if not self.is_url_blocked(source_url):
-                sources.set(source_url)
+                source_id = sources.set(source_url)
+                source_ids.append(source_id)
+
+        return source_ids
 
     def add_links(self, link_urls):
         self.start_reading = True
 
-        entries = Entries(connection=self.connection)
-
+        link_ids = []
         for link_url in link_urls:
-            if entries.exists(link=link_url):
-                continue
+            builder = EntryDataBuilder(self.connection)
+            link_id = builder.build_simple(link_url)
+            link_ids.append(link_id)
 
-            if not self.is_url_blocked(link_url):
-                BackgroundJob(connection=self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_ADD, subject=link_url)
+        return link_ids
 
     def is_url_blocked(self, url):
         entry_rules = EntryRules(self.connection)

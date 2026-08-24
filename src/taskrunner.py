@@ -204,7 +204,9 @@ class TaskRunner(object):
         handler = self.job2handler(job)
 
         if not handler:
-            raise IOError("Unsupported job")
+            AppLogging(self.connection).error(f"Unsupported job: {job.job}")
+            self.connection.backgroundjob.delete(id=job.id)
+            return True
 
         if handler:
             AppLogging(self.connection).debug(f"Running job {job.job} ID:{job.id}")

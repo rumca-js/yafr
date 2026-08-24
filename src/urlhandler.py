@@ -2,9 +2,15 @@ from webtoolkit import (
    BaseUrl,
    RemoteUrl,
    PageRequestObject,
+   UrlLocation,
 )
 
-from linkarchivetools.model import EntryRules, AppLogging
+from linkarchivetools.model import (
+   AppLogging,
+   BlockEntry,
+   ConfigurationEntry,
+   EntryRules,
+)
 
 
 class UrlHandler(object):
@@ -75,3 +81,23 @@ class UrlHandler(object):
         location = RemoteUrl.get_remote_server_location()
         url = RemoteUrl(request=request, remote_server_location=location)
         return url.get_social_properties()
+
+    def is_accepted(self):
+        location = UrlLocation(self.link)
+        domain = location.get_domain_only()
+
+        config = ConfigurationEntry(self.connection).get()
+
+        if not config.accept_ip_links and location.is_ipv4():
+            return False
+
+        if not config.accept_onion_links and location.is_onion():
+            return False
+
+        is_domain = location.is_domain()
+        if not config.accept_domain_links and is_domain:
+            return False
+        if not config.accept_non_domain_links and not is_domain:
+            return False
+
+        return True
