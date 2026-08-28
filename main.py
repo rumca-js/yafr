@@ -166,6 +166,7 @@ def parse_search(search, table, tags_table):
             return [column.ilike(f"%{value}%")]
 
     return [
+          table.c.id.ilike(f"%{search}%"),
           table.c.title.ilike(f"%{search}%"),
           table.c.description.ilike(f"%{search}%"),
           table.c.link.ilike(f"%{search}%"),
@@ -567,7 +568,14 @@ def add_links():
         link_ids = controller.add_links_text(raw_text)
         connection.close()
 
-        template_html = STR_TEMPLATE.replace("{template_string}", "Added")
+        text = ""
+        if link_ids:
+            for link_id in link_ids:
+                text += f"""<div>Added <a href="/search?search=id%3D{link_id}">{link_id}</a></div>\n"""
+        else:
+            text = "Not added anything"
+
+        template_html = STR_TEMPLATE.replace("{template_string}", text)
         html_text = get_view(template_html, title="OK")
         return render_template_string(html_text)
 

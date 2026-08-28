@@ -157,8 +157,6 @@ class Controller(object):
         return self.connection.configurationentry.update_json_data(id=config_entry.id, json_data=json_data)
 
     def add_sources(self, source_urls):
-        self.start_reading = True
-
         sources = Sources(self.connection)
         source_ids = []
 
@@ -173,8 +171,6 @@ class Controller(object):
         return source_ids
 
     def add_links(self, link_urls):
-        self.start_reading = True
-
         link_ids = []
         for link_url in link_urls:
             builder = EntryDataBuilder(self.connection)
@@ -193,11 +189,11 @@ class Controller(object):
 
     def add_sources_text(self, raw_text):
         source_urls = read_line_things(raw_text)
-        self.add_sources(source_urls)
+        return self.add_sources(source_urls)
 
     def add_links_text(self, raw_text):
         links_urls = read_line_things(raw_text)
-        self.add_links(links_urls)
+        return self.add_links(links_urls)
 
     def truncate(self):
         self.connection.entries_table.truncate()
