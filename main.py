@@ -40,6 +40,8 @@ from linkarchivetools.model import (
    source_and_entries_to_rss,
 )
 from linkarchivetools.utils.reflected import ReflectedTable
+from linkarchivetools.dbupdate import DbUpdate
+
 from webtoolkit import json_encode_field, DateUtils
 
 from src.urlhandler import UrlHandler
@@ -1928,6 +1930,9 @@ if __name__ == "__main__":
     debug_mode = args.debug
 
     if (debug_mode and os.environ.get("WERKZEUG_RUN_MAIN") == "true") or not debug_mode:
+        db_update = DbUpdate(db=app.config["DB_FILE"])
+        db_update.create_tables()
+
         thread = threading.Thread(
             target=runner.start,
             args=(),
