@@ -484,6 +484,10 @@ def source(source_id):
             page_hash = None
             body_hash = None
 
+        print(source_item)
+        print("Works")
+        print(source_item.url)
+
         return render_template_string(html_text, source_item=source_item, source_op_data = source_op,  page_hash = page_hash, body_hash = body_hash)
     else:
         html_text = get_view(NOK_TEMPLATE, title="Cannot find source")
