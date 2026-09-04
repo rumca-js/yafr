@@ -233,14 +233,14 @@ cffi = [
 
 [[package]]
 name = "brutefeedparser"
-version = "0.10.8"
+version = "1.0.0"
 description = "Brute Feed Parser"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "brutefeedparser-0.10.8-py3-none-any.whl", hash = "sha256:174cdbf448014a32445cc278c9988256267b14603abeb7135b1404180bb3392b"},
-    {file = "brutefeedparser-0.10.8.tar.gz", hash = "sha256:cfd3606c2d20cab4cf53035b6ea6c8006f5c1c8034cfc4212400684ac6f2c12b"},
+    {file = "brutefeedparser-1.0.0-py3-none-any.whl", hash = "sha256:efe3228866f448de8088dd77eeeae657c0523570e0c727fc75df50e7c45db972"},
+    {file = "brutefeedparser-1.0.0.tar.gz", hash = "sha256:86ce372f34cc4296a3269255152450907b448bbc4a9fcee1e50eca5b551fcb0c"},
 ]
 
 [package.dependencies]
@@ -570,14 +570,14 @@ files = [
 
 [[package]]
 name = "filelock"
-version = "3.32.4"
+version = "3.32.5"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "filelock-3.32.4-py3-none-any.whl", hash = "sha256:22e58ca3b1ae3b98993b762d7338367ae64fe50252bf78d59da3bfebcdf1cedd"},
-    {file = "filelock-3.32.4.tar.gz", hash = "sha256:2bde2e4cf732e0153406d8a7bc80620ecf5e621fe0d25e41143c4e3b4733ff30"},
+    {file = "filelock-3.32.5-py3-none-any.whl", hash = "sha256:142cd9fa77a872c5e78c62329a0d15278fadc686eb89e760017968961a4fd6b2"},
+    {file = "filelock-3.32.5.tar.gz", hash = "sha256:f6a6a28f743f9b95ce19db5abe0f376f75eb56517dff21e1a4751e2657d3e83d"},
 ]
 
 [[package]]
@@ -745,14 +745,14 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "linkarchivetools"
-version = "0.1.100"
+version = "0.1.119"
 description = "Link Archive Tools"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "linkarchivetools-0.1.100-py3-none-any.whl", hash = "sha256:6c69b09ac127f9960d0f1a75957a6b3f3b73315f612b0251c4bc257c68fca43c"},
-    {file = "linkarchivetools-0.1.100.tar.gz", hash = "sha256:9b636d5c501c9bf07a67b83004fd6727b773fd53247b5cf56c39b9e0d7f002d9"},
+    {file = "linkarchivetools-0.1.119-py3-none-any.whl", hash = "sha256:ff92f41500c644b9f368fd4d62026d31a652f360c1aaa2ce668f76bf130766cb"},
+    {file = "linkarchivetools-0.1.119.tar.gz", hash = "sha256:5ed53e37d75bfb4291411464402f355e03f5c3af5a7690b548f0cd0f5fc1e50a"},
 ]
 
 [package.dependencies]
@@ -761,7 +761,7 @@ python-dateutil = ">=2.8.2,<3.0.0"
 requests = ">=2.32.5,<3.0.0"
 sqlalchemy = "*"
 sympy = ">=1.13.2,<2.0.0"
-webtoolkit = ">=0.1.62,<0.2.0"
+webtoolkit = ">=0.1.67,<0.2.0"
 
 [[package]]
 name = "lxml"
@@ -1081,14 +1081,14 @@ re2 = ["google-re2 (>=1.1)"]
 
 [[package]]
 name = "platformdirs"
-version = "4.11.4"
+version = "4.11.7"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.10"
 groups = ["dev"]
 files = [
-    {file = "platformdirs-4.11.4-py3-none-any.whl", hash = "sha256:e34ff91a24bcddc6d939b878bdf3f5c437c9c46fe9e212b1bf455fdf1ee57586"},
-    {file = "platformdirs-4.11.4.tar.gz", hash = "sha256:f3373be828247211d0febabea97e238c3dfde8a60b3c90c32756fb52cb21556d"},
+    {file = "platformdirs-4.11.7-py3-none-any.whl", hash = "sha256:8a02cb259042c79d1cd0450facc2fe6dc9d303ae7901afbe33bf8ea0b188cef6"},
+    {file = "platformdirs-4.11.7.tar.gz", hash = "sha256:4f41487eeeeeb07f3a6625e61d9bc0ae6809f92d3386dbd74392fbb76108104d"},
 ]
 
 [[package]]
@@ -1610,14 +1610,14 @@ markers = {dev = "python_version == \"3.10\""}
 
 [[package]]
 name = "ua-generator"
-version = "2.1.3"
+version = "2.1.4"
 description = "A random user-agent generator"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "ua_generator-2.1.3-py3-none-any.whl", hash = "sha256:c67dd772d03621b0f934fec3c0806dc51ef2be3cddba0fe65ea4b34ac02e080e"},
-    {file = "ua_generator-2.1.3.tar.gz", hash = "sha256:82f7f8fb46e91e79a97a0bc0db0484062413d2d952b30f06f0400a05656f9a78"},
+    {file = "ua_generator-2.1.4-py3-none-any.whl", hash = "sha256:822606a308f1097ce299ed6f26fc90c3377da44861f5a9d41c6529390b3df1d5"},
+    {file = "ua_generator-2.1.4.tar.gz", hash = "sha256:e3936b8cc87e04eddaab053104d2cac163e14cce8dc2ba7a02639c213e8dff57"},
 ]
 
 [[package]]
@@ -1931,19 +1931,19 @@ files = [
 
 [[package]]
 name = "webtoolkit"
-version = "0.1.62"
+version = "0.1.67"
 description = "Web tools and interfaces for Internet data processing."
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "webtoolkit-0.1.62-py3-none-any.whl", hash = "sha256:440df07ccbb73cbc17c01704c236425df6fe1ee84ed32fd5925e27d685a33154"},
-    {file = "webtoolkit-0.1.62.tar.gz", hash = "sha256:fe7c2c8b1f63eeb48d5cd6e1c3122e05265ad783d16e8c933cef6cf685a72269"},
+    {file = "webtoolkit-0.1.67-py3-none-any.whl", hash = "sha256:b426a143cc1a80aea85872b99635b49f3f4a18d5a6ef352865bf216df58d7558"},
+    {file = "webtoolkit-0.1.67.tar.gz", hash = "sha256:cf40fc5383e40a73efe75e54a81eec4ba6318cc1768cd0a4a16df1ea5fc66202"},
 ]
 
 [package.dependencies]
 beautifulsoup4 = ">=4.13.5,<5.0.0"
-brutefeedparser = ">=0.10.5,<0.11.0"
+brutefeedparser = ">=1.0.0,<2.0.0"
 lxml = ">=5.4.0,<6.0.0"
 psutil = "*"
 python-dateutil = ">=2.8.2,<3.0.0"
@@ -2019,4 +2019,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "003305e09cbcc8535ace43f20472d72d2d9badc9ecc97702ef1f2d72412a61ef"
+content-hash = "0d8610195f33dc07c53f8d2ee02fbd4644dccc6e76ec64a267cb889dff85b3b3"
