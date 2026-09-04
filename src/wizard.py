@@ -6,6 +6,8 @@ class Wizard(object):
         self.connection = connection
 
     def init(self, config_entry):
+        from .controller import Controller
+
         controller = Controller(self.connection)
         controller.update_configuration(config_entry)
         # self.init_sources(init_sources)

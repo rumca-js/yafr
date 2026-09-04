@@ -16,10 +16,12 @@ class EntryDataBuilder(object):
         self.link = link
 
         if not self.is_enabled_to_store_link():
+            self.errors.append("Link not configured to be stored")
             return
 
         entries = Entries(connection=self.connection)
         if entries.exists(link=link):
+            self.errors.append("Link already exists")
             return
 
         entry_json = {"link" : link}

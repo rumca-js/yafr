@@ -48,7 +48,7 @@ class TaskRunner(object):
             config_entry = ConfigurationEntry(self.connection).get()
             if not config_entry.initialized:
                 wizard = Wizard(self.connection)
-                wziard.init(config_entry)
+                wizard.init(config_entry)
 
             self.close()
 
