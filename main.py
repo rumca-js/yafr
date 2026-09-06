@@ -456,6 +456,10 @@ def source(source_id):
     connection = get_connection()
 
     source_item = connection.sources_table.get(id=source_id)
+    if not source_item:
+        html_text = get_view(NOK_TEMPLATE, title="Cannot find source")
+        return render_template_string(html_text)
+
     source_ops = list(connection.sourceoperationaldata.get_where({"source_obj_id" : source_id}))
     source_op = None
     if len(source_ops) > 0:
@@ -467,31 +471,25 @@ def source(source_id):
         data["language"] = request.form.get("language")
         data["auto_tag"] = request.form.get("auto_tag")
         data["xpath"] = request.form.get("xpath", "")
+        data["age"] = request.form.get("age", 0)
 
-        connection.sources_table.update_json_data(id=source_op.id, json_data=data)
+        connection.sources_table.update_json_data(id=source_item.id, json_data=data)
+        #connection.sourceoperationaldata.update_json_data(id=source_op.id, json_data=data)
 
         html_text = get_view(OK_TEMPLATE, title="Updated")
         connection.close()
         return render_template_string(html_text)
 
-    if source_item:
-        html_text = get_view(SOURCE_TEMPLATE, title=source_item.title)
+    html_text = get_view(SOURCE_TEMPLATE, title=source_item.title)
 
-        if source_op:
-            page_hash = json_encode_field(source_op.page_hash)
-            body_hash = json_encode_field(source_op.body_hash)
-        else:
-            page_hash = None
-            body_hash = None
-
-        print(source_item)
-        print("Works")
-        print(source_item.url)
-
-        return render_template_string(html_text, source_item=source_item, source_op_data = source_op,  page_hash = page_hash, body_hash = body_hash)
+    if source_op:
+        page_hash = json_encode_field(source_op.page_hash)
+        body_hash = json_encode_field(source_op.body_hash)
     else:
-        html_text = get_view(NOK_TEMPLATE, title="Cannot find source")
-        return render_template_string(html_text)
+        page_hash = None
+        body_hash = None
+
+    return render_template_string(html_text, source_item=source_item, source_op_data = source_op,  page_hash = page_hash, body_hash = body_hash)
 
 
 @app.route("/source-edit", methods=["GET", "POST"])

@@ -360,6 +360,7 @@ SOURCE_TEMPLATE = """
 <div>Enabled:{{source_item.enabled}}</div>
 <div>Type:{{source_item.source_type}}</div>
 <div>Thumbnail:<a href="{{source_item.favicon}}">{{source_item.favicon}}</a></div>
+<div>Age:{{source_item.age}}</div>
 
 <p>
 <div>Date fetched:{{source_op_data.date_fetched}}</div>
@@ -377,6 +378,8 @@ SOURCE_TEMPLATE = """
     <div><input type="search" id="language" name="language" value="{{source_item.language}}"/></div>
     <div><label for="auto_tag">Auto tag</label></div>
     <div><input type="search" id="auto_tag" name="auto_tag" value="{{source_item.auto_tag}}"/></div>
+    <div><label for="age">Age designation. Can be 0</label></div>
+    <div><input type="search" id="age" name="age" value="{{source_item.age}}"/></div>
     <button type="submit">Save</button>
 </form>
 """
