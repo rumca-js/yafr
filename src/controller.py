@@ -84,7 +84,7 @@ class Controller(object):
     def get_link(self, link):
         entries = Entries(connection=self.connection)
         for entry in entries.get_table().get_where({"link" : link}):
-            return entry.id
+            return entry
 
     def add_links(self, link_urls):
         link_ids = []
