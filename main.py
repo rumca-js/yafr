@@ -197,7 +197,6 @@ def get_entries_for_request(connection, order_by, limit, offset, search=None, vi
     social_table = connection.socialdata.get_table()
     views_table = connection.searchview
 
-    print(f"View : {view_id}")
     view = None
     if not view_id:
         # TODO linkarchive should contain default view obtainer
@@ -211,7 +210,6 @@ def get_entries_for_request(connection, order_by, limit, offset, search=None, vi
         for searched_view in searched_views:
             print("Using search view")
             view = searched_view
-    print(f"Found view {view}")
 
     conditions = parse_search(search, table, tags_table)
 
@@ -222,7 +220,12 @@ def get_entries_for_request(connection, order_by, limit, offset, search=None, vi
 
     if not order_by and view:
         order_by = view.order_by
-    print(f"Using order by {order_by}")
+
+    config = connection.configurationentry.get_first()
+    if config.initialization_type == ConfigurationEntry.CONFIGURATION_NEWS:
+        order_bys = [table.c.date_published.desc()]
+    else:
+        order_bys = [table.c.page_rating_votes.desc()]
 
     order_bys = [table.c.date_published.desc()]
     if order_by == "-view_count":
@@ -280,8 +283,6 @@ def get_entries_for_request(connection, order_by, limit, offset, search=None, vi
         conditions = or_(*view_conditions)
 
     if conditions is not None:
-        print("Using search conditions")
-        print(conditions)
         entries_select = entries_select.where(conditions)
     if offset is not None:
         entries_select = entries_select.offset(offset)
@@ -315,7 +316,6 @@ def get_sources_for_request(connection, limit, offset, search=None):
         sources = list(connection.sources_table.get_where(limit=limit,
                                                           offset=offset,
                                                           order_by=order_by))
-    print(f"len {sources}")
     return sources
 
 
