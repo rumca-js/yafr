@@ -360,7 +360,6 @@ SOURCE_TEMPLATE = """
 <div>Enabled:{{source_item.enabled}}</div>
 <div>Type:{{source_item.source_type}}</div>
 <div>Thumbnail:<a href="{{source_item.favicon}}">{{source_item.favicon}}</a></div>
-<div>Age:{{source_item.age}}</div>
 
 <p>
 <div>Date fetched:{{source_op_data.date_fetched}}</div>
