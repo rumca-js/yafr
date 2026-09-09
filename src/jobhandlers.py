@@ -303,6 +303,10 @@ class ProcessSourceJobHandler(GenericJobHandler):
 
     def handle_valid_response(self, source, url, response):
         source_properties = url.get_properties()
+        if "language" in source_properties:
+            if source_properties["language"] is None:
+                source_properties["language"] = ""
+
         sources = Sources(self.connection)
         sources.set(source.url, source_properties, source_type=source.source_type)
 
