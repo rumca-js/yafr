@@ -18,9 +18,9 @@ from linkarchivetools.model import (
     ConfigurationEntry,
 )
 
+from .jobhandler import job2handler
 from .controller import Controller
 from .system import System
-from .jobhandlers import *
 from .wizard import Wizard
 
 
@@ -201,7 +201,7 @@ class TaskRunner(object):
         if not job:
             return False
 
-        handler = self.job2handler(job)
+        handler = job2handler(job)
 
         if not handler:
             AppLogging(self.connection).error(f"Unsupported job: {job.job}")
@@ -221,26 +221,6 @@ class TaskRunner(object):
 
             return True
         
-    def job2handler(self, job):
-        if job.job == BackgroundJob.JOB_PROCESS_SOURCE:
-            return ProcessSourceJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-        elif job.job == BackgroundJob.JOB_CLEANUP:
-            return CleanupJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-        elif job.job == BackgroundJob.JOB_LINK_UPDATE_DATA:
-            return UpdateLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-        elif job.job == BackgroundJob.JOB_LINK_RESET_DATA:
-            return ResetLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-        elif job.job == BackgroundJob.JOB_LINK_ADD:
-            return AddLinkJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-        elif job.job == BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL:
-            return DownloadSocialDataJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-        elif job.job == BackgroundJob.JOB_LINK_DOWNLOAD:
-            return LinkDownloadJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-        elif job.job == BackgroundJob.JOB_LINK_DOWNLOAD_MUSIC:
-            return LinkAudioDownloadJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-        elif job.job == BackgroundJob.JOB_LINK_DOWNLOAD_VIDEO:
-            return LinkVideoDownloadJobHandler(connection = self.connection, job=job, table_name = self.table_name)
-
     def add_update_jobs(self):
         config_entry = ConfigurationEntry(self.connection).get()
         number_of_update_entries = config_entry.number_of_update_entries

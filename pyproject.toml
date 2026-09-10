@@ -12,7 +12,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 flask="*"
-linkarchivetools="^0.1.125"
+linkarchivetools="^1.0.0"
 yt-dlp = {extras = ["default"], version = "^2026.8.19"}
 
 [tool.poetry.group.dev.dependencies]

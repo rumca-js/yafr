@@ -923,3 +923,38 @@ class CleanupJobHandler(GenericJobHandler):
         json_data["date_created"] = datetime.now()
 
         self.connection.backgroundjobhistory.insert_json_data(json_data=json_data)
+
+    def tables_cleanup(self):
+
+        """ Entries """
+
+        entries = Entries(self.connection)
+
+        for row in self.connection.entryvisithistory.get_where({}):
+            if entries.get(row.entry_id) is None:
+                self.connection.entryvisithistory.delete(id=row.id)
+
+        for transition_history in self.connection.entrytransitionhistory.get_where({}):
+            if entries.get(transition_history.entry_from_id) is None:
+                self.connection.entrytransitionhistory.delete(id=transition_history.id)
+            if entries.get(transition_history.entry_to_id) is None:
+                self.connection.entrytransitionhistory.delete(id=transition_history.id)
+
+        for row in self.connection.entrycompactedtags.get_where({}):
+            if entries.get(row.entry_id) is None:
+                self.connection.entrycompactedtags.delete(id=row.id)
+
+        for row in self.connection.readlater.get_where({}):
+            if entries.get(row.entry_id) is None:
+                self.connection.readlater.delete(id=row.id)
+
+        for row in self.connection.socialdata.get_where({}):
+            if entries.get(row.entry_id) is None:
+                self.connection.socialdata.delete(id=row.id)
+
+        """ Sources """
+        sources = Sources(self.connection)
+
+        for row in self.connection.sourceoperationaldata.get_where({}):
+            if sources.get(row.source_id) is None:
+                self.connection.sourceoperationaldata.delete(id=row.id)

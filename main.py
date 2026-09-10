@@ -42,7 +42,11 @@ from linkarchivetools.model import (
 from linkarchivetools.utils.reflected import ReflectedTable
 from linkarchivetools.dbupdate import DbUpdate
 
-from webtoolkit import json_encode_field, DateUtils
+from webtoolkit import (
+   json_encode_field,
+   DateUtils,
+   BaseUrl,
+)
 
 from src.urlhandler import UrlHandler
 from templates.templates import *
@@ -474,7 +478,6 @@ def source(source_id):
         data["age"] = request.form.get("age", 0)
 
         connection.sources_table.update_json_data(id=source_item.id, json_data=data)
-        #connection.sourceoperationaldata.update_json_data(id=source_op.id, json_data=data)
 
         html_text = get_view(OK_TEMPLATE, title="Updated")
         connection.close()
@@ -489,7 +492,21 @@ def source(source_id):
         page_hash = None
         body_hash = None
 
-    return render_template_string(html_text, source_item=source_item, source_op_data = source_op,  page_hash = page_hash, body_hash = body_hash)
+    base_url = BaseUrl(url=source_item.url)
+
+    feeds = base_url.get_feeds()
+    feeds.remove(source_item.url)
+    urls_map = base_url.get_urls()
+    urls = set(urls_map.values())
+    urls.remove(source_item.url)
+
+    return render_template_string(html_text,
+                                  source_item=source_item,
+                                  source_op_data=source_op,
+                                  page_hash=page_hash,
+                                  body_hash=body_hash,
+                                  feeds=feeds,
+                                  urls=urls)
 
 
 @app.route("/source-edit", methods=["GET", "POST"])
@@ -1394,6 +1411,22 @@ def remove_entry():
         connection.entries_table.delete_where({"id" : entry.id})
 
     html_text = get_view(OK_TEMPLATE, title="Remove entry")
+    return render_template_string(html_text)
+
+
+@app.route("/recreate-table")
+def recreate_table():
+    connection = get_connection()
+
+    table_name = request.args.get("id")
+    if not table_name:
+        html_text = get_view(NOK_TEMPLATE, title="Missing id")
+        return render_template_string(html_text)
+
+    update = DbUpdate(engine=connection.engine, connection=connection.connection)
+    update.recreate_table(table_name)
+
+    html_text = get_view(OK_TEMPLATE, title="Recreated")
     return render_template_string(html_text)
 
 

@@ -357,6 +357,13 @@ SOURCE_TEMPLATE = """
 
 <div>ID:{{source_item.id}}</div>
 <div>Url:<a href="{{source_item.url}}">{{source_item.url}}</a></div>
+{% for feed in feeds %}
+  <div>Feed:<a href="{{feed}}">{{feed}}</a></div>
+{% endfor %}
+{% for url in urls %}
+  <div>Url:<a href="{{url}}">{{url}}</a></div>
+{% endfor %}
+
 <div>Enabled:{{source_item.enabled}}</div>
 <div>Type:{{source_item.source_type}}</div>
 <div>Thumbnail:<a href="{{source_item.favicon}}">{{source_item.favicon}}</a></div>
