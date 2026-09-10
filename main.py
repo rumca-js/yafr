@@ -1951,6 +1951,10 @@ def parse_args():
         help="Port to bind the server (default: 5000)"
     )
     parser.add_argument(
+        "--recreate-table",
+        help="table to recreate"
+    )
+    parser.add_argument(
         "--debug",
         action="store_true",
         help="Run Flask in debug mode"
@@ -1967,6 +1971,9 @@ if __name__ == "__main__":
     if (debug_mode and os.environ.get("WERKZEUG_RUN_MAIN") == "true") or not debug_mode:
         db_update = DbUpdate(db=app.config["DB_FILE"])
         db_update.create_tables()
+
+        if args.recreate_table:
+            db_update.recreate_table(args.recreate_table)
 
         thread = threading.Thread(
             target=runner.start,

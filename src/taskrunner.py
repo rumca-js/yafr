@@ -7,6 +7,7 @@ from sqlalchemy import select, or_
 from webtoolkit import (
    RemoteUrl,
    RemoteServer,
+   PageRequestObject,
 )
 from linkarchivetools.model import (
     DbConnection,
@@ -18,7 +19,7 @@ from linkarchivetools.model import (
     ConfigurationEntry,
 )
 
-from .jobhandler import job2handler
+from .jobbuilder import job2handler
 from .controller import Controller
 from .system import System
 from .wizard import Wizard
@@ -201,7 +202,7 @@ class TaskRunner(object):
         if not job:
             return False
 
-        handler = job2handler(job)
+        handler = job2handler(self.connection, job, self.table_name)
 
         if not handler:
             AppLogging(self.connection).error(f"Unsupported job: {job.job}")
