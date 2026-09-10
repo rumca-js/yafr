@@ -464,7 +464,7 @@ def source(source_id):
         html_text = get_view(NOK_TEMPLATE, title="Cannot find source")
         return render_template_string(html_text)
 
-    source_ops = list(connection.sourceoperationaldata.get_where({"source_obj_id" : source_id}))
+    source_ops = list(connection.sourceoperationaldata.get_where({"source_id" : source_id}))
     source_op = None
     if len(source_ops) > 0:
         source_op = source_ops[0]
