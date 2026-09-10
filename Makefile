@@ -13,7 +13,7 @@
 .PHONY: backfiles test test-min test-real
 
 server:
-	poetry run python main.py
+	poetry run python main.py --recreate-table sourceoperationaldata
 
 # Assumptions:
 #  - python black is in your path
