@@ -494,11 +494,14 @@ def source(source_id):
 
     base_url = BaseUrl(url=source_item.url)
 
-    feeds = base_url.get_feeds()
-    feeds.remove(source_item.url)
+    feeds = set(base_url.get_feeds())
+    feeds.discard(source_item.url)
     urls_map = base_url.get_urls()
     urls = set(urls_map.values())
-    urls.remove(source_item.url)
+    urls.discard(source_item.url)
+
+    feeds.discard(None)
+    urls.discard(None)
 
     return render_template_string(html_text,
                                   source_item=source_item,

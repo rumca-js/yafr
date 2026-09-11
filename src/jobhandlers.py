@@ -164,7 +164,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 if entry.date_published:
                     date_published = entry.date_published
                     return_entry = entry
-            elif entry.date_published > date_published:
+            elif entry.date_published and entry.date_published > date_published:
                 date_published = entry.date_published
                 return_entry = entry
 
@@ -312,6 +312,9 @@ class ProcessSourceJobHandler(GenericJobHandler):
         if "language" in source_properties:
             if source_properties["language"] is None:
                 source_properties["language"] = ""
+        if "title" in source_properties:
+            if source_properties["title"] is None:
+                source_properties["title"] = ""
 
         sources = Sources(self.connection)
         sources.set(source.url, source_properties, source_type=source.source_type)

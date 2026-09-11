@@ -163,12 +163,21 @@ ENTRY_TEMPLATE = """
 <div class="title">
     {% if entry.link %}
         <a href="{{ entry.link }}" target="_blank" rel="noopener">
-            {{ entry.title or "Untitled entry" }}
+            {{ entry.title or entry.link }}
         </a>
     {% else %}
         {{ entry.title or "Untitled entry" }}
     {% endif %}
 </div>
+
+<div>Description: {{entry.description}}</div>
+<div>Date published: {{entry.date_published}}</div>
+<div>Author: {{entry.author}}</div>
+<div>Album: {{entry.album}}</div>
+<div>Language: {{entry.language}}</div>
+<div>Source: {{entry.source_id}}</div>
+<div>Source URL: {{entry.source_url}}</div>
+<div>Source title: {{entry.source_title}}</div>
 """
 
 
@@ -314,9 +323,6 @@ SOURCES_LIST_TEMPLATE = """
             </a>
             <div class="source-title">
                {{ source.url }}
-            </div>
-            <div class="source-title">
-               <a href="/rss/{{source.id}}">RSS</a>
             </div>
         </div>
     {% endfor %}

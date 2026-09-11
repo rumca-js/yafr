@@ -504,13 +504,19 @@ function getEntryDetailTags(entry) {
 function getViewMenu(entry) {
     let link = entry.link;
 
-    links = GetAllServicableLinks(link);
+    const links = []
 
     let source_url = getEntrySourceUrl(entry);
     if (source_url != null) {
         links.push({
-           name: `Source - ${source_url}`,
+           name: `Source URL - ${source_url}`,
            link: source_url
+        });
+
+        source_api_url = getSourceLocalLink(entry);
+        links.push({
+           name: `Source - ${source_api_url}`,
+           link: source_api_url
         });
 
         let channel_url = getChannelUrl(source_url);
@@ -536,6 +542,9 @@ function getViewMenu(entry) {
            }
         }
     }
+
+    const service_links = GetAllServicableLinks(link);
+    links.push(...service_links);
 
     let html = 
     `<div class="dropdown">
@@ -833,11 +842,14 @@ function getEntryOpParameters(entry) {
     if (entry.thumbnail != null) {
        text += `<div><a href="${entry.thumbnail}">Thumbnail</a></div>`;
     }
-    if (entry.source_title != null) {
+    if (entry.source_title != null && entry.source_title != "") {
        text += `<div>Source title: ${entry.source_title}</div>`;
     }
-    if (entry.source_url != null) {
+    if (entry.source_url != null && entry.source_url != "") {
        text += `<div>Source url: ${entry.source_url}</div>`;
+    }
+    if (entry.source_id != null) {
+       text += `<div>Source id: ${entry.source_id}</div>`;
     }
 
     if (entry.page_rating_visits != null) {

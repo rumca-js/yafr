@@ -94,6 +94,10 @@ function getEntryLocalLink(entry) {
     return `?entry_id=${entry.id}`;
 }
 
+function getSourceLocalLink(entry) {
+    return `/source/${entry.source_id}`;
+}
+
 function getStatusAPI() {
    return `/api/status`;
 }
