@@ -256,6 +256,12 @@ class ProcessSourceJobHandler(GenericJobHandler):
         if entry.bookmarked:
             return False
 
+        if entry.permanent:
+            return False
+
+        if entry.page_rating_votes > 0:
+            return False
+
         check_later = CheckLater(self.connection)
         if check_later.get(entry_id = entry.id):
             return False
@@ -897,8 +903,8 @@ class AddLinkJobHandler(GenericJobHandler):
 
 class CleanupJobHandler(GenericJobHandler):
     def run(self):
-        entries = Entries(self.connection)
-        entries.cleanup()
+        entries_controller = Entries(self.connection)
+        entries_controller.cleanup()
 
         sources_data = SourceData(self.connection)
         sources_data.cleanup()
@@ -910,6 +916,22 @@ class CleanupJobHandler(GenericJobHandler):
         tags.cleanup()
 
         self.add_backgroundjob_history()
+
+        config_entry = ConfigurationEntry(self.connection).get()
+        if config_entry.days_to_remove_links > 0:
+            entries_controller = Entries(self.connection)
+            """
+            TODO
+
+            table = entries_controller.get_table().get_table()
+            cutoff_date = datetime.now() - timedelta(days=config_entry.days_to_remove_links)
+            conditions = [table.c.date_created.isnul(), table.c.date_created < cutoff_date]
+            for entry in entries_controller.get_table().get_where(conditions=conditions):
+            for entry in entries:
+                if entry.date_published is None or entry.date_published < config_entry.days_to_remove_links:
+                    entries_controller.delete(entry.id)
+            """
+
         return True
 
     def add_backgroundjob_history(self):

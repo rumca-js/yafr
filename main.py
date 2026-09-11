@@ -1243,6 +1243,24 @@ def remove_all_entries():
     return render_template_string(html_text)
 
 
+@app.route("/remove-stray-entries")
+def remove_stray_entries():
+    """
+    Removes entries without source
+    """
+    connection = get_connection()
+
+    entries_controller = Entries(connection=connection)
+    entries = entries_controller.get_where({"source_id": None})
+    for entry in entries:
+        entries_controller.delete(entry.id)
+
+    connection.close()
+
+    html_text = get_view(OK_TEMPLATE, title="Remove all entries")
+    return render_template_string(html_text)
+
+
 @app.route("/remove-entries-no-source")
 def remove_entries_no_source():
     from sqlalchemy import (

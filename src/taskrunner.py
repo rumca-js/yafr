@@ -192,7 +192,7 @@ class TaskRunner(object):
         table = sd_controller.get_table().get_table()
         order_by = [table.c.date_fetched.asc()]
         for sd in sd_controller.get_table().get_where(order_by=order_by):
-            source = sources.get_table().get(id=sd.source_obj_id)
+            source = sources.get_table().get(id=sd.source_id)
             if source and source.enabled:
                 if sd_controller.is_update_needed(source):
                     job = BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_PROCESS_SOURCE, subject=str(source.id))
