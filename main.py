@@ -472,10 +472,12 @@ def source(source_id):
     if request.method == "POST":
         data = {}
         data["fetch_period"] = request.form.get("fetch_period", 0)
-        data["language"] = request.form.get("language")
-        data["auto_tag"] = request.form.get("auto_tag")
+        data["language"] = request.form.get("language", "")
+        data["auto_tag"] = request.form.get("auto_tag", "")
         data["xpath"] = request.form.get("xpath", "")
         data["age"] = request.form.get("age", 0)
+
+        data["auto_tag"] = data["auto_tag"].lower()
 
         connection.sources_table.update_json_data(id=source_item.id, json_data=data)
 

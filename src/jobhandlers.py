@@ -99,8 +99,8 @@ class ProcessSourceJobHandler(GenericJobHandler):
         if self.check_source_entry_conditions(sources, source):
             return True
 
-        if self.check_if_old_source_checked_once_a_day(sources, source):
-            return True
+        #if self.check_if_old_source_checked_once_a_day(sources, source):
+        #    return True
 
         return self.check_source(source)
 
@@ -127,11 +127,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
             sources.delete(id=source.id)
             return True
 
-        sd_controller = SourceData(self.connection)
-        if not sd_controller.is_update_needed(source):
-            now = datetime.now()
-            AppLogging(self.connection).debug(f"{source.url}: Update not needed @ {now}")
-            return True
+        # do not check if source data accept it. If we have process job - process
 
         return False
 

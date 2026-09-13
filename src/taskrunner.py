@@ -178,7 +178,7 @@ class TaskRunner(object):
         First read unread sources.
         The add jobs in order of reading need.
         """
-        sd_controller = SourceData(self.connection)
+        sd_controller = SourceData(self.connection, default_fetch_period_s=3600*2)
         sources = Sources(self.connection)
 
         for source in sources.get_table().get_where():
