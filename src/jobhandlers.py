@@ -430,6 +430,24 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 else:
                     AppLogging(self.connection).error("Could not add entry")
 
+        self.disable_if_unused_source(source)
+
+    def disable_if_unused_source(self, source):
+        config_entry = ConfigurationEntry(self.connection).get()
+        number_of_days = 0
+        try:
+            number_of_days = config_entry.days_inactivity_to_disable_source
+        except Exception as E:
+            number_of_days = 365
+
+        entry = self.get_newest_entry(source)
+        if entry and entry.date_published:
+            date_published = entry.date_published
+            diff = datetime.now() - date_published
+            if diff.days > number_of_days:
+                sources = Sources(self.connection)
+                sources.disable(source)
+
     def delete_source_entries(self, source, source_entries_json):
         entries = Entries(self.connection)
 
