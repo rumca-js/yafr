@@ -292,6 +292,7 @@ SOURCES_LIST_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
+    <a class="btn btn-primary" href="?order_by=enabled">Disabled</a>
     <a class="btn btn-primary" href="/sources-fetch-period">Set Fetch Period</a>
     <a class="btn btn-primary" href="/add-sources">Add sources</a>
 </div>
@@ -318,6 +319,9 @@ SOURCES_LIST_TEMPLATE = """
 
             <a href="/source/{{ source.id }}">
               <div class="source-title">
+              {% if not source.enabled %}
+                 [DISABLED]
+              {% endif %}
                  {{ source.title or "Untitled source" }}
               </div>
             </a>
@@ -354,8 +358,13 @@ SOURCE_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
-    <a class="btn btn-primary" href="/source-fetch?id={{source_item.id}}">Fetch</a>
     <a class="btn btn-primary" href="/search?search=source_id=={{source_item.id}}">Search</a>
+    {% if source_item.enabled %}
+       <a class="btn btn-primary" href="/source-disable/{{source_item.id}}">Disable</a>
+    {% else %}
+       <a class="btn btn-primary" href="/source-enable/{{source_item.id}}">Enable</a>
+    {% endif %}
+    <a class="btn btn-primary" href="/source-fetch?id={{source_item.id}}">Fetch</a>
     <a class="btn btn-primary" href="/remove-source?id={{source_item.id}}">Remove</a>
 </div>
 

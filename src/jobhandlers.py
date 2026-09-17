@@ -102,7 +102,9 @@ class ProcessSourceJobHandler(GenericJobHandler):
         #if self.check_if_old_source_checked_once_a_day(sources, source):
         #    return True
 
-        return self.check_source(source)
+        if not self.check_source(source):
+            sources = Sources(self.connection)
+            sources.error(source)
 
     def check_source_entry_conditions(self, sources, source):
         if not source:
@@ -152,8 +154,6 @@ class ProcessSourceJobHandler(GenericJobHandler):
         date_published = None
         return_entry = None
 
-        #order_by = entries.get_table().get_table().c.date_published.desc()
-        #entries_where = entries.get_table().get_where({"source_id" : source.id}, order_by=order_by)
         entries_where = entries.get_table().get_where({"source_id" : source.id})
         for entry in entries_where:
             if date_published is None:
@@ -215,6 +215,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 sd_controller.mark_read(source, url)
             else:
                 AppLogging(self.connection).error(f"URL:{source.url} Response is invalid")
+                return False
         else:
             AppLogging(self.connection).error(f"Source ID:{source.id} URL:{source.url} No response")
             return False

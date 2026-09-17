@@ -263,7 +263,7 @@ def get_entries_for_request(connection, order_by, limit, offset, search=None, vi
     else:
         order_bys = [table.c.date_published.desc()]
 
-    entries_select = (select(table,
+    select_stmt = (select(table,
                              tags_table.c.tag,
                              social_table.c.thumbs_up,
                              social_table.c.thumbs_down,
@@ -287,39 +287,76 @@ def get_entries_for_request(connection, order_by, limit, offset, search=None, vi
         conditions = or_(*view_conditions)
 
     if conditions is not None:
-        entries_select = entries_select.where(conditions)
+        select_stmt = select_stmt.where(conditions)
     if offset is not None:
-        entries_select = entries_select.offset(offset)
+        select_stmt = select_stmt.offset(offset)
     if limit is not None:
-        entries_select = entries_select.limit(limit)
+        select_stmt = select_stmt.limit(limit)
 
-    entries = connection.connection.execute(entries_select)
+    entries = connection.connection.execute(select_stmt)
 
     entries = list(entries)
 
     return entries
 
 
-def get_sources_for_request(connection, limit, offset, search=None):
-    table = connection.sources_table.get_table()
+def get_sources_for_request(connection, order_by, limit, offset, search=None):
+    sources_table = connection.sources_table.get_table()
+    source_data_table = connection.sourceoperationaldata.get_table()
 
-    order_by = [
-      connection.sources_table.get_table().c.title.desc()
+    order_bys = [
+      sources_table.c.title.desc()
     ]
+    if order_by == "enabled":
+        order_bys = [sources_table.c.enabled.asc()]
+    elif order_by == "-enabled":
+        order_bys = [sources_table.c.enabled.desc()]
+    elif order_by == "url":
+        order_bys = [sources_table.c.url.asc()]
+    elif order_by == "-url":
+        order_bys = [sources_table.c.url.desc()]
+    elif order_by == "title":
+        order_bys = [sources_table.c.title.asc()]
+    elif order_by == "-title":
+        order_bys = [sources_table.c.title.desc()]
+    elif order_by == "date_fetched":
+        order_bys = [source_data_table.c.date_fetched.asc()]
+    elif order_by == "-date_fetched":
+        order_bys = [source_data_table.c.date_fetched.desc()]
+    elif order_by == "consecutive_errors":
+        order_bys = [source_data_table.c.consecutive_errors.asc()]
+    elif order_by == "-consecutive_errors":
+        order_bys = [source_data_table.c.consecutive_errors.desc()]
 
     if search and search != "":
         conditions = [
-          table.c.title.ilike(f"%{search}%"),
-          table.c.url.ilike(f"%{search}%"),
+          sources_table.c.title.ilike(f"%{search}%"),
+          sources_table.c.url.ilike(f"%{search}%"),
         ]
-        sources = list(connection.sources_table.get_where(limit=limit,
-                                                          offset=offset,
-                                                          order_by=order_by,
-                                                          conditions=conditions))
     else:
-        sources = list(connection.sources_table.get_where(limit=limit,
-                                                          offset=offset,
-                                                          order_by=order_by))
+        conditions = None
+
+    select_stmt = (select(sources_table,
+                             source_data_table.c.date_fetched,
+                             source_data_table.c.consecutive_errors,
+                             )
+                     .outerjoin(source_data_table, sources_table.c.id == source_data_table.c.source_id)
+                     .order_by(*order_bys)
+                     )
+
+    if conditions:
+        conditions = or_(*conditions)
+
+    if conditions is not None:
+        select_stmt = select_stmt.where(conditions)
+    if offset is not None:
+        select_stmt = select_stmt.offset(offset)
+    if limit is not None:
+        select_stmt = select_stmt.limit(limit)
+
+    sources = connection.connection.execute(select_stmt)
+    sources = list(sources)
+
     return sources
 
 
@@ -399,6 +436,7 @@ def sources():
     connection = get_connection()
 
     search = request.args.get("search")
+    order_by = request.args.get("order_by")
 
     pagination = PagePagination(request)
     limit = pagination.get_limit()
@@ -407,17 +445,18 @@ def sources():
     page = pagination.get_page()
     prev_page = page - 1
     next_page = page + 1
+    args = f"order_by={order_by}"
 
     pagination_text = "";
     pagination_text += '<div id="pagination">'
     pagination_text += '<nav>'
     pagination_text += '<ul class="pagination">'
     if page > 2:
-        pagination_text += '<a href="?p=1" class="btnNavigation page-link">|&lt;</a>';
+        pagination_text += f'<a href="?p=1&{args}" class="btnNavigation page-link">|&lt;</a>';
     if page > 1:
-        pagination_text += f'<a href="?p={prev_page}" class="btnNavigation page-link">&lt;</a>';
+        pagination_text += f'<a href="?p={prev_page}&{args}" class="btnNavigation page-link">&lt;</a>';
     pagination_text += '<li class="page-item">'
-    pagination_text += f'<a href="?p={next_page}" class="btnNavigation page-link" >&gt;</a>';
+    pagination_text += f'<a href="?p={next_page}&{args}" class="btnNavigation page-link" >&gt;</a>';
     pagination_text += '</li>'
     pagination_text += '</ul>'
     pagination_text += '</nav>'
@@ -425,7 +464,7 @@ def sources():
 
     sources_len = connection.sources_table.count()
 
-    sources = get_sources_for_request(connection, limit, offset, search)
+    sources = get_sources_for_request(connection, order_by, limit, offset, search)
     template_text = SOURCES_LIST_TEMPLATE
     template_text = template_text.replace("{{pagination_text}}", pagination_text)
     if search is None:
@@ -541,6 +580,28 @@ def source_edit():
 
     html_text = get_view(SOURCE_EDIT_TEMPLATE, title="Edit source")
     return render_template_string(html_text, source=source)
+
+
+@app.route("/source-enable/<int:source_id>")
+def source_enable(source_id):
+    connection = get_connection()
+
+    controller = Sources(connection)
+    source = controller.get(id=source_id)
+    controller.enable(source)
+
+    return redirect(url_for("source", source_id=source_id))
+
+
+@app.route("/source-disable/<int:source_id>")
+def source_disable(source_id):
+    connection = get_connection()
+
+    controller = Sources(connection)
+    source = controller.get(id=source_id)
+    controller.disable(source)
+
+    return redirect(url_for("source", source_id=source_id))
 
 
 @app.route("/source-fetch")
@@ -1564,8 +1625,13 @@ def disable_job():
 def get_stats_map(connection):
     stats_map = {}
 
+    counter = 0
+    for row in connection.sources_table.get_where({"enabled" : False}):
+        counter += 1
+
     stats_map["Entries"] = connection.entries_table.count()
     stats_map["Sources"] = connection.sources_table.count()
+    stats_map["Sources - disabled"] = counter
     stats_map["Sources Operational Data"] = connection.sourceoperationaldata.count()
     stats_map["Entry rules"] = connection.entry_rules.count()
     stats_map["Social data"] = connection.socialdata.count()
@@ -1917,13 +1983,14 @@ def api_status():
 @app.route("/api/sources")
 def api_sources():
     connection = get_connection()
+    order_by = request.args.get("order_by")
 
     pagination = PagePagination(request)
     limit = pagination.get_limit()
     offset = pagination.get_offset()
 
     json_sources = []
-    sources = get_sources_for_request(connection, limit, offset)
+    sources = get_sources_for_request(connection, order_by, limit, offset)
 
     for source in sources:
         json_data_source = source_to_json(source, with_id=True)
