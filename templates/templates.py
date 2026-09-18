@@ -292,7 +292,12 @@ SOURCES_LIST_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
+
     <a class="btn btn-primary" href="?order_by=enabled">Disabled</a>
+    <a class="btn btn-primary" href="?order_by=-consecutive_errors">Errors</a>
+
+    <a class="btn btn-primary" href="/sources-enable-all">Enable all</a>
+    <a class="btn btn-primary" href="/sources-disable-all">Disable all</a>
     <a class="btn btn-primary" href="/sources-fetch-period">Set Fetch Period</a>
     <a class="btn btn-primary" href="/add-sources">Add sources</a>
 </div>

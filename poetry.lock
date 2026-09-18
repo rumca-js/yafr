@@ -570,14 +570,14 @@ files = [
 
 [[package]]
 name = "filelock"
-version = "3.32.7"
+version = "4.0.0"
 description = "A platform independent file lock."
 optional = false
 python-versions = ">=3.10"
 groups = ["main"]
 files = [
-    {file = "filelock-3.32.7-py3-none-any.whl", hash = "sha256:65ff0d0190ea42038b32bda4b77834fb05be2cad4c5b9b01aa4dfb3614536e52"},
-    {file = "filelock-3.32.7.tar.gz", hash = "sha256:37b8a3d9811b0f9aef7e5ec5c71bb320de52df51e6ca9bcd6f5ad81187660da7"},
+    {file = "filelock-4.0.0-py3-none-any.whl", hash = "sha256:a850aa9ec2acba8db9ca2e9fcf8a327fbc2f85e432725715b37bd76b7dd1f798"},
+    {file = "filelock-4.0.0.tar.gz", hash = "sha256:3611eca5d818ca9b00ec3cc7db1dcfe1e2aafc8d44fb4920d8cf60ad1f6bfda6"},
 ]
 
 [[package]]
@@ -700,14 +700,14 @@ test = ["objgraph", "psutil", "setuptools"]
 
 [[package]]
 name = "idna"
-version = "3.19"
+version = "3.20"
 description = "Internationalized Domain Names in Applications (IDNA)"
 optional = false
 python-versions = ">=3.9"
 groups = ["main"]
 files = [
-    {file = "idna-3.19-py3-none-any.whl", hash = "sha256:815e7be7a7806d54abb586dc943addc79e8b2ee16915059658cbeff4b1b43bf4"},
-    {file = "idna-3.19.tar.gz", hash = "sha256:5e0811a4383b21dc5838069f801c4fb62113b7447663d2530d2bd6e77b49bf15"},
+    {file = "idna-3.20-py3-none-any.whl", hash = "sha256:ab7ae7122974553370f0bdb919e1a960b2cd1bc1ef0276416d896db81c14582c"},
+    {file = "idna-3.20.tar.gz", hash = "sha256:a7db850025b95ded1eae8a46181a1a6c56c92c96f0e2b005d9ff8dc0210cab44"},
 ]
 
 [package.extras]
@@ -745,14 +745,14 @@ i18n = ["Babel (>=2.7)"]
 
 [[package]]
 name = "linkarchivetools"
-version = "1.0.14"
+version = "1.0.16"
 description = "Link Archive Tools"
 optional = false
 python-versions = "<4.0,>=3.10"
 groups = ["main"]
 files = [
-    {file = "linkarchivetools-1.0.14-py3-none-any.whl", hash = "sha256:29581e7660609914839124d98c5f9c7f01a86dfd18ff757067d56b3d25d38351"},
-    {file = "linkarchivetools-1.0.14.tar.gz", hash = "sha256:2b32e28748d8cb893948db4a7a6860850df79ec79e304c0c39125bbe477fc930"},
+    {file = "linkarchivetools-1.0.16-py3-none-any.whl", hash = "sha256:781dd5b64206823f84b518396e8516b006984c379c11330f242a53f87e271774"},
+    {file = "linkarchivetools-1.0.16.tar.gz", hash = "sha256:41f14e1a76b6a1851150a5c6c1f2526048c8f80e8d9a0c0555dc1e948c903dd5"},
 ]
 
 [package.dependencies]
@@ -2025,4 +2025,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.10"
-content-hash = "be590a9560f064ed2c0d8953011eabd67aa97b75f90056f734785c1b6dd93fc0"
+content-hash = "0230a9b32f9302fe6a7fe35e3aab5106df5cc41742fcde2d5df352600d1cf6c4"

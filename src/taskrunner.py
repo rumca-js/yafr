@@ -223,31 +223,8 @@ class TaskRunner(object):
             return True
         
     def add_update_jobs(self):
-        config_entry = ConfigurationEntry(self.connection).get()
-        number_of_update_entries = config_entry.number_of_update_entries
-
-        if not number_of_update_entries:
-            return
-
-        # TODO should be part of configuration
-        days_to_update = 5
-
-        date_cutoff = datetime.now() - timedelta(days=days_to_update)
-
-        table = self.connection.entries_table.get_table()
-        entries_select = (select(table)
-                          .order_by(table.c.page_rating_votes.desc())
-                          .where(or_(table.c.date_update_last.is_(None),
-                                 table.c.date_update_last < date_cutoff)
-                          )
-                          .limit(number_of_update_entries)
-                         )
-
-        entries = self.connection.connection.execute(entries_select)
-        entry_objs = list(entries)
-
-        for entry in entry_objs:
-            BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_UPDATE_DATA, subject=str(entry.id))
+        updater = EntriesUpdater(connection=self.connection)
+        updater.update()
 
     def is_crawling_server_ok(self):
         config = self.connection.configurationentry.get()

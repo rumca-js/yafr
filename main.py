@@ -604,6 +604,32 @@ def source_disable(source_id):
     return redirect(url_for("source", source_id=source_id))
 
 
+@app.route("/sources-enable-all")
+def sources_enable_all(source_id):
+    connection = get_connection()
+
+    controller = Sources(connection)
+    sources = controller.get_where()
+    for source in sources:
+        controller.enable(source)
+
+    html_text = get_view(OK_TEMPLATE, title="Enabled all")
+    return render_template_string(html_text)
+
+
+@app.route("/sources-disable-all")
+def sources_disable_all(source_id):
+    connection = get_connection()
+
+    controller = Sources(connection)
+    sources = controller.get_where()
+    for source in sources:
+        controller.disable(source)
+
+    html_text = get_view(OK_TEMPLATE, title="Enabled all")
+    return render_template_string(html_text)
+
+
 @app.route("/source-fetch")
 def source_fetch():
     connection = get_connection()
