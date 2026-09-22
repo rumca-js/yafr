@@ -23,6 +23,7 @@ from .jobbuilder import job2handler
 from .controller import Controller
 from .system import System
 from .wizard import Wizard
+from .entryupdater import EntriesUpdater
 
 
 class TaskRunner(object):
