@@ -691,20 +691,20 @@ VIEW_ADD_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
-    <a class="btn btn-primary" href="/view-remove?id={{view.id}}">Remove</a>
+    <a class="btn btn-primary" href="/view-remove?id={{view_item.id}}">Remove</a>
 </div>
 
 <form method="POST">
     <div><label for="name">Name</label></div>
-    <div><input type="search" id="name" name="name" value="{{view.name}}"/></div>
+    <div><input type="search" id="name" name="name" value="{{view_item.name}}"/></div>
     <div><label for="name">Priority</label></div>
-    <div><input type="search" id="priority" name="priority" value="{{view.priority}}"/></div>
+    <div><input type="search" id="priority" name="priority" value="{{view_item.priority}}"/></div>
     <div><label for="name">Default</label></div>
-    <div><input type="search" id="default" name="default" value="{{view.default}}"/></div>
+    <div><input type="search" id="default" name="default" value="{{view_item.default}}"/></div>
     <div><label for="name">Filter statement</label></div>
-    <div><input type="search" id="filter_statement" name="filter_statement" value="{{view.filter_statement}}"/></div>
+    <div><input type="search" id="filter_statement" name="filter_statement" value="{{view_item.filter_statement}}"/></div>
     <div><label for="name">Order by</label></div>
-    <div><input type="search" id="order_by" name="order_by" value="{{view.order_by}}"/></div>
+    <div><input type="search" id="order_by" name="order_by" value="{{view_item.order_by}}"/></div>
    <button type="submit">Save</button>
 </form>
 """
