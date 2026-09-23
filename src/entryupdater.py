@@ -141,7 +141,7 @@ class EntriesUpdater(object):
                           .where(
                               and_(
                                  (or_(table.c.date_update_last.is_(None),
-                                 table.c.date_update_last < date_cutoff)
+                                 table.c.date_update_last < date_cutoff),
                                   table.c.manual_status_code != 0)
                               )
                           )
