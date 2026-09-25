@@ -35,6 +35,7 @@ from .entryurlinterface import EntryUrlInterface
 from .controller import Controller
 from .urlhandler import UrlHandler
 from .ytdownloader import YtDownloader
+from .entryupdater import EntryUpdater
 
 
 def move_to_db(config, entry, file):
@@ -715,7 +716,7 @@ class UpdateLinkJobHandler(GenericJobHandler):
 
     def update_entry(self, entry):
         updater = EntryUpdater(connection=self.connection, entry=entry)
-        updater.update_data()
+        updater.update_data(entry=entry)
 
         return True
 
@@ -734,7 +735,7 @@ class ResetLinkJobHandler(GenericJobHandler):
 
     def reset_entry(self, entry):
         updater = EntryUpdater(connection=self.connection, entry=entry)
-        updater.reset_data()
+        updater.reset_data(entry=entry)
         return True
 
 
