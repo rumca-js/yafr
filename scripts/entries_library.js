@@ -508,19 +508,19 @@ function getViewMenu(entry) {
 
     let source_url = getEntrySourceUrl(entry);
     if (source_url != null) {
-        links.push({
-           name: `Source URL - ${source_url}`,
-           link: source_url
-        });
-
         source_api_url = getSourceLocalLink(entry);
         links.push({
            name: `Source - ${source_api_url}`,
            link: source_api_url
         });
 
+        links.push({
+           name: `Source URL - ${source_url}`,
+           link: source_url
+        });
+
         let channel_url = getChannelUrl(source_url);
-        if (channel_url && channel_url != source_url) {
+        if (channel_url && channel_url != source_url && channel_url != link) {
             links.push({
                name: `Channel - ${channel_url}`,
                link: channel_url
@@ -533,7 +533,7 @@ function getViewMenu(entry) {
            const feeds = handler.getFeeds();
            for (const feed of feeds) {
                const safeFeed = sanitizeLink(feed);
-               if (safeFeed && safeFeed != source_url) {
+               if (safeFeed && safeFeed != source_url && safeFeed != link) {
                   links.push({
                       name: `RSS - ${safeFeed}`,
                       link: safeFeed
