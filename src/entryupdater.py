@@ -1,4 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timedelta
+from sqlalchemy import select, or_, and_
 
 from linkarchivetools.model import (
    AppLogging,
@@ -136,17 +137,21 @@ class EntriesUpdater(object):
         date_cutoff = datetime.now() - timedelta(days=days_to_update)
 
         table = self.connection.entries_table.get_table()
-        entries_select = (select(table)
-                          .order_by(table.c.page_rating_votes.desc())
-                          .where(
-                              and_(
-                                 (or_(table.c.date_update_last.is_(None),
-                                 table.c.date_update_last < date_cutoff),
-                                  table.c.manual_status_code != 0)
-                              )
-                          )
-                          .limit(number_of_update_entries)
-                         )
+
+        entries_select = (
+            select(table)
+            .where(
+                and_(
+                    or_(
+                        table.c.date_update_last.is_(None),
+                        table.c.date_update_last < date_cutoff
+                    ),
+                    table.c.manual_status_code != 0
+                )
+            )
+            .order_by(table.c.page_rating_votes.desc())
+            .limit(number_of_update_entries)
+        )
 
         entries = self.connection.connection.execute(entries_select)
         return list(entries)
@@ -154,5 +159,5 @@ class EntriesUpdater(object):
     def update(self):
         entries = self.get_generic_entries()
 
-        for entry in entry_objs:
+        for entry in entries:
             BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_UPDATE_DATA, subject=str(entry.id))
