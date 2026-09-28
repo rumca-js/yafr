@@ -129,7 +129,7 @@ class EntriesUpdater(object):
         number_of_update_entries = config_entry.number_of_update_entries
 
         if not number_of_update_entries:
-            return
+            return []
 
         # TODO should be part of configuration
         days_to_update = 5
