@@ -1165,7 +1165,7 @@ function entryGalleryTemplateDesktop(entry, show_icons = true, small_icons = fal
             entry="${entry.id}"
             title="${hover_title}"
             class="list-group-item list-group-item-action m-1 border rounded p-2"
-            style="text-overflow: ellipsis; max-width: 18%; min-width: 18%; width: auto; aspect-ratio: 1 / 1; text-decoration: none; display:flex; flex-direction:column; ${display_style} ${bookmark_class}"
+            style="text-overflow: ellipsis; max-width: 18%; min-width: 18%; width: auto; aspect-ratio: 4/5; text-decoration: none; display:flex; flex-direction:column; ${display_style} ${bookmark_class}"
 	    ${view_modal_class_setup}
         >
 	${contents}
@@ -1202,7 +1202,7 @@ function entryGalleryTemplateMobile(entry, show_icons = true, small_icons = fals
             entry="${entry.id}"
             title="${hover_title}"
             class="list-group-item list-group-item-action border rounded p-2"
-            style="text-overflow: ellipsis; max-width: 100%; min-width: 100%; width: auto; aspect-ratio: 1 / 1; text-decoration: none; display:flex; flex-direction:column; ${display_style} ${bookmark_class}"
+            style="text-overflow: ellipsis; max-width: 100%; min-width: 100%; width: auto; aspect-ratio: 4/5; text-decoration: none; display:flex; flex-direction:column; ${display_style} ${bookmark_class}"
 	    ${view_modal_class_setup}
         >
 	${contents}
@@ -1708,23 +1708,23 @@ function entryGalleryTemplateDesktopContents(entry, show_icons = true, small_ico
 
     return `
             <div style="display: flex; flex-direction:column; align-content:normal; height:100%">
-                <div style="flex: 0 0 70%; flex-shrink: 0;flex-grow:0;max-height:70%" id="entryTumbnail">
+                <div style="flex: 1 1 auto; min-height:0; overflow:hidden" id="entryTumbnail">
                     ${thumbnail_text}
                 </div>
                 <div
                       style="
-                      flex: 0 0 auto;
+                      flex: 0 0 6em;
                       overflow: hidden;
                       text-overflow: ellipsis;
                       white-space: normal;
                       line-height: 1.2em;
-                      max-height: 4.8em;
+                      max-height: 6.0em;
                       "
                       id="entryDetails">
-                    <span style="font-weight: bold" class="text-primary" entryTitle="true">${title_safe}</span>
-                    <div class="link-list-item-description" entryDetails="true">${source_title}</div>
-                    <div class="text-reset mx-2">${tags_text} ${language_text}</div>
-                    <div class="entry-social">${social}</div>
+                    <div style="font-weight: bold; line-height:1.2em; max-height:2.4em; overflow:hidden" class="text-primary" entryTitle="true">${title_safe}</div>
+                    <div style="line-height:1.2em; max-height:1.2em; overflow:hidden;" class="" entryDetails="true">${source_title}</div>
+                    <div style="line-height:1.2em; max-height:1.2em; overflow:hidden" class="text-reset mx-2">${tags_text} ${language_text}</div>
+                    <div style="line-height:1.2em; max-height:1.2em; overflow:hidden" class="mx-2">${social}</div>
                 </div>
             </div>
      `;
@@ -1753,8 +1753,8 @@ function entryGalleryTemplateMobileContents(entry, show_icons = true, small_icon
     if (thumbnail)
     {
        thumbnail_text = `
-           <div style="flex: 0 0 70%; flex-shrink: 0;flex-grow:0;max-height:70%">
-              <img src="${thumbnail}" style="width:100%; max-height:100%; object-fit:cover"/>
+           <div style="flex: 1 1 auto; min-height:0; overflow:hidden">
+              <img src="${thumbnail}" style="width:100%;max-height:100%;aspect-ratio:3/4;object-fit:cover;"/>
            </div>
     `;
     }
@@ -1773,14 +1773,16 @@ function entryGalleryTemplateMobileContents(entry, show_icons = true, small_icon
                  ${badge_dead}
                  ${badge_read_later}
                 <div
-		    style="flex: 0 0 30%;
-		           flex-shrink: 0;
-			   flex-grow:0;max-height:30%
+		    style="
+                      flex: 0 0 6em;
+		      flex-shrink: 0;
+                      line-height: 1.2em;
+                      max-height: 6.0em;
                       ">
-                    <span style="font-weight: bold" class="text-primary" entryTitle="true">${title_safe}</span>
-                    <div class="link-list-item-description" entryDetails="true">${source_title}</div>
-                    <div class="text-reset mx-2">${tags_text} ${language_text}</div>
-                    <div class="entry-social">${social}</div>
+                    <div style="font-weight: bold; line-height:1.2em; max-height:2.4em; overflow:hidden;" class="text-primary" entryTitle="true">${title_safe}</div>
+                    <div class="line-height:1.2em; max-height:1.2em; overflow:hidden;" entryDetails="true">${source_title}</div>
+                    <div class="line-height:1.2em; max-height:1.2em; overflow:hidden;mx-2">${tags_text} ${language_text}</div>
+                    <div class="line-height:1.2em; max-height:1.2em; overflow:hidden;">${social}</div>
                 </div>
             </div>
 	    `;
