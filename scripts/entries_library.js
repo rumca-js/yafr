@@ -1202,7 +1202,7 @@ function entryGalleryTemplateMobile(entry, show_icons = true, small_icons = fals
             entry="${entry.id}"
             title="${hover_title}"
             class="list-group-item list-group-item-action border rounded p-2"
-            style="text-overflow: ellipsis; max-width: 100%; min-width: 100%; width: auto; aspect-ratio: 4/5; text-decoration: none; display:flex; flex-direction:column; ${display_style} ${bookmark_class}"
+            style="text-overflow: ellipsis; max-width: 100%; min-width: 100%; width: auto; aspect-ratio: 1/1; text-decoration: none; display:flex; flex-direction:column; ${display_style} ${bookmark_class}"
 	    ${view_modal_class_setup}
         >
 	${contents}
@@ -1754,7 +1754,7 @@ function entryGalleryTemplateMobileContents(entry, show_icons = true, small_icon
     {
        thumbnail_text = `
            <div style="flex: 1 1 auto; min-height:0; overflow:hidden">
-              <img src="${thumbnail}" style="width:100%;max-height:100%;aspect-ratio:3/4;object-fit:cover;"/>
+              <img src="${thumbnail}" style="width:100%;max-height:100%;aspect-ratio:1/1;object-fit:cover;"/>
            </div>
     `;
     }

@@ -33,6 +33,7 @@ from linkarchivetools.model import (
    AppLogging,
    SearchView,
    EntryVotes,
+   EntryVisitHistoryTable,
    EntryTags,
    ConfigurationEntry,
    entry_to_json,
@@ -1967,6 +1968,9 @@ def api_entry_visit():
         json_data["page_rating_visits"] = entry.page_rating_visits + 1
 
         connection.entries_table.update_json_data(entry.id, json_data)
+
+        visits = EntryVisitHistoryTable(connection=connection)
+        visits.visited(entry)
 
         props = {}
         props["status"] = True
