@@ -882,18 +882,24 @@ function GetAllServicableLinks(link) {
 
        const link_versions = handler.getLinkVersions();
        for (const link_version of link_versions) {
-           service_links.push({
-               name: `Link - ${link_version}`,
-               link: link_version
-           });
+           if (link != link_version)
+           {
+               service_links.push({
+                   name: `Link - ${link_version}`,
+                   link: link_version
+               });
+           }
        }
 
        for (const feed of feeds) {
-           const safeFeed = sanitizeLink(feed);
-           service_links.push({
-               name: `RSS - ${safeFeed}`,
-               link: safeFeed
-           });
+           if (link != feed)
+           {
+               const safeFeed = sanitizeLink(feed);
+               service_links.push({
+                   name: `RSS - ${safeFeed}`,
+                   link: safeFeed
+               });
+           }
        }
     }
 

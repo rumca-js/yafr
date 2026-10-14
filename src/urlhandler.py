@@ -78,8 +78,11 @@ class UrlHandler(object):
         return False
 
     def get_social_properties(self):
+        config = self.connection.configurationentry.get()
+        client_id=config.instance_title
+
         location = RemoteUrl.get_remote_server_location()
-        url = RemoteUrl(request=request, remote_server_location=location)
+        url = RemoteUrl(request=request, remote_server_location=location, client_id=client_id)
         return url.get_social_properties()
 
     def is_accepted(self):

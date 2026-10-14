@@ -292,6 +292,12 @@ SOURCES_LIST_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
+
+    <a class="btn btn-primary" href="?order_by=enabled">Disabled</a>
+    <a class="btn btn-primary" href="?order_by=-consecutive_errors">Errors</a>
+
+    <a class="btn btn-primary" href="/sources-enable-all">Enable all</a>
+    <a class="btn btn-primary" href="/sources-disable-all">Disable all</a>
     <a class="btn btn-primary" href="/sources-fetch-period">Set Fetch Period</a>
     <a class="btn btn-primary" href="/add-sources">Add sources</a>
 </div>
@@ -318,6 +324,9 @@ SOURCES_LIST_TEMPLATE = """
 
             <a href="/source/{{ source.id }}">
               <div class="source-title">
+              {% if not source.enabled %}
+                 [DISABLED]
+              {% endif %}
                  {{ source.title or "Untitled source" }}
               </div>
             </a>
@@ -340,11 +349,11 @@ SOURCE_EDIT_TEMPLATE = """
 
 <form method="POST">
     <div><label for="title">Title</label></div>
-    <div><input type="search" id="title" name="title" value="{{source.title}}"/></div>
+    <div><input type="search" id="title" name="title" value="{{source.title}}" class="form-control" autofocus/></div>
     <div><label for="url">URL</label></div>
-    <div><input type="search" id="url" name="url" value="{{source.url}}"/></div>
+    <div><input type="search" id="url" name="url" value="{{source.url}}" class="form-control"/></div>
     <div><label for="language">Language</label></div>
-    <div><input type="search" id="language" name="language" value="{{source.language}}"/></div>
+    <div><input type="search" id="language" name="language" value="{{source.language}}" class="form-control"/></div>
    <button type="submit">Save</button>
 </form>
 """
@@ -354,8 +363,13 @@ SOURCE_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
-    <a class="btn btn-primary" href="/source-fetch?id={{source_item.id}}">Fetch</a>
     <a class="btn btn-primary" href="/search?search=source_id=={{source_item.id}}">Search</a>
+    {% if source_item.enabled %}
+       <a class="btn btn-primary" href="/source-disable/{{source_item.id}}">Disable</a>
+    {% else %}
+       <a class="btn btn-primary" href="/source-enable/{{source_item.id}}">Enable</a>
+    {% endif %}
+    <a class="btn btn-primary" href="/source-fetch?id={{source_item.id}}">Fetch</a>
     <a class="btn btn-primary" href="/remove-source?id={{source_item.id}}">Remove</a>
 </div>
 
@@ -383,15 +397,15 @@ SOURCE_TEMPLATE = """
 
 <form method="POST">
     <div><label for="fetch_period">Fetch period</label></div>
-    <div><input type="search" id="fetch_period" name="fetch_period" value="{{source_item.fetch_period}}"/></div>
+    <div><input type="search" id="fetch_period" name="fetch_period" value="{{source_item.fetch_period}}" class="form-control"/></div>
     <div><label for="xpath">Link acceptance 're' expression</label></div>
-    <div><input type="search" id="xpath" name="xpath" value="{{source_item.xpath}}"/></div>
+    <div><input type="search" id="xpath" name="xpath" value="{{source_item.xpath}}" class="form-control"/></div>
     <div><label for="language">Language</label></div>
-    <div><input type="search" id="language" name="language" value="{{source_item.language}}"/></div>
+    <div><input type="search" id="language" name="language" value="{{source_item.language}}" class="form-control"/></div>
     <div><label for="auto_tag">Auto tag</label></div>
-    <div><input type="search" id="auto_tag" name="auto_tag" value="{{source_item.auto_tag}}"/></div>
+    <div><input type="search" id="auto_tag" name="auto_tag" value="{{source_item.auto_tag}}" class="form-control"/></div>
     <div><label for="age">Age designation. Can be 0</label></div>
-    <div><input type="search" id="age" name="age" value="{{source_item.age}}"/></div>
+    <div><input type="search" id="age" name="age" value="{{source_item.age}}" class="form-control"/></div>
     <button type="submit">Save</button>
 </form>
 """
@@ -407,7 +421,7 @@ ADD_LINKS_TEMPLATE = """
 
 <form method="POST">
     <p>One source URL per line:</p>
-    <textarea name="sources" autofocus>{{raw_data}}</textarea>
+    <textarea name="sources" class="form-control" autofocus>{{raw_data}}</textarea>
     <br>
     <button type="submit">Add</button>
 </form>
@@ -423,7 +437,7 @@ ADD_SOURCES_TEMPLATE = """
 
 <form method="POST">
     <p>One source URL per line:</p>
-    <textarea name="sources" autofocus>{{raw_data}}</textarea>
+    <textarea name="sources" class="form-control" autofocus>{{raw_data}}</textarea>
     <br>
     <button type="submit">Add</button>
 </form>
@@ -445,17 +459,17 @@ ENTRY_EDIT_TEMPLATE = """
 
 <form method="POST">
     <div><label for="title">Title</label></div>
-    <div><input type="search" id="title" name="title" value="{{entry.title}}"/></div>
+    <div><input type="search" id="title" name="title" value="{{entry.title}}" class="form-control" autofocus/></div>
     <div><label for="link">Link</label></div>
-    <div><input type="search" id="link" name="link" value="{{entry.link}}"/></div>
+    <div><input type="search" id="link" name="link" value="{{entry.link}}" class="form-control"/></div>
     <div><label for="description">Description</label></div>
-    <div><textarea type="search" id="description" name="description">{{entry.description}}</textarea></div>
+    <div><textarea type="search" id="description" name="description" class="form-control">{{entry.description}}</textarea></div>
     <div><label for="language">Language</label></div>
-    <div><input type="search" id="language" name="language" value="{{properties.language}}"/></div>
+    <div><input type="search" id="language" name="language" value="{{properties.language}}" class="form-control"/></div>
     <div><label for="date_published">Date published</label></div>
-    <div><input type="search" id="date_published" name="date_published" value="{{entry.date_published}}"/></div>
+    <div><input type="search" id="date_published" name="date_published" value="{{entry.date_published}}" class="form-control"/></div>
     <div><label for="age">Age</label></div>
-    <div><input type="search" id="age" name="age" value="{{properties.age}}"/></div>
+    <div><input type="search" id="age" name="age" value="{{properties.age}}" class="form-control"/></div>
    <button type="submit">Save</button>
 </form>
 """
@@ -504,7 +518,7 @@ ENTRY_TAG_TEMPLATE = """
 <form method="POST">
     <div><label for="entry-tag">Tag:</label></div>
     <div>
-       <input type="search" id="entry-tag" name="entry-tag" value="{{current_tags}}" autofocus/>
+       <input type="search" id="entry-tag" name="entry-tag" value="{{current_tags}}" class="form-control" autofocus/>
     </div>
    <button type="submit">Save</button>
 </form>
@@ -522,7 +536,7 @@ Will block sources, and entries.
 
 <form method="POST">
     <p>The URLs/feeds below will be blocked. One source URL per line:</p>
-    <textarea name="sources" autofocus>{{raw_data}}</textarea>
+    <textarea name="sources" class="form-control" autofocus>{{raw_data}}</textarea>
     <br>
     <button type="submit">Save</button>
 </form>
@@ -539,7 +553,7 @@ DEFINE_BLOCK_ENTRIES_TEMPLATE = """
 
 <form method="POST">
     <p>The URLs/feeds below will be blocked. One source URL per line:</p>
-    <textarea name="sources" autofocus>{{raw_data}}</textarea>
+    <textarea name="sources" class="form-control" autofocus>{{raw_data}}</textarea>
     <br>
     <button type="submit">Save</button>
 </form>
@@ -556,7 +570,7 @@ ADD_BLOCK_ENTRIES_TEMPLATE = """
 
 <form method="POST">
     <p>The URLs/feeds below will be blocked. One source URL per line:</p>
-    <textarea name="sources" autofocus>{{raw_data}}</textarea>
+    <textarea name="sources" class="form-control" autofocus>{{raw_data}}</textarea>
     <br>
     <button type="submit">Save</button>
 </form>
@@ -629,13 +643,13 @@ ENTRY_RULE_ADD_TEMPLATE = """
 
 <form method="POST">
     <div><label for="rule_name">Rule Name</label></div>
-    <div><input type="search" id="rule_name" name="rule_name" value="{{rule.rule_name}}"/></div>
+    <div><input type="search" id="rule_name" name="rule_name" value="{{rule.rule_name}}" class="form-control"/></div>
     <div><label for="enabled">Enabled</label></div>
-    <div><input type="search" id="enabled" name="enabled" value="{{rule.enabled}}"/></div>
+    <div><input type="search" id="enabled" name="enabled" value="{{rule.enabled}}" class="form-control"/></div>
     <div><label for="block">Block</label></div>
-    <div><input type="search" id="block" name="block" value="{{rule.block}}"/></div>
+    <div><input type="search" id="block" name="block" value="{{rule.block}}" class="form-control"/></div>
     <div><label for="trust">Trust</label></div>
-    <div><input type="search" id="trust" name="trust" value="{{rule.trust}}"/></div>
+    <div><input type="search" id="trust" name="trust" value="{{rule.trust}}" class="form-control"/></div>
    <button type="submit">Save</button>
 </form>
 """
@@ -677,20 +691,20 @@ VIEW_ADD_TEMPLATE = """
 <div class="nav-buttons">
     <button class="btn btn-primary" onclick="history.back()">Go back</button>
     <a class="btn btn-primary" href="/">Home</a>
-    <a class="btn btn-primary" href="/view-remove?id={{view.id}}">Remove</a>
+    <a class="btn btn-primary" href="/view-remove?id={{view_item.id}}">Remove</a>
 </div>
 
 <form method="POST">
     <div><label for="name">Name</label></div>
-    <div><input type="search" id="name" name="name" value="{{view.name}}"/></div>
+    <div><input type="search" id="name" name="name" value="{{view_item.name}}" class="form-control"/></div>
     <div><label for="name">Priority</label></div>
-    <div><input type="search" id="priority" name="priority" value="{{view.priority}}"/></div>
+    <div><input type="search" id="priority" name="priority" value="{{view_item.priority}}" class="form-control"/></div>
     <div><label for="name">Default</label></div>
-    <div><input type="search" id="default" name="default" value="{{view.default}}"/></div>
+    <div><input type="search" id="default" name="default" value="{{view_item.default}}" class="form-control"/></div>
     <div><label for="name">Filter statement</label></div>
-    <div><input type="search" id="filter_statement" name="filter_statement" value="{{view.filter_statement}}"/></div>
+    <div><input type="search" id="filter_statement" name="filter_statement" value="{{view_item.filter_statement}}" class="form-control"/></div>
     <div><label for="name">Order by</label></div>
-    <div><input type="search" id="order_by" name="order_by" value="{{view.order_by}}"/></div>
+    <div><input type="search" id="order_by" name="order_by" value="{{view_item.order_by}}" class="form-control"/></div>
    <button type="submit">Save</button>
 </form>
 """
@@ -806,10 +820,10 @@ CONFIGURATION_TEMPLATE = """
 {% for config_setting, config_value in configuration.items() %}
     {% if config_setting == "instance_description" %}
     <div><label for="{{config_setting}}">{{config_setting}}</label></div>
-    <div><textarea type="search" id="{{config_setting}}" name="{{config_setting}}" size="30">{{config_value}}</textarea></div>
+    <div><textarea type="search" id="{{config_setting}}" name="{{config_setting}}" size="30" class="form-control">{{config_value}}</textarea></div>
     {% else %}
     <div><label for="{{config_setting}}">{{config_setting}}</label></div>
-    <div><input type="search" id="{{config_setting}}" name="{{config_setting}}" value="{{config_value}}" size="30"/></div>
+    <div><input type="search" id="{{config_setting}}" name="{{config_setting}}" value="{{config_value}}" size="30" class="form-control"/></div>
     {% endif %}
 {% endfor %}
    <button type="submit">Search</button>

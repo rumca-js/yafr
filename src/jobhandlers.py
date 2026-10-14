@@ -11,7 +11,7 @@ from webtoolkit import (
    YouTubeVideoHandler,
    ContentLinkParser,
    HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS,
-   HTTP_STATUS_TOO_MANY_REQUESTS,
+   HTTP_STATUS_CODE_SERVER_DATA_NOT_READY,
    DateUtils,
 )
 
@@ -35,6 +35,7 @@ from .entryurlinterface import EntryUrlInterface
 from .controller import Controller
 from .urlhandler import UrlHandler
 from .ytdownloader import YtDownloader
+from .entryupdater import EntryUpdater
 
 
 def move_to_db(config, entry, file):
@@ -102,7 +103,9 @@ class ProcessSourceJobHandler(GenericJobHandler):
         #if self.check_if_old_source_checked_once_a_day(sources, source):
         #    return True
 
-        return self.check_source(source)
+        if not self.check_source(source):
+            sources = Sources(self.connection)
+            sources.error(source)
 
     def check_source_entry_conditions(self, sources, source):
         if not source:
@@ -152,8 +155,6 @@ class ProcessSourceJobHandler(GenericJobHandler):
         date_published = None
         return_entry = None
 
-        #order_by = entries.get_table().get_table().c.date_published.desc()
-        #entries_where = entries.get_table().get_where({"source_id" : source.id}, order_by=order_by)
         entries_where = entries.get_table().get_where({"source_id" : source.id})
         for entry in entries_where:
             if date_published is None:
@@ -189,24 +190,12 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 sd_controller = SourceData(self.connection)
                 page_same = False
 
-                if not self.is_source_entry(source):
-                    # AppLogging(self.connection).debug(f"Source {source.id} does not have any entries in db!")
+                source_data = sd_controller.get_source_data(source)
+                if source_data and source_data.page_hash and url.get_hash() and source_data.page_hash == url.get_hash():
+                    page_same = True
 
-                    op_data = sd_controller.get_source_data(source=source)
-                    if op_data:
-                        new_data={}
-                        new_data["page_hash"] = None
-                        new_data["body_hash"] = None
-                        new_data["date_fetched"] = None
-                        sd_controller.get_table().update_json_data(id=op_data.id, json_data=new_data)
-                
-                # TODO
-                #source_data = sd_controller.get_source_data(source)
-                #if source_data and source_data.page_hash and url.get_hash() and source_data.page_hash == url.get_hash():
-                #    page_same = True
-
-                #if source_data and source_data.body_hash and url.get_body_hash() and source_data.body_hash == url.get_body_hash():
-                #    page_same = True
+                if source_data and source_data.body_hash and url.get_body_hash() and source_data.body_hash == url.get_body_hash():
+                    page_same = True
 
                 if not page_same:
                     self.handle_valid_response(source, url, response)
@@ -215,6 +204,7 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 sd_controller.mark_read(source, url)
             else:
                 AppLogging(self.connection).error(f"URL:{source.url} Response is invalid")
+                return False
         else:
             AppLogging(self.connection).error(f"Source ID:{source.id} URL:{source.url} No response")
             return False
@@ -236,12 +226,14 @@ class ProcessSourceJobHandler(GenericJobHandler):
                 return
 
             response = url.get_response()
-            if response:
-                if (response.get_status_code() == HTTP_STATUS_TOO_MANY_REQUESTS or
-                    response.get_status_code() == HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS):
+            if response is not None:
+                if (response.get_status_code() == HTTP_STATUS_CODE_SERVER_TOO_MANY_REQUESTS or
+                    response.get_status_code() == HTTP_STATUS_CODE_SERVER_DATA_NOT_READY):
                     AppLogging(self.connection).warning("Retry of request")
                     # for reddit this blocked other jobs - adding new links
-                    return
+                    time.sleep(10)
+                    continue
+
             if response is None:
                 AppLogging(self.connection).error(f"Source ID:{source.id} URL:{source.url} No response")
                 return
@@ -405,9 +397,11 @@ class ProcessSourceJobHandler(GenericJobHandler):
     def handle_valid_response__rss(self, source, url, response):
         source_entries_json = url.get_entries()
 
-        # TODO - if job was created then it should be processed?
-        #if not self.is_new_entry(source, source_entries_json):
-        #    return
+        """
+        date_fetched might mean source was refreshed, but response was invalid.
+        """
+        if not self.is_new_entry(source, source_entries_json):
+            return
 
         self.delete_source_entries(source, source_entries_json)
         entries = Entries(self.connection)
@@ -721,53 +715,8 @@ class UpdateLinkJobHandler(GenericJobHandler):
         return self.update_entry(entry)
 
     def update_entry(self, entry):
-        handler = UrlHandler(connection=self.connection, link=entry.link)
-        url = handler.get_link_url()
-        response = url.get_response()
-        if response is None:
-            AppLogging(self.connection).error(f"URL:{enry.link} Response is None")
-            return False
-
-        json_data = {}
-        json_data["date_update_last"] = datetime.now()
-
-        if not entry.title:
-            json_data["title"] = url.get_title()
-        if not entry.description:
-            json_data["description"] = url.get_description()
-        if url.get_thumbnail():
-            json_data["thumbnail"] = url.get_thumbnail()
-        if url.get_author():
-            json_data["author"] = url.get_author()
-        if url.get_album():
-            json_data["album"] = url.get_album()
-        if not entry.date_created:
-            json_data["date_created"] = datetime.now()
-        if not entry.date_published and url.get_date_published():
-            json_data["date_published"] = url.get_date_published()
-
-        json_data["status_code"] = url.get_status_code()
-        json_data["contents_hash"] = url.get_hash()
-        json_data["body_hash"] = url.get_body_hash()
-        json_data["meta_hash"] = url.get_meta_hash()
-
-        if response.is_invalid():
-            json_data["date_dead_since"] = datetime.now()
-        else:
-            json_data["date_dead_since"] = None
-
-        if entry.link.endswith("/"):
-            json_data["link"] = entry.link[:-1]
-
-        self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
-
-        config_entry = ConfigurationEntry(self.connection).get()
-        if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
-            BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry.id))
-
-        # TODO does not work
-        #if config_entry.entry_update_download_audio:
-        #    BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry.id))
+        updater = EntryUpdater(connection=self.connection, entry=entry)
+        updater.update_data(entry=entry)
 
         return True
 
@@ -785,50 +734,8 @@ class ResetLinkJobHandler(GenericJobHandler):
         return self.reset_entry(entry)
 
     def reset_entry(self, entry):
-        handler = UrlHandler(connection=self.connection, link=entry.link)
-        url = handler.get_link_url()
-        response = url.get_response()
-        if response is None:
-            AppLogging(self.connection).error("URL:{enry.link} Response is None")
-            return False
-
-        json_data = {}
-        json_data["date_update_last"] = datetime.now()
-
-        if url.get_title():
-            json_data["title"] = url.get_title()
-        if url.get_description():
-            json_data["description"] = url.get_description()
-        if url.get_thumbnail():
-            json_data["thumbnail"] = url.get_thumbnail()
-        if url.get_author():
-            json_data["author"] = url.get_author()
-        if url.get_album():
-            json_data["album"] = url.get_album()
-        if not entry.date_created:
-            json_data["date_created"] = datetime.now()
-        if not entry.date_published and url.get_date_published():
-            json_data["date_published"] = url.get_date_published()
-
-        json_data["status_code"] = url.get_status_code()
-        json_data["contents_hash"] = url.get_hash()
-        json_data["body_hash"] = url.get_body_hash()
-        json_data["meta_hash"] = url.get_meta_hash()
-
-        if response.is_invalid():
-            json_data["date_dead_since"] = datetime.now()
-        else:
-            json_data["date_dead_since"] = None
-
-        if entry.link.endswith("/"):
-            json_data["link"] = entry.link[:-1]
-
-        self.connection.entries_table.update_json_data(id=entry.id, json_data=json_data)
-
-        config_entry = ConfigurationEntry(self.connection).get()
-        if config_entry.enable_social_data and config_entry.entry_update_fetches_social_data:
-            BackgroundJob(self.connection).create_single_job(job_name=BackgroundJob.JOB_LINK_DOWNLOAD_SOCIAL, subject=str(entry.id))
-
+        updater = EntryUpdater(connection=self.connection, entry=entry)
+        updater.reset_data(entry=entry)
         return True
 
 
